@@ -1,0 +1,103 @@
+/* ── Report Page ─────────────────────────────────────────── */
+.report-page { padding: 24px; background: #f8fafc; min-height: 100vh; font-family: 'Segoe UI', sans-serif; }
+
+.page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.page-title  { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0 0 4px; display:flex; gap:8px; }
+.page-sub    { color: #64748b; font-size: 0.88rem; margin: 0; }
+
+.btn-export {
+  padding: 9px 20px; background: #3b82f6; color: #fff;
+  border: none; border-radius: 8px; font-size: 0.88rem;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.2s;
+}
+.btn-export:hover { background: #2563eb; }
+
+/* ── Filter Bar ──────────────────────────────────────────── */
+.filter-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: #fff; padding: 14px 18px; border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px;
+}
+.search-input {
+  flex: 1; min-width: 200px; padding: 8px 14px;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  font-size: 0.88rem; outline: none; color: #374151;
+}
+.search-input:focus { border-color: #3b82f6; }
+.ward-select {
+  padding: 8px 14px; border: 1px solid #e2e8f0;
+  border-radius: 8px; font-size: 0.88rem; color: #374151;
+  background: #fff; cursor: pointer; outline: none;
+}
+.result-count { font-size: 0.82rem; color: #64748b; white-space: nowrap; margin-left: auto; }
+
+.loading-msg { text-align: center; padding: 30px; color: #64748b; }
+
+/* ── Table ───────────────────────────────────────────────── */
+.table-wrap {
+  background: #fff; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+thead { background: #f1f5f9; }
+th { padding: 12px 14px; text-align: left; font-weight: 600; color: #374151;
+     border-bottom: 2px solid #e2e8f0; white-space: nowrap; }
+td { padding: 11px 14px; border-bottom: 1px solid #f1f5f9; color: #374151; }
+tbody tr:hover { background: #f8fafc; }
+tbody tr:last-child td { border-bottom: none; }
+.name-cell { font-weight: 500; color: #1e293b; }
+.empty-row { text-align: center; color: #94a3b8; padding: 30px !important; }
+
+/* ── Status Badges ───────────────────────────────────────── */
+.badge { padding: 3px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; display:inline-block; }
+.badge-green  { background: #d1fae5; color: #065f46; }
+.badge-orange { background: #fef3c7; color: #92400e; }
+.badge-red    { background: #fee2e2; color: #991b1b; }
+.badge-gray   { background: #f1f5f9; color: #64748b; }
+
+/* ── Pagination ──────────────────────────────────────────── */
+.pagination {
+  display: flex; justify-content: center; gap: 6px;
+  margin-top: 20px; flex-wrap: wrap;
+}
+.pagination button {
+  padding: 6px 13px; border: 1px solid #e2e8f0;
+  border-radius: 6px; background: #fff; color: #374151;
+  font-size: 0.84rem; cursor: pointer; transition: all 0.2s;
+}
+.pagination button:hover:not(:disabled) { background: #f1f5f9; border-color: #3b82f6; }
+.pagination button.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+.pagination button:disabled { opacity: 0.4; cursor: default; }
+
+@media (max-width: 600px) {
+  .report-page { padding: 12px; }
+  .page-header { flex-direction: column; gap: 12px; }
+}
+
+/* ✅ Clear filter button */
+.btn-clear {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #64748b;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.btn-clear:hover { background: #fee2e2; color: #b91c1c; border-color: #fca5a5; }
+
+/* Loading spinner */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

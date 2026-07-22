@@ -1,0 +1,191 @@
+<div class="container">
+
+  <h2><i class="fas fa-list-alt"></i> Holding Tax Applications</h2>
+
+  <div class="filter-box">
+    <input type="text" placeholder="Search by name"
+           [(ngModel)]="searchText" (input)="filterData()">
+    <select [(ngModel)]="selectedType" (change)="filterData()">
+      <option value="">{{ ls.current === "bn" ? "সকল ধরন" : "All Types" }}</option>
+      <option value="New Holding">New Holding</option>
+      <option value="Ownership Transfer">{{ ls.current === "bn" ? "মালিকানা হস্তান্তর" : "Ownership Transfer" }}</option>
+    </select>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+  </div>
+
+  <table class="app-table" *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th>
+        <th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+        <th>Applied Date</th>
+        <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+        <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let app of filteredApps; let i = index">
+
+        <tr>
+          <td>{{ i + 1 }}</td>
+          <td>{{ app.name }}</td>
+          <td>
+            <span [class]="'type-badge type-' + (app.type === 'New Holding' ? 'new' : 'transfer')">
+              {{ app.type }}
+            </span>
+          </td>
+          <td>{{ app.details?.createdAt | javaDate }}</td>
+          <td>
+            <span [class]="'status-badge ' + statusClass(app.status)">{{ app.status }}</span>
+          </td>
+          <td class="action-col">
+            <button class="icon-btn view"    (click)="toggleDetails(i)"            [title]="ls.current === 'bn' ? 'বিবরণ' : 'Details'">
+              <i class="fas fa-eye"></i>
+            </button>
+            <ng-container *ngIf="app.type === 'New Holding' || app.type === 'Ownership Transfer'; else legacyApprove">
+              <button class="icon-btn approve" *ngIf="canApprove(app)" (click)="openApproval(app)" [title]="approvalLabel(app)">
+                <i class="fas fa-check"></i>
+              </button>
+            </ng-container>
+            <ng-template #legacyApprove>
+              <button class="icon-btn approve" *ngIf="app.status === 'Pending'" (click)="updateStatus(app,'Approved')" title="Approve">
+                <i class="fas fa-check"></i>
+              </button>
+            </ng-template>
+            <button class="icon-btn reject" *ngIf="canReject(app)" (click)="updateStatus(app,'Rejected')" [title]="ls.current === 'bn' ? 'প্রত্যাখ্যান' : 'Reject'">
+              <i class="fas fa-times"></i>
+            </button>
+            
+            <button class="icon-btn pdf"
+                    *ngIf="app.status === 'Approved'"
+                    (click)="openDownloadPopup(app)"
+                    title="Download Certificate PDF">
+              <i class="fas fa-file-pdf"></i>
+            </button>
+          </td>
+        </tr>
+
+        <!-- Details Row -->
+        <tr *ngIf="expandedIndex === i">
+          <td colspan="6">
+            <div class="details-panel">
+              <section class="details-section">
+                <h4><i class="fas fa-id-card"></i> Application Information</h4>
+                <div class="details-box">
+                  <div *ngFor="let item of visibleDetailEntries(app.details)" class="detail-item">
+                    <span class="detail-key">{{ prettyLabel(item.key) }}</span>
+                    <span class="detail-val">{{ item.value || '—' }}</span>
+                  </div>
+                </div>
+              </section>
+
+              <section class="details-section" *ngIf="fileEntries(app.details).length">
+                <h4><i class="fas fa-paperclip"></i> Uploaded Documents</h4>
+                <div class="document-grid">
+                  <article class="document-card" *ngFor="let f of fileEntries(app.details)">
+                    <div class="document-preview">
+                      <img *ngIf="isImage(f.url)" [src]="fileUrl(f.url)" [alt]="f.label">
+                      <i *ngIf="isPdf(f.url)" class="fas fa-file-pdf generic-file pdf-file"></i>
+                      <i *ngIf="!isImage(f.url) && !isPdf(f.url)" class="fas fa-file-alt generic-file"></i>
+                    </div>
+                    <div class="document-meta">
+                      <strong>{{ f.label }}</strong>
+                      <div class="document-actions">
+                        <a [href]="fileUrl(f.url)" target="_blank" rel="noopener"><i class="fas fa-eye"></i> View</a>
+                        <a [href]="fileUrl(f.url)" download><i class="fas fa-download"></i> Download</a>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+              </section>
+
+              <section class="details-section approval-history" *ngIf="app.details?.approvalStage > 0">
+                <h4><i class="fas fa-user-check"></i> Two-Step Approval History</h4>
+                <div class="approval-stage-grid">
+                  <article class="approval-stage-card completed">
+                    <span class="stage-number">1</span>
+                    <div><strong>Department Officer Approval</strong><p>{{ app.details?.firstApprovedBy || 'Completed' }} · {{ app.details?.firstApprovedAt | javaDate }}</p></div>
+                    <div class="approval-assets">
+                      <img *ngIf="app.details?.firstSignature" [src]="app.details.firstSignature" alt="First signature">
+                      <img *ngIf="app.details?.firstSeal" [src]="app.details.firstSeal" alt="First seal">
+                    </div>
+                  </article>
+                  <article class="approval-stage-card" [class.completed]="app.details?.approvalStage >= 2">
+                    <span class="stage-number">2</span>
+                    <div><strong>Admin Final Approval</strong><p>{{ app.details?.secondApprovedBy || 'Waiting for final approval' }} <span *ngIf="app.details?.secondApprovedAt">· {{ app.details.secondApprovedAt | javaDate }}</span></p></div>
+                    <div class="approval-assets">
+                      <img *ngIf="app.details?.secondSignature" [src]="app.details.secondSignature" alt="Second signature">
+                      <img *ngIf="app.details?.secondSeal" [src]="app.details.secondSeal" alt="Second seal">
+                    </div>
+                  </article>
+                </div>
+              </section>
+            </div>
+          </td>
+        </tr>
+
+      </ng-container>
+
+      <tr *ngIf="filteredApps.length === 0 && !isLoading">
+        <td colspan="6" class="empty-row">
+          <i class="fas fa-inbox"></i> No applications found
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>
+
+
+<!-- Citizen-service style two-step approval modal -->
+<div class="ht-modal-backdrop" *ngIf="approvalApp" (click)="closeApproval()">
+  <div class="approval-modal" (click)="$event.stopPropagation()">
+    <button class="ht-modal-close" type="button" (click)="closeApproval()">×</button>
+    <div class="approval-modal-head">
+      <div class="approval-icon"><i class="fas fa-stamp"></i></div>
+      <div><span>{{ approvalLabel(approvalApp) }}</span><h3>{{ approvalApp.type }}</h3><p>{{ approvalApp.name }} · Application #{{ approvalApp.id }}</p></div>
+    </div>
+    <div class="approval-upload-grid">
+      <label class="approval-upload-box">
+        <input type="file" accept="image/*" hidden (change)="onSignatureSelected($event)">
+        <ng-container *ngIf="!signaturePreview; else signatureImage"><i class="fas fa-signature"></i><strong>Upload Signature</strong><small>PNG/JPG image</small></ng-container>
+        <ng-template #signatureImage><img [src]="signaturePreview" alt="Signature preview"><span>Change signature</span></ng-template>
+      </label>
+      <label class="approval-upload-box">
+        <input type="file" accept="image/*" hidden (change)="onSealSelected($event)">
+        <ng-container *ngIf="!sealPreview; else sealImage"><i class="fas fa-certificate"></i><strong>Upload Official Seal</strong><small>PNG/JPG image</small></ng-container>
+        <ng-template #sealImage><img [src]="sealPreview" alt="Seal preview"><span>Change seal</span></ng-template>
+      </label>
+    </div>
+    <div class="approval-note"><i class="fas fa-info-circle"></i> Signature and seal are stored separately for this approval stage and printed separately in the final PDF.</div>
+    <button class="approval-submit" type="button" [disabled]="approvalBusy || !signatureBase64 || !sealBase64" (click)="submitApproval()">
+      <i class="fas" [class.fa-spinner]="approvalBusy" [class.fa-spin]="approvalBusy" [class.fa-check-circle]="!approvalBusy"></i>
+      {{ approvalBusy ? 'Saving approval...' : 'Confirm Approval' }}
+    </button>
+  </div>
+</div>
+
+<!-- Unified Holding Tax PDF Download Popup -->
+<div class="ht-modal-backdrop" *ngIf="downloadModalApp" (click)="closeDownloadPopup()">
+  <div class="ht-download-modal" (click)="$event.stopPropagation()">
+    <button class="ht-modal-close" type="button" (click)="closeDownloadPopup()">×</button>
+    <div class="ht-success-ring"><i class="fas fa-check"></i></div>
+    <span class="ht-modal-kicker">PDF READY TO DOWNLOAD</span>
+    <h3>{{ downloadModalApp.type }}</h3>
+    <p class="ht-ready-copy">The application is approved and the official PDF is ready. Please review the summary before downloading.</p>
+    <div class="ht-cert-summary">
+      <div><span>Applicant</span><strong>{{ downloadModalApp.name || '—' }}</strong></div>
+      <div><span>Application Type</span><strong>{{ downloadModalApp.type }}</strong></div>
+      <div><span>Holding No</span><strong>{{ downloadModalApp.details?.holdingNo || downloadModalApp.details?.holdingNumber || '—' }}</strong></div>
+      <div><span>Status</span><strong class="ht-approved-text">Approved</strong></div>
+    </div>
+    <button class="ht-download-confirm" type="button" (click)="confirmDownload()">
+      <i class="fas fa-download"></i> Download Official PDF
+    </button>
+  </div>
+</div>

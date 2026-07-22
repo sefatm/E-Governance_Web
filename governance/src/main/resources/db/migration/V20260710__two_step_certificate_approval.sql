@@ -1,0 +1,27 @@
+-- Two-step approval fields for citizen service certificates.
+ALTER TABLE birth_death_certificate
+  ADD COLUMN IF NOT EXISTS approval_stage INT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS first_approved_by VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS first_signature LONGTEXT NULL,
+  ADD COLUMN IF NOT EXISTS first_approved_at DATETIME NULL,
+  ADD COLUMN IF NOT EXISTS second_approved_by VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS second_signature LONGTEXT NULL,
+  ADD COLUMN IF NOT EXISTS second_approved_at DATETIME NULL;
+
+ALTER TABLE citizen_certificate
+  ADD COLUMN IF NOT EXISTS approval_stage INT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS first_approved_by VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS first_signature LONGTEXT NULL,
+  ADD COLUMN IF NOT EXISTS first_approved_at DATETIME NULL,
+  ADD COLUMN IF NOT EXISTS second_approved_by VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS second_signature LONGTEXT NULL,
+  ADD COLUMN IF NOT EXISTS second_approved_at DATETIME NULL;
+
+ALTER TABLE family_certificate
+  ADD COLUMN IF NOT EXISTS approval_stage INT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS first_approved_by VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS first_signature LONGTEXT NULL,
+  ADD COLUMN IF NOT EXISTS first_approved_at DATETIME NULL,
+  ADD COLUMN IF NOT EXISTS second_approved_by VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS second_signature LONGTEXT NULL,
+  ADD COLUMN IF NOT EXISTS second_approved_at DATETIME NULL;

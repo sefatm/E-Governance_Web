@@ -1,0 +1,103 @@
+<div class="aa-page">
+  <div class="aa-header">
+    <div><h2>📊 Social Cards — Analytics Dashboard</h2><p>সব কার্ডের পরিসংখ্যান ও বিশ্লেষণ</p></div>
+    <button class="btn-refresh" (click)="loadAll()">🔄 Refresh</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+
+  <div *ngIf="!isLoading">
+
+    <!-- Overview Stats -->
+    <div class="stats-grid">
+      <div class="stat-box" style="border-left:4px solid #065f46">
+        <div class="stat-icon" style="background:#d1fae5;color:#065f46">👨‍👩‍👧</div>
+        <div><div class="stat-num">{{ stats.familyApproved }} / {{ stats.familyTotal }}</div><div class="stat-lbl">{{ ls.current === "bn" ? "পারিবারিক কার্ড" : "Family Card" }}</div></div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #1e40af">
+        <div class="stat-icon" style="background:#dbeafe;color:#1e40af">🌾</div>
+        <div><div class="stat-num">{{ stats.farmerApproved }} / {{ stats.farmerTotal }}</div><div class="stat-lbl">{{ ls.current === "bn" ? "কৃষক কার্ড" : "Farmer Card" }}</div></div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #92400e">
+        <div class="stat-icon" style="background:#fef3c7;color:#92400e">🔥</div>
+        <div class="stat-num">
+  {{ stats.lpgApproved }} / {{ stats.lpgTotal }}
+</div>
+<div class="stat-lbl">LPG Card</div>
+      </div>
+      <div class="stat-box" style="border-left:4px solid #5b21b6">
+        <div class="stat-icon" style="background:#ede9fe;color:#5b21b6">👩</div>
+        <div><div class="stat-num">{{ stats.vgdApproved }} / {{ stats.vgdTotal }}</div><div class="stat-lbl">VGD/VGF Card</div></div>
+      </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">Card Type-wise Approval</div>
+        <div class="chart-wrap"><canvas id="approvalChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Status Distribution (সব কার্ড)</div>
+        <div class="chart-wrap"><canvas id="statusChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Monthly Application Trend</div>
+        <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- Ward Coverage Chart -->
+    <div class="chart-card full-width">
+      <div class="chart-title">Ward-wise Approved Card Coverage</div>
+      <div class="chart-wrap-tall"><canvas id="wardChart"></canvas></div>
+    </div>
+
+    <!-- Summary Row -->
+    <div class="summary-row">
+
+      <!-- VGD Summary -->
+      <div class="summary-card">
+        <div class="summary-title">📦 VGD/VGF মাসিক বিতরণ সারসংক্ষেপ</div>
+        <div class="summary-grid">
+          <div class="s-item"><span class="s-lbl">VGD কার্ড</span><span class="s-val" style="color:#5b21b6">{{ vgdSummary.vgdCount }}</span></div>
+          <div class="s-item"><span class="s-lbl">VGF কার্ড</span><span class="s-val" style="color:#9d174d">{{ vgdSummary.vgfCount }}</span></div>
+          <div class="s-item"><span class="s-lbl">মোট চাল</span><span class="s-val">{{ vgdSummary.totalRiceKg }} কেজি</span></div>
+          <div class="s-item"><span class="s-lbl">মোট গম</span><span class="s-val">{{ vgdSummary.totalWheatKg }} কেজি</span></div>
+          <div class="s-item"><span class="s-lbl">মোট নগদ</span><span class="s-val">৳{{ vgdSummary.totalCash | number }}</span></div>
+        </div>
+      </div>
+
+      <!-- Farmer Subsidy Summary -->
+      <div class="summary-card">
+        <div class="summary-title">🌾 কৃষক ভর্তুকি সারসংক্ষেপ</div>
+        <div class="summary-grid">
+          <div class="s-item"><span class="s-lbl">Approved কৃষক</span><span class="s-val" style="color:#1e40af">{{ stats.farmerApproved }}</span></div>
+          <div class="s-item"><span class="s-lbl">মোট জমি</span><span class="s-val">{{ farmerSubsidy.totalLand.toFixed(1) }} একর</span></div>
+          <div class="s-item"><span class="s-lbl">সার কোটা</span><span class="s-val">{{ farmerSubsidy.totalFertilizer }} কেজি</span></div>
+          <div class="s-item"><span class="s-lbl">বীজ কোটা</span><span class="s-val">{{ farmerSubsidy.totalSeed }} কেজি</span></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ward Coverage Table -->
+    <div class="table-wrap" *ngIf="wardData.length > 0">
+      <div class="chart-title" style="padding:16px 20px;">ওয়ার্ড-ভিত্তিক Approved কার্ড সংখ্যা</div>
+      <table class="app-table">
+        <thead><tr><th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th><th>Family</th><th>Farmer</th><th>LPG</th><th>VGD/VGF</th><th>{{ ls.current === "bn" ? "মোট" : "Total" }}</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let w of wardData">
+            <td><strong>{{ w.ward }}</strong></td>
+            <td><span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:12px;font-size:12px;">{{ w.family }}</span></td>
+            <td><span style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:12px;font-size:12px;">{{ w.farmer }}</span></td>
+            <td><span style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:12px;font-size:12px;">{{ w.lpg }}</span></td>
+            <td><span style="background:#ede9fe;color:#5b21b6;padding:2px 8px;border-radius:12px;font-size:12px;">{{ w.vgd }}</span></td>
+            <td><strong>{{ w.family + w.farmer + w.lpg + w.vgd }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

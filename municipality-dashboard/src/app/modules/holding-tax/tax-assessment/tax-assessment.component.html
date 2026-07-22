@@ -1,0 +1,118 @@
+<div class="form-container">
+  <div class="form-card">
+
+    <div class="card-header">
+      <div class="header-icon">
+        <i class="fas fa-calculator" style="color:#fff;font-size:18px"></i>
+      </div>
+      <div>
+        <h2>Holding Tax Assessment</h2>
+        <p>Calculate annual tax for a holding</p>
+      </div>
+    </div>
+
+    <form (ngSubmit)="calculateTax()" class="gov-form">
+      <div class="section-label">Holding Details</div>
+      <div class="row">
+        <div class="input-group">
+          <label>{{ ls.current === "bn" ? "হোল্ডিং নম্বর" : "Holding Number" }} <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.holdingNo" name="holdingNo" placeholder="e.g. H-001" required>
+        </div>
+        <div class="input-group">
+          <label>{{ ls.current === "bn" ? "মালিকের নাম" : "Owner Name" }} <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.ownerName" name="ownerName" placeholder="Property owner's name" required>
+        </div>
+      </div>
+
+      <div class="section-label">Property Information</div>
+
+      <div class="row">
+        <div class="input-group">
+          <label>{{ ls.current === "bn" ? "সম্পত্তির ধরন" : "Property Type" }} <span class="req">*</span></label>
+          <select [(ngModel)]="form.propertyType" name="propertyType" required>
+            <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+            <option>Residential</option>
+            <option>Commercial</option>
+            <option>Mixed</option>
+            <option>Government</option>
+            <option>Educational</option>
+            <option>Religious</option>
+            <option>Industrial</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Total Area (sq ft) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="form.area" name="area" placeholder="Enter area in sq ft" required>
+        </div>
+      </div>
+
+      <div class="section-label">Tax Calculation</div>
+
+      <div class="row">
+        <div class="input-group">
+          <label>Tax Rate (per sq ft) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="form.rate" name="rate"
+                 placeholder="e.g. 2.5" required>
+        </div>
+        <div class="input-group">
+          <label>Previous Due (BDT)</label>
+          <!-- FIX: was form.due → now form.previousDue -->
+          <input type="number" [(ngModel)]="form.previousDue" name="previousDue" placeholder="0 if no previous due">
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+          <i class="fas fa-calculator"></i>
+          {{ isSubmitting ? 'Saving...' : 'Calculate Tax' }}
+        </button>
+        <button type="button" class="btn-secondary" (click)="resetForm()">
+          <i class="fas fa-redo"></i> {{ ls.current === "bn" ? "রিসেট" : "Reset" }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Result Receipt -->
+    <div *ngIf="result" class="result-box">
+      <div class="result-title">
+        <i class="fas fa-receipt"></i> Assessment Result
+      </div>
+
+      <div class="result-grid">
+        <div class="result-item">
+          <span class="r-label">Holding No</span>
+          <span class="r-value">{{ form.holdingNo }}</span>
+        </div>
+        <div class="result-item">
+          <span class="r-label">Owner</span>
+          <span class="r-value">{{ form.ownerName }}</span>
+        </div>
+        <div class="result-item">
+          <span class="r-label">{{ ls.current === "bn" ? "সম্পত্তির ধরন" : "Property Type" }}</span>
+          <span class="r-value">{{ form.propertyType }}</span>
+        </div>
+        <div class="result-item">
+          <span class="r-label">Area</span>
+          <span class="r-value">{{ form.area }} sq ft</span>
+        </div>
+        <div class="result-item">
+          <span class="r-label">Rate</span>
+          <span class="r-value">{{ form.rate }} BDT/sq ft</span>
+        </div>
+        <div class="result-item">
+          <span class="r-label">Previous Due</span>
+          <span class="r-value">{{ form.previousDue || 0 | number }} BDT</span>
+        </div>
+        <div class="result-item">
+          <span class="r-label">Tax Amount</span>
+          <span class="r-value">{{ result.tax | number }} BDT</span>
+        </div>
+        <div class="result-item result-total">
+          <span class="r-label">Total Payable</span>
+          <span class="r-value">{{ result.total | number }} BDT</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

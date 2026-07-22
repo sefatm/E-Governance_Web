@@ -1,0 +1,143 @@
+<div class="admin-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="ph-icon"><i class="fas fa-passport"></i></div>
+    <div>
+      <h2 class="ph-title">Passport Application Review</h2>
+      <p class="ph-sub">Approve or reject submitted passport applications</p>
+    </div>
+    <div class="ph-count" *ngIf="applications.length > 0">{{ applications.length }} Total</div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="fas fa-search"></i>
+      <input type="text" [placeholder]="ls.current === 'bn' ? 'নাম বা NID দিয়ে খুঁজুন...' : 'Search by name or NID...'"
+             [(ngModel)]="searchText" (input)="applyFilter()">
+    </div>
+    <select [(ngModel)]="filterStatus" (change)="applyFilter()">
+      <option value="">{{ ls.current === "bn" ? "সকল অবস্থা" : "All Status" }}</option>
+      <option value="PENDING">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</option>
+      <option value="APPROVED">{{ ls.current === "bn" ? "অনুমোদিত" : "Approved" }}</option>
+      <option value="REJECTED">{{ ls.current === "bn" ? "প্রত্যাখ্যাত" : "Rejected" }}</option>
+    </select>
+    <button class="refresh-btn" (click)="load()">
+      <i class="fas fa-sync-alt"></i> {{ ls.current === "bn" ? "রিফ্রেশ" : "Refresh" }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-box" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> Loading applications...
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!isLoading">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }}</th>
+          <th>{{ ls.current === "bn" ? "পাসপোর্টের ধরন" : "Passport Type" }}</th>
+          <th>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</th>
+          <th>Contact</th>
+          <th>{{ ls.current === "bn" ? "পরিমাণ" : "Amount" }}</th>
+          <th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of filtered; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td><strong>{{ app.fullName }}</strong></td>
+          <td>{{ app.passportType || '—' }}</td>
+          <td class="mono">{{ app.nidNumber }}</td>
+          <td>{{ app.contact }}</td>
+          <td>৳{{ app.amount | number }}</td>
+          <td>{{ app.applicationDate || '—' }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="getStatusClass(app.status)">
+              {{ app.status || 'PENDING' }}
+            </span>
+          </td>
+          <td class="action-cell">
+            <!-- View -->
+            <button class="btn-view" (click)="view(app)">{{ ls.current === "bn" ? "দেখুন" : "View" }}</button>
+
+            <!-- Approve -->
+            <button class="btn-approve"
+                    *ngIf="app.status?.toUpperCase() !== 'APPROVED'"
+                    (click)="approve(app.id)">{{ ls.current === "bn" ? "অনুমোদন" : "Approve" }}</button>
+
+            <!-- Reject toggle -->
+            <button class="btn-reject"
+                    *ngIf="app.status?.toUpperCase() !== 'REJECTED'"
+                    (click)="toggleReject(app)">{{ ls.current === "bn" ? "প্রত্যাখ্যান" : "Reject" }}</button>
+
+            <!-- Reject input -->
+            <div class="reject-box" *ngIf="app.showReject">
+              <input [(ngModel)]="app.rejectReason" placeholder="Enter reason">
+              <button class="btn-confirm" (click)="confirmReject(app)">{{ ls.current === "bn" ? "নিশ্চিত করুন" : "Confirm" }}</button>
+            </div>
+
+            <!-- Delete -->
+            <button class="btn-delete" (click)="deleteApp(app.id)">{{ ls.current === "bn" ? "মুছুন" : "Delete" }}</button>
+          </td>
+        </tr>
+
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="9" class="no-data">
+            <i class="fas fa-inbox"></i> No applications found.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- View Modal -->
+<div class="modal-overlay" *ngIf="selected">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Application Details</h3>
+      <button class="modal-close" (click)="closeView()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }}</span><strong>{{ selected.fullName }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }}</span><strong>{{ selected.dob }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "জন্মস্থান" : "Place of Birth" }}</span><strong>{{ selected.placeOfBirth }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }}</span><strong>{{ selected.gender }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "জাতীয়তা" : "Nationality" }}</span><strong>{{ selected.nationality }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "বৈবাহিক অবস্থা" : "Marital Status" }}</span><strong>{{ selected.maritalStatus }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "ধর্ম" : "Religion" }}</span><strong>{{ selected.religion }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "রক্তের গ্রুপ" : "Blood Group" }}</span><strong>{{ selected.bloodGroup || '—' }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "পাসপোর্টের ধরন" : "Passport Type" }}</span><strong>{{ selected.passportType }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</span><strong>{{ selected.nidNumber }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "পূর্ববর্তী পাসপোর্ট" : "Previous Passport" }}</span><strong>{{ selected.passportNoPrevious || '—' }}</strong></div>
+      <div class="detail-row"><span>Current Address</span><strong>{{ selected.currentAddress }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "স্থায়ী ঠিকানা" : "Permanent Address" }}</span><strong>{{ selected.permanentAddress || '—' }}</strong></div>
+      <div class="detail-row"><span>Contact</span><strong>{{ selected.contact }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}</span><strong>{{ selected.email }}</strong></div>
+      <div class="detail-row"><span>Father's Name</span><strong>{{ selected.fatherName }}</strong></div>
+      <div class="detail-row"><span>Mother's Name</span><strong>{{ selected.motherName }}</strong></div>
+      <div class="detail-row"><span>Emergency Contact</span><strong>{{ selected.emergencyContactName }} — {{ selected.emergencyContactPhone }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method" }}</span><strong>{{ selected.paymentMethod }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "পরিমাণ" : "Amount" }}</span><strong>৳{{ selected.amount | number }}</strong></div>
+      <div class="detail-row"><span>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</span>
+        <span class="status-badge" [ngClass]="getStatusClass(selected.status)">
+          {{ selected.status || 'PENDING' }}
+        </span>
+      </div>
+      <div class="detail-row" *ngIf="selected.rejectReason">
+        <span>Reject Reason</span><strong class="reject-reason">{{ selected.rejectReason }}</strong>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close-modal" (click)="closeView()">{{ ls.current === "bn" ? "বন্ধ করুন" : "Close" }}</button>
+    </div>
+  </div>
+</div>

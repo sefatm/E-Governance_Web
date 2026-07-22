@@ -1,0 +1,31 @@
+<div class="ad-wrapper">
+  <div class="ad-card">
+    <div class="ad-icon">
+      <i class="fas fa-shield-alt"></i>
+    </div>
+    <h1 class="ad-title">{{ ls.current === "bn" ? "অ্যাক্সেস নিষিদ্ধ" : "Access Denied" }}</h1>
+    <p class="ad-subtitle">Access Denied — 403</p>
+
+    <p class="ad-desc">
+      আপনার বর্তমান role দিয়ে এই পেজটি দেখার অনুমতি নেই।
+    </p>
+
+    <div class="ad-role-badge" *ngIf="currentRole">
+      <i class="fas fa-user-tag"></i>
+      আপনার Role: <strong>{{ currentRole }}</strong>
+    </div>
+
+    <p class="ad-help">
+      প্রয়োজনে <strong>System Administrator</strong>-এর সাথে যোগাযোগ করুন।
+    </p>
+
+    <div class="ad-actions">
+      <button class="btn-dashboard" (click)="goToDashboard()">
+        <i class="fas fa-tachometer-alt"></i> Dashboard-এ ফিরুন
+      </button>
+      <button class="btn-logout" (click)="logout()">
+        <i class="fas fa-sign-out-alt"></i> {{ ls.current === "bn" ? "লগআউট" : "Logout" }}
+      </button>
+    </div>
+  </div>
+</div>

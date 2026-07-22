@@ -1,0 +1,236 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="toasts.length > 0">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">কৃষক কার্ড আবেদন ফরম</h2>
+        <span class="tl-header__title-en">Farmer Card Application Form — Department of Agricultural Extension</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="tl-steps">
+    <ng-container *ngFor="let s of steps; let i = index">
+      <div class="tl-step" [class.tl-step--done]="currentStep > i+1" [class.tl-step--active]="currentStep === i+1">
+        <div class="tl-step__circle">
+          <i class="fas fa-check" *ngIf="currentStep > i+1"></i>
+          <span *ngIf="currentStep <= i+1">{{ i+1 }}</span>
+        </div>
+        <span class="tl-step__label">{{ s }}</span>
+      </div>
+      <div class="tl-step__line" *ngIf="i < steps.length - 1" [class.tl-step__line--done]="currentStep > i+1"></div>
+    </ng-container>
+  </div>
+
+  <div class="tl-card">
+    <form (ngSubmit)="submitForm()" novalidate>
+
+      <!-- STEP 1 — Personal Info -->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 1">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-user"></i></div>
+          <div><h3>{{ ls.current === "bn" ? "ব্যক্তিগত তথ্য" : "Personal Information" }}</h3><p>কৃষকের সম্পূর্ণ ব্যক্তিগত তথ্য প্রদান করুন</p></div>
+          <span class="tl-step-tag">Step 1 of 3</span>
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>কৃষকের নাম <span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-user tl-ico"></i>
+              <input type="text" [(ngModel)]="form.farmerName" name="farmerName" [class.tl-invalid]="submitted && !form.farmerName" placeholder="সম্পূর্ণ নাম বাংলায়">
+            </div>
+            <div class="tl-err" *ngIf="submitted && !form.farmerName"><i class="fas fa-circle-exclamation"></i> নাম আবশ্যক</div>
+          </div>
+          <div class="tl-field">
+            <label>পিতার নাম</label>
+            <div class="tl-input-wrap"><i class="fas fa-user tl-ico"></i>
+              <input type="text" [(ngModel)]="form.fatherName" name="fatherName" placeholder="পিতার সম্পূর্ণ নাম">
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>জাতীয় পরিচয়পত্র নং <span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-id-card tl-ico"></i>
+              <input type="text" [(ngModel)]="form.nid" name="nid" [class.tl-invalid]="submitted && !form.nid" placeholder="১০ বা ১৭ ডিজিটের NID">
+            </div>
+            <div class="tl-err" *ngIf="submitted && !form.nid"><i class="fas fa-circle-exclamation"></i> NID আবশ্যক</div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }}</label>
+            <div class="tl-input-wrap"><i class="fas fa-calendar tl-ico"></i>
+              <input type="date" [(ngModel)]="form.dateOfBirth" name="dateOfBirth">
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }}<span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-phone tl-ico"></i>
+              <input type="tel" [(ngModel)]="form.contact" name="contact" [class.tl-invalid]="submitted && !form.contact" placeholder="01XXXXXXXXX">
+            </div>
+            <div class="tl-err" *ngIf="submitted && !form.contact"><i class="fas fa-circle-exclamation"></i> মোবাইল আবশ্যক</div>
+          </div>
+          <div class="tl-field">
+            <label>জেলা</label>
+            <div class="tl-input-wrap"><i class="fas fa-map tl-ico"></i>
+              <select [(ngModel)]="form.district" name="district">
+                <option value="">-- জেলা নির্বাচন করুন --</option>
+                <option *ngFor="let d of districts" [value]="d">{{ d }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="tl-field" style="grid-column:1/-1">
+            <label>{{ ls.current === "bn" ? "বর্তমান ঠিকানা" : "Present Address" }}<span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-map-marker-alt tl-ico tl-ico--top"></i>
+              <textarea [(ngModel)]="form.address" name="address" [class.tl-invalid]="submitted && !form.address" placeholder="গ্রাম, ডাকঘর, উপজেলা"></textarea>
+            </div>
+            <div class="tl-err" *ngIf="submitted && !form.address"><i class="fas fa-circle-exclamation"></i> ঠিকানা আবশ্যক</div>
+          </div>
+        </div>
+        <div class="tl-nav"><span></span>
+          <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 2 — Land & Bank -->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 2">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-seedling"></i></div>
+          <div><h3>জমি ও ব্যাংক তথ্য</h3><p>কৃষি জমি এবং ভর্তুকি গ্রহণের তথ্য প্রদান করুন</p></div>
+          <span class="tl-step-tag">Step 2 of 3</span>
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>নিজস্ব জমি (একর)</label>
+            <div class="tl-input-wrap"><i class="fas fa-ruler-combined tl-ico"></i>
+              <input type="number" [(ngModel)]="form.landOwn" name="landOwn" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>লিজকৃত জমি (একর)</label>
+            <div class="tl-input-wrap"><i class="fas fa-ruler-combined tl-ico"></i>
+              <input type="number" [(ngModel)]="form.landLease" name="landLease" min="0" step="0.01" placeholder="0.00">
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>মোট জমি</label>
+            <div class="tl-input-wrap"><i class="fas fa-calculator tl-ico"></i>
+              <input type="text" [value]="(+form.landOwn + +form.landLease).toFixed(2) + ' একর'" readonly class="bg-light">
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>চাষের মৌসুম</label>
+            <div class="tl-input-wrap"><i class="fas fa-sun tl-ico"></i>
+              <select [(ngModel)]="form.farmingSeason" name="farmingSeason">
+                <option value="">-- নির্বাচন করুন --</option>
+                <option>রবি (শীতকালীন)</option>
+                <option>খরিফ-১ (গ্রীষ্মকালীন)</option>
+                <option>খরিফ-২ (বর্ষাকালীন)</option>
+                <option>সারা বছর</option>
+              </select>
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ব্যাংকের নাম" : "Bank Name" }}</label>
+            <div class="tl-input-wrap"><i class="fas fa-university tl-ico"></i>
+              <select [(ngModel)]="form.bankName" name="bankName">
+                <option value="">-- নির্বাচন করুন --</option>
+                <option>সোনালী ব্যাংক</option><option>কৃষি ব্যাংক</option>
+                <option>জনতা ব্যাংক</option><option>অগ্রণী ব্যাংক</option>
+                <option>রূপালী ব্যাংক</option><option>{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "অ্যাকাউন্ট নম্বর" : "Account Number" }}</label>
+            <div class="tl-input-wrap"><i class="fas fa-hashtag tl-ico"></i>
+              <input type="text" [(ngModel)]="form.bankAccount" name="bankAccount" placeholder="ব্যাংক অ্যাকাউন্ট নম্বর">
+            </div>
+          </div>
+          <div class="tl-field" style="grid-column:1/-1">
+            <label>প্রধান ফসলের ধরন</label>
+            <div class="tl-input-wrap"><i class="fas fa-leaf tl-ico"></i>
+              <input type="text" [(ngModel)]="form.cropTypes" name="cropTypes" placeholder="যেমন: ধান, গম, সবজি, ভুট্টা">
+            </div>
+          </div>
+        </div>
+        <div class="tl-nav">
+          <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}</button>
+          <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 3 — Documents -->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 3">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-file-upload"></i></div>
+          <div><h3>ডকুমেন্ট আপলোড</h3><p>ছবি, NID ও জমির দলিলের কপি আপলোড করুন</p></div>
+          <span class="tl-step-tag">Step 3 of 3</span>
+        </div>
+        <div class="tl-uploads" style="grid-template-columns: repeat(3,1fr)">
+          <div class="tl-upload-card">
+            <div class="tl-upload-label"><i class="fas fa-camera"></i> ছবি <span class="tl-upload-hint">JPG/PNG</span></div>
+            <div *ngIf="!photoPreview" class="tl-upload-zone" (click)="photoInput.click()">
+              <i class="fas fa-cloud-upload-alt tl-upload-icon"></i><span>পাসপোর্ট সাইজ</span><span style="font-size:10px;color:#94a3b8">Click to upload</span>
+            </div>
+            <div *ngIf="photoPreview" class="tl-photo-preview">
+              <img [src]="photoPreview"><button type="button" class="tl-remove-btn" (click)="removePhoto()"><i class="fas fa-times"></i></button>
+            </div>
+            <input #photoInput type="file" accept="image/*" hidden (change)="onPhoto($event)">
+          </div>
+          <div class="tl-upload-card">
+            <div class="tl-upload-label"><i class="fas fa-id-card"></i> NID কপি <span class="tl-upload-hint">PDF/JPG</span></div>
+            <div *ngIf="!nidFileName" class="tl-upload-zone" (click)="nidInput.click()">
+              <i class="fas fa-cloud-upload-alt tl-upload-icon"></i><span>NID স্ক্যান/ছবি</span><span style="font-size:10px;color:#94a3b8">Click to upload</span>
+            </div>
+            <div *ngIf="nidFileName" class="tl-file-preview">
+              <i class="fas fa-file-alt"></i><span>{{ nidFileName }}</span>
+              <button type="button" class="tl-remove-btn" (click)="removeNid()"><i class="fas fa-times"></i></button>
+            </div>
+            <input #nidInput type="file" accept="image/*,application/pdf" hidden (change)="onNidFile($event)">
+          </div>
+          <div class="tl-upload-card">
+            <div class="tl-upload-label"><i class="fas fa-file-contract"></i> জমির দলিল <span class="tl-upload-hint">PDF/JPG</span></div>
+            <div *ngIf="!landDocName" class="tl-upload-zone" (click)="landInput.click()">
+              <i class="fas fa-cloud-upload-alt tl-upload-icon"></i><span>দলিল/পর্চা</span><span style="font-size:10px;color:#94a3b8">Click to upload</span>
+            </div>
+            <div *ngIf="landDocName" class="tl-file-preview">
+              <i class="fas fa-file-alt"></i><span>{{ landDocName }}</span>
+              <button type="button" class="tl-remove-btn" (click)="landDocName=null; landDocFile=null"><i class="fas fa-times"></i></button>
+            </div>
+            <input #landInput type="file" accept="image/*,application/pdf" hidden (change)="onLandDoc($event)">
+          </div>
+        </div>
+        <div class="tl-declaration">
+          <label class="tl-check-label">
+            <input type="checkbox" [(ngModel)]="declared" name="declared">
+            আমি ঘোষণা করছি যে উপরে প্রদত্ত সকল তথ্য সঠিক ও সত্য। প্রদত্ত জমির তথ্য সঠিক। মিথ্যা তথ্য প্রদান করলে আইনগত ব্যবস্থা নেওয়া হতে পারে।
+          </label>
+        </div>
+        <div class="tl-nav">
+          <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}</button>
+          <button type="submit" class="tl-btn tl-btn--submit" [disabled]="loading || !declared">
+            <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "জমা হচ্ছে..." : "Submitting..." }}</span>
+            <span *ngIf="!loading"><i class="fas fa-paper-plane"></i> {{ ls.current === "bn" ? "আবেদন জমা দিন" : "Submit Application" }}</span>
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>

@@ -1,0 +1,150 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="successMsg">
+  <div class="tl-toast tl-toast--ok"><i class="fas fa-circle-check"></i><span>{{ successMsg }}</span></div>
+</div>
+
+<div class="tl-page">
+
+  <!-- ── Header ── -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">{{ ls.current === "bn" ? "স্মার্ট বিন পর্যবেক্ষণ" : "Smart Bin Monitoring" }}</h2>
+        <span class="tl-header__title-en">Smart Bin Monitoring — Waste Management Division</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- ── Summary chips ── -->
+  <div class="tl-summary-row">
+    <div class="sum-chip sum-total">
+      <div class="sum-icon"><i class="fas fa-trash-can"></i></div>
+      <div><div class="sum-label">মোট বিন</div><div class="sum-val">{{ bins.length }}</div></div>
+    </div>
+    <div class="sum-chip sum-full">
+      <div class="sum-icon"><i class="fas fa-triangle-exclamation"></i></div>
+      <div><div class="sum-label">ভর্তি (≥80%)</div><div class="sum-val">{{ fullBinsCount }}</div></div>
+    </div>
+    <div class="sum-chip sum-done">
+      <div class="sum-icon"><i class="fas fa-circle-check"></i></div>
+      <div><div class="sum-label">আজকে সংগ্রহ</div><div class="sum-val">{{ collectedToday }}</div></div>
+    </div>
+    <div class="sum-chip sum-maint">
+      <div class="sum-icon"><i class="fas fa-wrench"></i></div>
+      <div><div class="sum-label">রক্ষণাবেক্ষণ</div><div class="sum-val">{{ maintenanceCount }}</div></div>
+    </div>
+  </div>
+
+
+  <div class="tl-card" style="margin-top:16px;padding:18px">
+    <div class="tl-records-head"><h3><i class="fas fa-plus-circle"></i> Add Smart Bin</h3></div>
+    <div class="tl-grid-2">
+      <div class="tl-field"><label>Bin Code *</label><input [(ngModel)]="newBin.binCode" placeholder="BIN-001"></div>
+      <div class="tl-field"><label>Location *</label><input [(ngModel)]="newBin.location" placeholder="Market Gate A"></div>
+      <div class="tl-field"><label>Ward</label><input [(ngModel)]="newBin.ward" placeholder="Ward 5"></div>
+      <div class="tl-field"><label>Bin Type</label><select [(ngModel)]="newBin.binType"><option>General</option><option>Recyclable</option><option>Organic</option></select></div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px"><button class="tl-btn tl-btn--submit" (click)="createBin()"><i class="fas fa-plus"></i> Add Bin</button></div>
+  </div>
+
+  <!-- ── Filter bar ── -->
+  <div class="tl-filter-bar" style="margin-top:16px">
+    <div class="tl-filter-select" style="min-width:200px">
+      <i class="fas fa-filter"></i>
+      <select [(ngModel)]="filterStatus">
+        <option value="">সকল স্ট্যাটাস</option>
+        <option>Normal</option>
+        <option>Full</option>
+        <option>Collected</option>
+        <option>Maintenance</option>
+      </select>
+    </div>
+    <span class="tl-count-badge" style="margin-left:auto">{{ filteredBins.length }} টি বিন</span>
+  </div>
+
+  <!-- ── Table ── -->
+  <div class="tl-records-section" style="margin-top:12px">
+    <div class="tl-records-head">
+      <h3><i class="fas fa-microchip"></i> স্মার্ট বিন তালিকা</h3>
+      <div style="display:flex;gap:8px">
+        <span class="tl-count-badge bin-full-badge" *ngIf="fullBinsCount > 0">
+          <i class="fas fa-triangle-exclamation"></i> {{ fullBinsCount }} টি খালি করতে হবে
+        </span>
+      </div>
+    </div>
+    <div class="tl-table-wrap">
+      <table class="tl-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ ls.current === "bn" ? "অবস্থান" : "Location" }}</th>
+            <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+            <th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+            <th>ভর্তির মাত্রা</th>
+            <th>স্ট্যাটাস</th>
+            <th>{{ ls.current === "bn" ? "শেষ সংগ্রহ" : "Last Collection" }}</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let bin of filteredBins; let i = index"
+              [class.row-full]="bin.fillLevel >= 80 && bin.status !== 'Collected' && bin.status !== 'Maintenance'">
+            <td class="td-num">{{ i + 1 }}</td>
+            <td><strong>{{ bin.location }}</strong></td>
+            <td><span class="ward-chip">{{ bin.ward }}</span></td>
+            <td>
+              <span class="bin-type-badge" [class]="'bt-' + bin.binType?.toLowerCase()">
+                {{ bin.binType }}
+              </span>
+            </td>
+            <td class="td-fill">
+              <div class="fill-wrap">
+                <div class="fill-bar">
+                  <div class="fill-inner" [style.width.%]="bin.fillLevel" [ngClass]="fillClass(bin.fillLevel)"></div>
+                </div>
+                <span class="fill-pct" [ngStyle]="{'color': getColor(bin.fillLevel)}">{{ bin.fillLevel }}%</span>
+              </div>
+            </td>
+            <td>
+              <span class="status-pill" [ngClass]="statusClass(bin.status)">
+                <span class="s-dot"></span>{{ bin.status }}
+              </span>
+            </td>
+            <td class="td-date">{{ bin.lastCollected || '—' }}</td>
+            <td>
+              <div class="action-btns">
+                <button class="act-btn" title="Update fill level" (click)="promptFill(bin)"><i class="fas fa-gauge-high"></i></button>
+                <button class="act-btn act-collect"
+                        title="সংগ্রহ করুন"
+                        [disabled]="bin.status === 'Collected' || bin.status === 'Maintenance'"
+                        (click)="collectBin(bin)">
+                  <i class="fas fa-trash-arrow-up"></i>
+                </button>
+                <button class="act-btn act-maint"
+                        title="রক্ষণাবেক্ষণ"
+                        [disabled]="bin.status === 'Maintenance'"
+                        (click)="markMaintenance(bin)">
+                  <i class="fas fa-wrench"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredBins.length === 0">
+            <td colspan="8" class="no-data">
+              <i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#d1d5db"></i>
+              কোনো বিন পাওয়া যায়নি
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

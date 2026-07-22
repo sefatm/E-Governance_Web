@@ -1,0 +1,140 @@
+<div class="auth-page">
+
+  <!-- Left panel -->
+  <div class="auth-left">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+          <rect width="36" height="36" rx="10" fill="rgba(255,255,255,0.15)"/>
+          <path d="M18 6L28 11V20C28 25 23.5 29.5 18 31C12.5 29.5 8 25 8 20V11L18 6Z"
+                stroke="white" stroke-width="2" fill="rgba(255,255,255,0.1)"/>
+          <circle cx="18" cy="18" r="4" fill="white"/>
+        </svg>
+      </div>
+      <div>
+        <h1>{{ ls.current === "bn" ? "মাদারীপুর পৌরসভা" : "Madaripur Municipality" }}</h1>
+        <p>{{ ls.current === "bn" ? "ডিজিটাল সেবা পোর্টাল" : "Digital Service Portal" }}</p>
+      </div>
+    </div>
+
+    <div class="left-body">
+      <h2>Join the System</h2>
+      <p>Create your account to access government digital services from anywhere.</p>
+      <ul class="features">
+        <li><i class="fas fa-shield-alt"></i> Secure account creation</li>
+        <li><i class="fas fa-id-card"></i> Role-based access control</li>
+        <li><i class="fas fa-file-alt"></i> Apply for certificates</li>
+        <li><i class="fas fa-bell"></i> Track your applications</li>
+      </ul>
+    </div>
+
+    <p class="left-footer">© 2026 Madaripur Municipality. All rights reserved.</p>
+  </div>
+
+  <!-- Right panel -->
+  <div class="auth-right">
+    <div class="form-card">
+
+      <div class="form-header">
+        <h2>Create Account</h2>
+        <p>Fill in your details to get started</p>
+      </div>
+
+      <div class="error-box" *ngIf="errorMsg">
+        <i class="fas fa-exclamation-circle"></i> {{ errorMsg }}
+      </div>
+
+      <form (ngSubmit)="register()">
+
+        <!-- Full Name -->
+        <div class="input-group">
+          <label for="name">{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }} <span class="req">*</span></label>
+          <div class="input-wrap">
+            <i class="fas fa-user input-icon"></i>
+            <input id="name" type="text" [(ngModel)]="name" name="name"
+                   placeholder="Enter your full name" autocomplete="name">
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="input-group">
+          <label for="email">{{ ls.current === "bn" ? "ইমেইল ঠিকানা" : "Email Address" }} <span class="req">*</span></label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope input-icon"></i>
+            <input id="email" type="email" [(ngModel)]="email" name="email"
+                   placeholder="your@email.com" autocomplete="email">
+          </div>
+        </div>
+
+        <!-- Role -->
+        <div class="input-group">
+          <label for="role">{{ ls.current === "bn" ? "ভূমিকা" : "Role" }} <span class="req">*</span></label>
+          <div class="input-wrap select-wrap">
+            <i class="fas fa-user-tag input-icon"></i>
+            <select id="role" [(ngModel)]="role" name="role">
+              <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Password + Confirm -->
+        <div class="row-2">
+
+          <div class="input-group">
+            <label for="password">{{ ls.current === "bn" ? "পাসওয়ার্ড" : "Password" }} <span class="req">*</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input id="password" [type]="showPass ? 'text' : 'password'"
+                     [(ngModel)]="password" name="password"
+                     placeholder="Min 6 characters">
+              <button type="button" class="toggle-pass" (click)="showPass=!showPass">
+                <i [class]="showPass ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <div class="strength-bar" *ngIf="password">
+              <div class="strength-fill"
+                   [style.width.%]="passwordStrength * 20"
+                   [style.background]="strengthColor"></div>
+            </div>
+            <span class="strength-label" *ngIf="password" [style.color]="strengthColor">
+              {{ strengthLabel }}
+            </span>
+          </div>
+
+          <div class="input-group">
+            <label for="repassword">{{ ls.current === "bn" ? "পাসওয়ার্ড নিশ্চিত" : "Confirm Password" }} <span class="req">*</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-lock input-icon"></i>
+              <input id="repassword" [type]="showRePass ? 'text' : 'password'"
+                     [(ngModel)]="repassword" name="repassword"
+                     placeholder="Re-enter password">
+              <button type="button" class="toggle-pass" (click)="showRePass=!showRePass">
+                <i [class]="showRePass ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <span class="match-ok" *ngIf="repassword && password === repassword">
+              <i class="fas fa-check-circle"></i> Passwords match
+            </span>
+            <span class="match-err" *ngIf="repassword && password !== repassword">
+              <i class="fas fa-times-circle"></i> Do not match
+            </span>
+          </div>
+
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+          <i class="fas fa-user-plus"       *ngIf="!isLoading"></i>
+          {{ isLoading ? 'Creating Account...' : 'Create Account' }}
+        </button>
+
+      </form>
+
+      <div class="form-footer">
+        <p>{{ ls.current === "bn" ? "ইতিমধ্যে অ্যাকাউন্ট আছে?" : "Already have an account?" }} <a routerLink="/login">{{ ls.current === "bn" ? "সাইন ইন" : "Sign In" }}</a></p>
+      </div>
+
+    </div>
+  </div>
+
+</div>

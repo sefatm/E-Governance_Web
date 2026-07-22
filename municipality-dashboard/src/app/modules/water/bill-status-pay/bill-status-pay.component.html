@@ -1,0 +1,123 @@
+<div class="wb-page">
+  <section class="hero">
+    <div class="hero-icon"><i class="fas fa-droplet"></i></div>
+    <div>
+      <span class="eyebrow">MUNICIPALITY WATER SUPPLY</span>
+      <h1>Water Bill Status & Payment</h1>
+      <p>Check your bill securely using meter number and registered mobile number.</p>
+    </div>
+  </section>
+
+  <section class="search-card">
+    <div class="step"><span>01</span><div><b>Find Your Bill</b><small>Enter the registered information</small></div></div>
+    <div class="form-grid">
+      <label>
+        <span>Meter Number</span>
+        <div class="input-wrap"><i class="fas fa-gauge-high"></i><input [(ngModel)]="meterNo" placeholder="e.g. WM-001234"></div>
+      </label>
+      <label>
+        <span>Registered Mobile</span>
+        <div class="input-wrap"><i class="fas fa-mobile-screen"></i><input [(ngModel)]="mobile" placeholder="01XXXXXXXXX" maxlength="11"></div>
+      </label>
+    </div>
+    <button class="primary" (click)="checkStatus()" [disabled]="loading">
+      <i class="fas" [ngClass]="loading ? 'fa-spinner fa-spin' : 'fa-magnifying-glass'"></i>
+      {{ loading ? 'Checking...' : 'Check Bill Status' }}
+    </button>
+  </section>
+
+  <div class="notice success" *ngIf="message"><i class="fas fa-circle-check"></i>{{ message }}</div>
+  <div class="notice error" *ngIf="error"><i class="fas fa-circle-exclamation"></i>{{ error }}</div>
+
+  <section class="results" *ngIf="searched && !loading">
+    <div class="results-head">
+      <div><span class="eyebrow">BILL HISTORY</span><h2>Your Water Bills</h2></div>
+      <span class="count">{{ bills.length }} bill{{ bills.length===1 ? '' : 's' }}</span>
+    </div>
+
+    <div class="empty" *ngIf="!bills.length">
+      <i class="fas fa-file-circle-xmark"></i>
+      <h3>No bill found</h3>
+      <p>Check your meter number and registered mobile number.</p>
+    </div>
+
+    <div class="bill-grid" *ngIf="bills.length">
+      <article class="bill-card" *ngFor="let bill of bills">
+        <div class="bill-top">
+          <div>
+            <small>{{ bill.month }}</small>
+            <h3>{{ bill.name }}</h3>
+            <span class="meter"><i class="fas fa-gauge"></i> {{ bill.meterNo }}</span>
+          </div>
+          <span class="status" [ngClass]="statusClass(bill.status)">{{ bill.status || 'Unpaid' }}</span>
+        </div>
+
+        <div class="metrics">
+          <div><span>Usage</span><strong>{{ bill.units || 0 | number }} L</strong></div>
+          <div><span>Connection</span><strong>{{ bill.connectionType }}</strong></div>
+          <div class="amount"><span>Amount</span><strong>৳ {{ bill.amount || 0 | number:'1.2-2' }}</strong></div>
+        </div>
+
+        <div class="paid-meta" *ngIf="statusClass(bill.status)==='paid'">
+          <span><i class="fas fa-receipt"></i> {{ bill.receiptNo || 'Receipt issued' }}</span>
+          <span *ngIf="bill.txnRef"><i class="fas fa-hashtag"></i> {{ bill.txnRef }}</span>
+        </div>
+
+        <button class="pay" *ngIf="statusClass(bill.status)!=='paid'" (click)="openPayment(bill)">
+          <i class="fas fa-credit-card"></i> Pay This Bill
+        </button>
+        <button class="pay" *ngIf="statusClass(bill.status)==='paid' && bill.receiptNo" (click)="downloadPaidBillReceipt(bill)"><i class="fas fa-file-pdf"></i> Download PDF Receipt</button>
+        <div class="paid-banner" *ngIf="statusClass(bill.status)==='paid' && !bill.receiptNo"><i class="fas fa-shield-check"></i> Payment Complete</div>
+      </article>
+    </div>
+  </section>
+</div>
+
+<div class="modal-backdrop" *ngIf="payBillItem" (click)="closePayment()">
+  <div class="payment-modal" (click)="$event.stopPropagation()">
+    <button class="close" (click)="closePayment()"><i class="fas fa-xmark"></i></button>
+
+    <ng-container *ngIf="!receipt">
+      <div class="modal-icon"><i class="fas fa-droplet"></i></div>
+      <span class="eyebrow">SECURE BILL PAYMENT</span>
+      <h2>Confirm Water Bill Payment</h2>
+      <p class="modal-sub">Official receipt will be generated and emailed after successful payment.</p>
+
+      <div class="summary">
+        <div><span>Meter</span><strong>{{ payBillItem.meterNo }}</strong></div>
+        <div><span>Month</span><strong>{{ payBillItem.month }}</strong></div>
+        <div><span>Customer</span><strong>{{ payBillItem.name }}</strong></div>
+        <div class="grand"><span>Payable Amount</span><strong>৳ {{ payBillItem.amount || 0 | number:'1.2-2' }}</strong></div>
+      </div>
+
+      <div class="pay-form">
+        <label><span>NID *</span><input [(ngModel)]="payment.nid" placeholder="National ID number"></label>
+        <label><span>Mobile</span><input [(ngModel)]="payment.mobile" placeholder="01XXXXXXXXX"></label>
+        <label><span>Email for receipt</span><input type="email" [(ngModel)]="payment.email" placeholder="name@example.com"></label>
+        <label><span>Payment Method</span>
+          <select [(ngModel)]="payment.method">
+            <option>Mobile Banking</option><option>Card</option><option>Bank Transfer</option><option>Cash Counter</option>
+          </select>
+        </label>
+        <label class="full"><span>Provider Transaction ID (demo optional)</span><input [(ngModel)]="payment.providerTxnId" placeholder="e.g. BKASH-123456"></label>
+      </div>
+
+      <button class="confirm" (click)="confirmPayment()" [disabled]="paying">
+        <i class="fas" [ngClass]="paying ? 'fa-spinner fa-spin' : 'fa-lock'"></i>
+        {{ paying ? 'Processing...' : 'Confirm & Pay' }}
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="receipt">
+      <div class="success-mark"><i class="fas fa-check"></i></div>
+      <span class="eyebrow">PAYMENT SUCCESSFUL</span>
+      <h2>Your Receipt Is Ready</h2>
+      <p class="modal-sub">A PDF copy has also been queued for email delivery.</p>
+      <div class="receipt-box">
+        <span>Receipt Number</span><strong>{{ receipt.receiptNo }}</strong>
+        <small>Paid Amount: ৳ {{ receipt.amount | number:'1.2-2' }}</small>
+      </div>
+      <button class="confirm" (click)="downloadReceipt()"><i class="fas fa-file-pdf"></i> Download Official PDF Receipt</button>
+    </ng-container>
+  </div>
+</div>

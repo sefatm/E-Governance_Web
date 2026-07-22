@@ -1,0 +1,144 @@
+<div class="form-container">
+
+  <!-- Stats Banner -->
+  <div class="stats-banner">
+    <div class="sb-text">
+      <h2>{{ ls.current === "bn" ? "ই-টেন্ডার পোর্টাল" : "E-Tender Portal" }}</h2>
+      <p>{{ ls.current === "bn" ? "সরকারি টেন্ডারের তালিকা দেখুন এবং অনলাইনে বিড জমা দিন।" : "View the list of government tenders and submit bids online." }}</p>
+    </div>
+    <div class="sb-stats">
+      <div class="stat-box">
+        <span class="stat-num">{{ openCount }}</span>
+        <span class="stat-lbl">{{ ls.current === "bn" ? "খোলা টেন্ডার" : "Open Tenders" }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num">{{ totalCount }}</span>
+        <span class="stat-lbl">{{ ls.current === "bn" ? "মোট প্রকাশিত" : "Total Published" }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num">{{ awardedCount }}</span>
+        <span class="stat-lbl">Awarded</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Row -->
+  <div class="filter-row">
+    <button
+      *ngFor="let f of filterOptions"
+      class="filter-btn"
+      [class.active]="activeFilter === f"
+      (click)="applyFilter(f)">
+      {{ f }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+  </div>
+
+  <!-- Tender Cards -->
+  <div class="tender-grid" *ngIf="!isLoading">
+
+    <div class="tender-card"
+         *ngFor="let n of filteredNotices"
+         (click)="viewDetails(n)"
+         [class.card-urgent]="n.status==='Open' && daysLeft(n.endDate) <= 3">
+
+      <div class="tc-top">
+        <span class="tender-no">{{ n.tenderNo }}</span>
+        <span class="badge" [ngClass]="statusClass(n.status!)">{{ n.status }}</span>
+      </div>
+
+      <h3 class="tc-title">{{ n.title }}</h3>
+
+      <div class="tc-meta-row">
+        <span><i class="fas fa-map-marker-alt"></i> {{ n.workLocation || 'Location TBD' }}</span>
+        <span><i class="fas fa-tag"></i> {{ n.category }}</span>
+      </div>
+
+      <div class="tc-meta-grid">
+        <div class="meta-item">
+          <label>{{ ls.current === "bn" ? "আনুমানিক খরচ" : "Estimated Cost" }}</label>
+          <span>{{ formatCurrency(n.estimatedCost) }}</span>
+        </div>
+        <div class="meta-item">
+          <label>EMD Required</label>
+          <span>{{ formatCurrency(n.emdAmount) }}</span>
+        </div>
+        <div class="meta-item">
+          <label>{{ ls.current === "bn" ? "শুরুর তারিখ" : "Start Date" }}</label>
+          <span>{{ n.startDate | date:'dd MMM yyyy' }}</span>
+        </div>
+        <div class="meta-item">
+          <label>{{ ls.current === "bn" ? "সময়সীমা" : "Deadline" }}</label>
+          <span>{{ n.endDate | date:'dd MMM yyyy' }}</span>
+        </div>
+      </div>
+
+      <!-- Gap Fix #1: Deadline countdown badge -->
+      <div class="tc-deadline" *ngIf="n.status === 'Open'">
+        <span class="deadline-badge" [ngClass]="deadlineClass(n.endDate)">
+          ⏰ {{ deadlineLabel(n.endDate) }}
+        </span>
+      </div>
+      <div class="tc-deadline" *ngIf="n.status === 'Closed' || n.status === 'Awarded'">
+        <span class="deadline-badge dl-expired">{{ ls.current === "bn" ? "বিড বন্ধ" : "Bid Closed" }}</span>
+      </div>
+
+      <div class="tc-footer" (click)="$event.stopPropagation()">
+        <button class="btn-view" (click)="viewDetails(n)">
+          <i class="fas fa-eye"></i> {{ ls.current === "bn" ? "বিস্তারিত" : "View Details" }}
+        </button>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="filteredNotices.length === 0">
+      <i class="fas fa-folder-open"></i>
+      <p>No tender found.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Tender Details</h3>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedNotice">
+      <div class="detail-top">
+        <span class="tender-no">{{ selectedNotice.tenderNo }}</span>
+        <span class="badge" [ngClass]="statusClass(selectedNotice.status!)">{{ selectedNotice.status }}</span>
+      </div>
+      <h3 class="detail-title">{{ selectedNotice.title }}</h3>
+      <p class="detail-desc">{{ selectedNotice.description || 'No description provided.' }}</p>
+
+      <!-- Gap Fix #1: Deadline in detail modal -->
+      <div class="detail-deadline" *ngIf="selectedNotice.status === 'Open'">
+        <span class="deadline-badge" [ngClass]="deadlineClass(selectedNotice.endDate)">
+          ⏰ {{ deadlineLabel(selectedNotice.endDate) }}
+        </span>
+      </div>
+
+      <div class="detail-grid">
+        <div class="dg-item"><label>{{ ls.current === "bn" ? "বিভাগ" : "Category" }}</label><span>{{ selectedNotice.category }}</span></div>
+        <div class="dg-item"><label>{{ ls.current === "bn" ? "অবস্থান" : "Location" }}</label><span>{{ selectedNotice.workLocation || '—' }}</span></div>
+        <div class="dg-item"><label>{{ ls.current === "bn" ? "আনুমানিক খরচ" : "Estimated Cost" }}</label><span>{{ formatCurrency(selectedNotice.estimatedCost) }}</span></div>
+        <div class="dg-item"><label>EMD Amount</label><span>{{ formatCurrency(selectedNotice.emdAmount) }}</span></div>
+        <div class="dg-item"><label>{{ ls.current === "bn" ? "শুরুর তারিখ" : "Start Date" }}</label><span>{{ selectedNotice.startDate | date:'dd MMM yyyy' }}</span></div>
+        <div class="dg-item"><label>{{ ls.current === "bn" ? "জমার শেষ তারিখ" : "Submission Deadline" }}</label>
+          <span [style.color]="daysLeft(selectedNotice.endDate) <= 3 && selectedNotice.status === 'Open' ? '#dc2626' : ''">
+            {{ selectedNotice.endDate | date:'dd MMM yyyy' }}
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close-modal" (click)="closeModal()">{{ ls.current === "bn" ? "বন্ধ করুন" : "Close" }}</button>
+    </div>
+  </div>
+</div>

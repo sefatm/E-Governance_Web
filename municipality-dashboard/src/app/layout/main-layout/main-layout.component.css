@@ -1,0 +1,48 @@
+/* main-layout.component.css */
+
+.layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+  margin-left: 260px;
+  transition: margin-left 0.3s ease;
+}
+
+.main.collapsed {
+  margin-left: 70px;
+}
+
+.scroll-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.scroll-area::-webkit-scrollbar       { width: 6px; }
+.scroll-area::-webkit-scrollbar-thumb { background: #c5d9c5; border-radius: 10px; }
+
+.content {
+  flex: 1;
+  background: #f0f4f0;
+  padding: 20px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+  .content { padding: 14px; }
+}

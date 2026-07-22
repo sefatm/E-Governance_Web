@@ -1,0 +1,247 @@
+/* ============================================
+   Health Center Info — Premium Gov Design
+   ============================================ */
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 20px 80px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #1e29b;
+  background-color: #f0fdf4;
+}
+
+
+/* ===== PAGE HEADER ===== */
+.container > h2 {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+  color: #ffffff;
+  padding: 28px 36px;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  margin: 0;
+  border-radius: 14px 14px 0 0;
+  border-bottom: 5px solid #f59e0b;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 32px;
+}
+
+
+/* ===== FORM CARD ===== */
+.form-card {
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  padding: 28px 32px 32px;
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.04), 
+    0 10px 25px -5px rgba(0, 0, 0, 0.06);
+  margin-bottom: 32px;
+}
+
+.form-card h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #064e3b;
+  margin: 0 0 20px 0;
+  padding-left: 12px;
+  border-left: 4px solid #059669;
+}
+
+
+/* ===== FORM INPUTS ===== */
+.form-card input,
+.form-card select {
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 14px;
+  font-family: inherit;
+  color: #111827;
+  background-color: #f9fafb;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-card input::placeholder {
+  color: #9ca3af;
+}
+
+.form-card input:focus,
+.form-card select:focus {
+  outline: none;
+  background-color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.08);
+}
+
+/* Select dropdown arrow */
+.form-card select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 42px;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.form-card select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%23059669' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.form-card select option { 
+  background: white; 
+  color: #111827; 
+}
+
+
+/* ===== FORM BUTTON ===== */
+.form-card button {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  padding: 13px 28px;
+  font-size: 15px;
+  font-weight: 0;
+  font-family: inherit;
+  color: white;
+  background: #059669;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.25);
+  transition: all 0.2s ease;
+  font-weight: 700;
+}
+
+.form-card button:hover {
+  background: #047857;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.form-card button:active {
+  transform: translateY(0);
+}
+
+
+/* ===== MAIN TABLE ===== */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+table thead th {
+  background: #f8fafb;
+  text-align: left;
+  padding: 14px 24px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+table tbody td {
+  padding: 16px 24px;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 1px solid #f1f5f6;
+  font-weight: 500;
+}
+
+table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table tbody tr:hover td {
+  background-color: #f8fafc;
+}
+
+/* যদি contact না থাকে শুধু দাশ দেখানোর জন্য placeholder হিসেবে দেখাবে */
+td:has(ng-template) {
+  color: #9ca3af !important;
+}
+
+
+/* ===== DELETE BUTTON (Inline Rounded Pill) ===== */
+.delete {
+  display: inline-block;
+  padding: 6px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #dc2626;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  border-radius: 100px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.delete:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(220, 38, 28, 0.2);
+}
+
+.delete:active {
+  transform: translateY(0);
+}
+
+
+/* ===== EMPTY STATE ROW ===== */
+td[colspan="5"] {
+  text-align: center;
+  padding: 48px 20px !important;
+  font-size: 14px;
+  font-weight: 500;
+  color: #9ca3eb;
+  background-color: transparent !important;
+}
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .container {
+    margin: 0 auto;
+    padding: 0 12px 60px;
+  }
+
+  .container > h2 {
+    padding: 24px 20px;
+    font-size: 18px;
+  }
+
+  .form-card {
+    padding: 24px 20px 28px;
+  }
+
+  /* টেবিল হরিজন্টাল স্ক্রল হবে */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+  }
+
+  table thead th,
+  table tbody td {
+    padding: 12px 16px;
+  }
+}

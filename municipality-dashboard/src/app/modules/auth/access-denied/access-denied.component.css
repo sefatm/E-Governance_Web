@@ -1,0 +1,117 @@
+.ad-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f4ff 0%, #fdf0f0 100%);
+  padding: 24px;
+}
+
+.ad-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 52px 44px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,.10);
+  border-top: 6px solid #dc2626;
+}
+
+.ad-icon {
+  width: 80px;
+  height: 80px;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+.ad-icon i {
+  font-size: 36px;
+  color: #dc2626;
+}
+
+.ad-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 4px;
+}
+
+.ad-subtitle {
+  font-size: 13px;
+  color: #dc2626;
+  font-weight: 600;
+  margin: 0 0 20px;
+  letter-spacing: 0.5px;
+}
+
+.ad-desc {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0 0 16px;
+}
+
+.ad-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 7px 18px;
+  font-size: 13px;
+  color: #334155;
+  margin-bottom: 18px;
+}
+
+.ad-role-badge i { color: #6366f1; }
+
+.ad-help {
+  font-size: 13px;
+  color: #94a3b8;
+  margin: 0 0 32px;
+}
+
+.ad-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-dashboard {
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  padding: 11px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.2s;
+}
+.btn-dashboard:hover { background: #16304f; }
+
+.btn-logout {
+  background: #fff;
+  color: #dc2626;
+  border: 1.5px solid #dc2626;
+  padding: 11px 24px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+.btn-logout:hover { background: #fef2f2; }

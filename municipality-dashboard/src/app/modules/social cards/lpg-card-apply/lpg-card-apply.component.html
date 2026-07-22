@@ -1,0 +1,213 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="toasts.length > 0">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'" [class.tl-toast--fail]="t.type==='error'" [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">এলপিজি কার্ড আবেদন ফরম</h2>
+        <span class="tl-header__title-en">LPG Card Application Form — Ministry of Energy & Mineral Resources</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="tl-steps">
+    <ng-container *ngFor="let s of steps; let i = index">
+      <div class="tl-step" [class.tl-step--done]="currentStep > i+1" [class.tl-step--active]="currentStep === i+1">
+        <div class="tl-step__circle">
+          <i class="fas fa-check" *ngIf="currentStep > i+1"></i>
+          <span *ngIf="currentStep <= i+1">{{ i+1 }}</span>
+        </div>
+        <span class="tl-step__label">{{ s }}</span>
+      </div>
+      <div class="tl-step__line" *ngIf="i < steps.length - 1" [class.tl-step__line--done]="currentStep > i+1"></div>
+    </ng-container>
+  </div>
+
+  <div class="tl-card">
+    <form (ngSubmit)="submitForm()" novalidate>
+
+      <!-- STEP 1 — Personal Info -->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 1">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-user"></i></div>
+          <div><h3>{{ ls.current === "bn" ? "ব্যক্তিগত তথ্য" : "Personal Information" }}</h3><p>কার্ডধারীর সম্পূর্ণ তথ্য প্রদান করুন</p></div>
+          <span class="tl-step-tag">Step 1 of 3</span>
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>কার্ডধারীর নাম <span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-user tl-ico"></i>
+              <input type="text" [(ngModel)]="form.holderName" name="holderName" [class.tl-invalid]="submitted && !form.holderName" placeholder="সম্পূর্ণ নাম বাংলায়">
+            </div>
+            <div class="tl-err" *ngIf="submitted && !form.holderName"><i class="fas fa-circle-exclamation"></i> নাম আবশ্যক</div>
+          </div>
+          <div class="tl-field">
+            <label>জাতীয় পরিচয়পত্র নং <span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-id-card tl-ico"></i>
+              <input type="text" [(ngModel)]="form.nid" name="nid" [class.tl-invalid]="submitted && !form.nid" placeholder="১০ বা ১৭ ডিজিটের NID">
+            </div>
+            <div class="tl-err" *ngIf="submitted && !form.nid"><i class="fas fa-circle-exclamation"></i> NID আবশ্যক</div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }}<span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-phone tl-ico"></i>
+              <input type="tel" [(ngModel)]="form.contact" name="contact" [class.tl-invalid]="submitted && !form.contact" placeholder="01XXXXXXXXX">
+            </div>
+            <div class="tl-err" *ngIf="submitted && !form.contact"><i class="fas fa-circle-exclamation"></i> মোবাইল আবশ্যক</div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }}</label>
+            <div class="tl-input-wrap"><i class="fas fa-calendar tl-ico"></i>
+              <input type="date" [(ngModel)]="form.dateOfBirth" name="dateOfBirth">
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>পরিবারের সদস্য সংখ্যা <span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-users tl-ico"></i>
+              <input type="number" [(ngModel)]="form.membersCount" name="membersCount" min="1" max="30">
+            </div>
+            <div class="tl-err" *ngIf="form.membersCount > 6" style="color:#059669">
+              <i class="fas fa-info-circle"></i> সদস্য ৬ এর বেশি — মাসিক কোটা ২ সিলিন্ডার হবে
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>চুলার সংখ্যা</label>
+            <div class="tl-input-wrap"><i class="fas fa-fire tl-ico"></i>
+              <input type="number" [(ngModel)]="form.stoveCount" name="stoveCount" min="1" max="5">
+            </div>
+          </div>
+          <div class="tl-field" style="grid-column:1/-1">
+            <label>{{ ls.current === "bn" ? "বর্তমান ঠিকানা" : "Present Address" }}<span class="req">*</span></label>
+            <div class="tl-input-wrap"><i class="fas fa-map-marker-alt tl-ico tl-ico--top"></i>
+              <textarea [(ngModel)]="form.address" name="address" [class.tl-invalid]="submitted && !form.address" placeholder="বাড়ি নং, রাস্তা, এলাকা"></textarea>
+            </div>
+            <div class="tl-err" *ngIf="submitted && !form.address"><i class="fas fa-circle-exclamation"></i> ঠিকানা আবশ্যক</div>
+          </div>
+        </div>
+        <!-- Gas line warning -->
+        <div class="tl-declaration" style="background:#fff5f5;border-color:#fca5a5;margin-top:16px">
+          <label class="tl-check-label" style="color:#991b1b">
+            <input type="checkbox" [(ngModel)]="form.hasGasLine" name="hasGasLine">
+            আমার বাড়িতে পাইপলাইন গ্যাস সংযোগ আছে
+          </label>
+          <p *ngIf="form.hasGasLine" style="margin:8px 0 0 28px;font-size:12px;color:#dc2626">
+            ⚠️ পাইপলাইন গ্যাস সংযোগ থাকলে LPG কার্ডের জন্য আবেদন করা যাবে না।
+          </p>
+        </div>
+        <div class="tl-nav"><span></span>
+          <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()" [disabled]="form.hasGasLine">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 2 — Location & Dealer -->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 2">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-store"></i></div>
+          <div><h3>এলাকা ও ডিলারের তথ্য</h3><p>ওয়ার্ড, জেলা এবং নিকটস্থ ডিলারের তথ্য দিন</p></div>
+          <span class="tl-step-tag">Step 2 of 3</span>
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ওয়ার্ড নং" : "Ward No." }}</label>
+            <div class="tl-input-wrap"><i class="fas fa-map-pin tl-ico"></i><input type="text" [(ngModel)]="form.ward" name="ward" placeholder="যেমন: ০৩"></div>
+          </div>
+          <div class="tl-field">
+            <label>উপজেলা</label>
+            <div class="tl-input-wrap"><i class="fas fa-location-dot tl-ico"></i><input type="text" [(ngModel)]="form.upazila" name="upazila"></div>
+          </div>
+          <div class="tl-field">
+            <label>জেলা</label>
+            <div class="tl-input-wrap"><i class="fas fa-map tl-ico"></i>
+              <select [(ngModel)]="form.district" name="district">
+                <option value="">-- জেলা নির্বাচন করুন --</option>
+                <option *ngFor="let d of districts" [value]="d">{{ d }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>সিলিন্ডারের আকার</label>
+            <div class="tl-input-wrap"><i class="fas fa-gas-pump tl-ico"></i>
+              <select [(ngModel)]="form.cylinderSize" name="cylinderSize">
+                <option value="12kg">12kg</option>
+                <option value="5.5kg">5.5kg</option>
+              </select>
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ডিলারের নাম" : "Dealer Name" }}</label>
+            <div class="tl-input-wrap"><i class="fas fa-store tl-ico"></i><input type="text" [(ngModel)]="form.dealerName" name="dealerName" placeholder="নিকটস্থ এলপিজি ডিলার"></div>
+          </div>
+          <div class="tl-field">
+            <label>ডিলারের মোবাইল</label>
+            <div class="tl-input-wrap"><i class="fas fa-phone tl-ico"></i><input type="tel" [(ngModel)]="form.dealerContact" name="dealerContact" placeholder="01XXXXXXXXX"></div>
+          </div>
+        </div>
+        <div class="tl-nav">
+          <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}</button>
+          <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 3 — Documents -->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 3">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-file-upload"></i></div>
+          <div><h3>ডকুমেন্ট আপলোড</h3><p>ছবি ও NID এর কপি আপলোড করুন</p></div>
+          <span class="tl-step-tag">Step 3 of 3</span>
+        </div>
+        <div class="tl-uploads">
+          <div class="tl-upload-card">
+            <div class="tl-upload-label"><i class="fas fa-camera"></i> ছবি <span class="tl-upload-hint">JPG/PNG</span></div>
+            <div *ngIf="!photoPreview" class="tl-upload-zone" (click)="photoInput.click()">
+              <i class="fas fa-cloud-upload-alt tl-upload-icon"></i><span>পাসপোর্ট সাইজ</span>
+            </div>
+            <div *ngIf="photoPreview" class="tl-photo-preview">
+              <img [src]="photoPreview"><button type="button" class="tl-remove-btn" (click)="removePhoto()"><i class="fas fa-times"></i></button>
+            </div>
+            <input #photoInput type="file" accept="image/*" hidden (change)="onPhoto($event)">
+          </div>
+          <div class="tl-upload-card">
+            <div class="tl-upload-label"><i class="fas fa-id-card"></i> NID কপি <span class="tl-upload-hint">PDF/JPG</span></div>
+            <div *ngIf="!nidFileName" class="tl-upload-zone" (click)="nidInput.click()">
+              <i class="fas fa-cloud-upload-alt tl-upload-icon"></i><span>NID স্ক্যান/ছবি</span>
+            </div>
+            <div *ngIf="nidFileName" class="tl-file-preview">
+              <i class="fas fa-file-alt"></i><span>{{ nidFileName }}</span>
+              <button type="button" class="tl-remove-btn" (click)="nidFileName=null;nidFile=null"><i class="fas fa-times"></i></button>
+            </div>
+            <input #nidInput type="file" accept="image/*,application/pdf" hidden (change)="onNidFile($event)">
+          </div>
+        </div>
+        <div class="tl-declaration">
+          <label class="tl-check-label">
+            <input type="checkbox" [(ngModel)]="declared" name="declared">
+            আমি ঘোষণা করছি যে আমার বাড়িতে পাইপলাইন গ্যাস নেই এবং প্রদত্ত সকল তথ্য সঠিক। মিথ্যা তথ্য প্রদান করলে কার্ড বাতিল করা হবে।
+          </label>
+        </div>
+        <div class="tl-nav">
+          <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}</button>
+          <button type="submit" class="tl-btn tl-btn--submit" [disabled]="loading || !declared">
+            <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "জমা হচ্ছে..." : "Submitting..." }}</span>
+            <span *ngIf="!loading"><i class="fas fa-paper-plane"></i> {{ ls.current === "bn" ? "আবেদন জমা দিন" : "Submit Application" }}</span>
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>

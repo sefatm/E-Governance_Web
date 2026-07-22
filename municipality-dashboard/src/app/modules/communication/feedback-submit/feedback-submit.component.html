@@ -1,0 +1,149 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="errorMsg">
+  <div class="tl-toast tl-toast--fail"><i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span></div>
+</div>
+
+<div class="tl-page">
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">নাগরিক ফিডব্যাক ফরম</h2>
+        <span class="tl-header__title-en">Citizen Feedback &amp; Complaint — Communication Division</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- Success State -->
+  <div class="tl-card" *ngIf="success">
+    <div class="success-box">
+      <div class="success-icon"><i class="fas fa-circle-check"></i></div>
+      <h3>ফিডব্যাক সফলভাবে দাখিল হয়েছে!</h3>
+      <p>আপনার ফিডব্যাক গ্রহণ করা হয়েছে। আমাদের দল শীঘ্রই পর্যালোচনা করবে।</p>
+      <p class="ref-id">Reference ID: <strong>#{{ submittedId }}</strong></p>
+      <button class="tl-btn tl-btn--submit" (click)="resetForm()">
+        <i class="fas fa-plus"></i> নতুন ফিডব্যাক দিন
+      </button>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div class="tl-card" *ngIf="!success">
+    <form (ngSubmit)="submitForm()" #f="ngForm" novalidate>
+      <div class="tl-panel tl-panel--active">
+
+        <!-- Category chips -->
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-comments"></i></div>
+          <div><h3>ফিডব্যাক দাখিল করুন</h3><p>ফিডব্যাকের ধরন নির্বাচন করুন এবং তথ্য পূরণ করুন</p></div>
+        </div>
+
+        <div class="tl-section-label"><i class="fas fa-tag"></i> ফিডব্যাকের ধরন <span class="req">*</span></div>
+        <div class="cat-chips">
+          <label class="cat-chip" *ngFor="let cat of categories" [class.active]="form.category===cat">
+            <input type="radio" [value]="cat" [(ngModel)]="form.category" name="category" hidden>
+            <span>{{ cat }}</span>
+          </label>
+        </div>
+
+        <!-- Personal info -->
+        <div class="tl-section-label" style="margin-top:24px"><i class="fas fa-user"></i> {{ ls.current === "bn" ? "ব্যক্তিগত তথ্য" : "Personal Information" }}</div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>সম্পূর্ণ নাম <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-user tl-ico"></i>
+              <input type="text" [(ngModel)]="form.citizenName" name="citizenName" placeholder="আপনার সম্পূর্ণ নাম" required>
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>NID নম্বর</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-id-card tl-ico"></i>
+              <input type="text" [(ngModel)]="form.nid" name="nid" placeholder="জাতীয় পরিচয়পত্র নম্বর">
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }}<span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-phone tl-ico"></i>
+              <input type="tel" [(ngModel)]="form.mobile" name="mobile" placeholder="01XXXXXXXXX" required>
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-envelope tl-ico"></i>
+              <input type="email" [(ngModel)]="form.email" name="email" placeholder="email@example.com">
+            </div>
+          </div>
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ওয়ার্ড নম্বর" : "Ward Number" }}</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-map-pin tl-ico"></i>
+              <input type="text" [(ngModel)]="form.ward" name="ward" placeholder="যেমন: ৪">
+            </div>
+          </div>
+        </div>
+
+        <!-- Feedback details -->
+        <div class="tl-section-label" style="margin-top:24px"><i class="fas fa-file-lines"></i> ফিডব্যাকের বিবরণ</div>
+        <div class="tl-grid-2">
+          <div class="tl-field" style="grid-column:1/-1">
+            <label>{{ ls.current === "bn" ? "বিষয়" : "Subject" }}<span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-heading tl-ico"></i>
+              <input type="text" [(ngModel)]="form.subject" name="subject" placeholder="সংক্ষিপ্ত বিষয়" required>
+            </div>
+          </div>
+          <div class="tl-field" style="grid-column:1/-1">
+            <label>{{ ls.current === "bn" ? "বার্তা" : "Message" }}<span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-pen tl-ico tl-ico--top"></i>
+              <textarea [(ngModel)]="form.message" name="message" rows="5" placeholder="বিস্তারিত বর্ণনা করুন..." required></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Star Rating -->
+        <div class="tl-section-label" style="margin-top:20px"><i class="fas fa-star"></i> সেবার মান মূল্যায়ন করুন <span class="req">*</span></div>
+        <div class="star-row">
+          <button type="button" class="star-btn" *ngFor="let s of [1,2,3,4,5]"
+                  [class.filled]="s<=(hoveredStar||form.rating||0)"
+                  (mouseenter)="hoveredStar=s" (mouseleave)="hoveredStar=0"
+                  (click)="setRating(s)">★</button>
+          <span class="star-label">
+            {{ form.rating===1?'অত্যন্ত খারাপ':form.rating===2?'খারাপ':form.rating===3?'মোটামুটি':form.rating===4?'ভালো':form.rating===5?'চমৎকার':'ক্লিক করে রেটিং দিন' }}
+          </span>
+        </div>
+
+        <!-- Declaration -->
+        <div class="declaration-box">
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer">
+            <input type="checkbox" [(ngModel)]="form['agree']" name="agree" style="margin-top:2px;accent-color:#059669">
+            <span>আমি নিশ্চিত করছি যে প্রদত্ত সকল তথ্য সঠিক ও সত্য।</span>
+          </label>
+        </div>
+
+        <div class="tl-nav" style="justify-content:flex-end">
+          <button type="button" class="tl-btn tl-btn--cancel" (click)="resetForm()">
+            <i class="fas fa-rotate-left"></i> {{ ls.current === "bn" ? "রিসেট" : "Reset" }}</button>
+          <button type="submit" class="tl-btn tl-btn--submit"
+                  [disabled]="isSubmitting||!f.valid||!form['agree']||!form.rating||!form.category">
+            <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+            <i class="fas fa-paper-plane"     *ngIf="!isSubmitting"></i>
+            {{ isSubmitting ? 'দাখিল হচ্ছে...' : 'ফিডব্যাক দাখিল করুন' }}
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+<!-- vgd-stock.component.html -->
+<div class="stock-page">
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-boxes-stacked me-2" style="color:#5b21b6"></i> VGD/VGF Stock ব্যবস্থাপনা</h2>
+      <p>মাসিক চাল, গম ও নগদ সহায়তার stock তৈরি ও পর্যবেক্ষণ করুন</p>
+    </div>
+    <div class="header-totals">
+      <div class="total-chip vgd"><span class="tc-label">{{ ls.current === "bn" ? "ভিজিডি স্টক" : "VGD Stock" }}</span><span class="tc-val">{{ countType('VGD') }}</span></div>
+      <div class="total-chip vgf"><span class="tc-label">VGF Stock</span><span class="tc-val">{{ countType('VGF') }}</span></div>
+      <div class="total-chip warn" *ngIf="lowStockCount()>0">
+        <span class="tc-label">কম মজুদ</span><span class="tc-val">{{ lowStockCount() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add form -->
+  <div class="form-card">
+    <div class="form-card-head" (click)="formOpen=!formOpen" style="cursor:pointer">
+      <h3><i class="fas fa-plus-circle me-2"></i>নতুন Stock যোগ করুন</h3>
+      <i class="fas" [class.fa-chevron-up]="formOpen" [class.fa-chevron-down]="!formOpen"></i>
+    </div>
+    <div class="form-body" *ngIf="formOpen">
+      <div class="form-grid">
+        <div class="field-group">
+          <label>Card Type <span class="req">*</span></label>
+          <select [(ngModel)]="form.cardType">
+            <option value="VGD">VGD (চাল/গম)</option>
+            <option value="VGF">VGF (নগদ)</option>
+            <option value="ALL">উভয়</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>{{ ls.current === "bn" ? "ব্যাচ লেবেল" : "Batch Label" }} <span class="req">*</span></label>
+          <input [(ngModel)]="form.batchLabel" placeholder="যেমন: জুন ২০২৫">
+        </div>
+        <div class="field-group">
+          <label>মাস (YYYY-MM) <span class="req">*</span></label>
+          <input [(ngModel)]="form.cycleMonth" type="month">
+        </div>
+        <div class="field-group">
+          <label>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}<span class="req">*</span></label>
+          <input [(ngModel)]="form.ward" placeholder="যেমন: 02">
+        </div>
+        <div class="field-group">
+          <label>ডিলার</label>
+          <input [(ngModel)]="form.dealerName" [placeholder]="ls.current === 'bn' ? 'ডিলারের নাম' : 'Dealer Name'">
+        </div>
+        <div class="field-group" *ngIf="form.cardType!=='VGF'">
+          <label>চাল (কেজি)</label>
+          <input [(ngModel)]="form.riceKg" type="number" min="0" placeholder="0">
+        </div>
+        <div class="field-group" *ngIf="form.cardType!=='VGF'">
+          <label>গম (কেজি)</label>
+          <input [(ngModel)]="form.wheatKg" type="number" min="0" placeholder="0">
+        </div>
+        <div class="field-group" *ngIf="form.cardType!=='VGD'">
+          <label>নগদ (টাকা)</label>
+          <input [(ngModel)]="form.cashAmount" type="number" min="0" placeholder="0">
+        </div>
+        <div class="field-group">
+          <label>মোট কার্ড <span class="req">*</span></label>
+          <input [(ngModel)]="form.totalCards" type="number" min="1" placeholder="0">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn-save" (click)="save()" [disabled]="saving">
+          <i class="fas" [class.fa-floppy-disk]="!saving" [class.fa-spinner]="saving" [class.fa-spin]="saving"></i>
+          {{ saving ? 'সংরক্ষণ হচ্ছে...' : 'Stock যোগ করুন' }}
+        </button>
+        <button class="btn-clear" (click)="clearForm()"><i class="fas fa-eraser"></i> {{ ls.current === "bn" ? "মুছুন" : "Delete" }}</button>
+        <span class="form-msg" *ngIf="msg" [class.error]="isError">
+          <i class="fas" [class.fa-check-circle]="!isError" [class.fa-triangle-exclamation]="isError"></i>
+          {{ msg }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <select [(ngModel)]="filterType" (change)="applyFilter()" class="f-select">
+      <option value="">{{ ls.current === "bn" ? "সকল ধরন" : "All Types" }}</option>
+      <option value="VGD">VGD</option>
+      <option value="VGF">VGF</option>
+    </select>
+    <select [(ngModel)]="filterMonth" (change)="applyFilter()" class="f-select">
+      <option value="">সকল মাস</option>
+      <option *ngFor="let m of monthList" [value]="m">{{ m }}</option>
+    </select>
+    <label class="low-toggle">
+      <input type="checkbox" [(ngModel)]="showLowOnly" (change)="applyFilter()">
+      শুধু কম মজুদ
+    </label>
+    <button class="btn-refresh" (click)="load()"><i class="fas fa-rotate-right"></i></button>
+  </div>
+
+  <!-- Table -->
+  <div class="section-card">
+    <div *ngIf="isLoading" class="state-loading"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+    <div *ngIf="!isLoading" class="table-wrap">
+      <table class="stock-table" *ngIf="filteredStocks.length>0">
+        <thead><tr>
+          <th>#</th><th>Batch</th><th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th><th>মাস</th><th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th><th>ডিলার</th>
+          <th>চাল (kg)</th><th>গম (kg)</th><th>নগদ (৳)</th>
+          <th>মোট কার্ড</th><th>বিতরণ</th><th>বাকি</th><th>{{ ls.current === "bn" ? "অগ্রগতি" : "Progress" }}</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let s of filteredStocks; let i=index"
+              [class.row-low]="remaining(s)<5">
+            <td class="td-num">{{ i+1 }}</td>
+            <td class="td-batch">{{ s.batchLabel }}</td>
+            <td>
+              <span class="type-badge" [class.t-vgd]="s.cardType==='VGD'" [class.t-vgf]="s.cardType==='VGF'">
+                {{ s.cardType }}
+              </span>
+            </td>
+            <td>{{ s.cycleMonth }}</td>
+            <td><span class="ward-badge">{{ s.ward }}</span></td>
+            <td>{{ s.dealerName || '—' }}</td>
+            <td class="td-item">{{ s.riceKg > 0 ? s.riceKg : '—' }}</td>
+            <td class="td-item">{{ s.wheatKg > 0 ? s.wheatKg : '—' }}</td>
+            <td class="td-item">{{ s.cashAmount > 0 ? (s.cashAmount | number) : '—' }}</td>
+            <td class="td-total">{{ s.totalCards }}</td>
+            <td class="td-dist">{{ s.distributed }}</td>
+            <td><b [class.low]="remaining(s)<5" [class.zero]="remaining(s)<=0">{{ remaining(s) }}</b></td>
+            <td class="td-progress">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width]="pct(s)+'%'"
+                     [class.full]="pct(s)>=100" [class.high]="pct(s)>=75"></div>
+              </div>
+              <span class="pct-label">{{ pct(s)|number:'1.0-0' }}%</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="filteredStocks.length===0" class="state-empty">
+        <i class="fas fa-inbox"></i><p>কোনো stock পাওয়া যায়নি।</p>
+      </div>
+    </div>
+  </div>
+</div>

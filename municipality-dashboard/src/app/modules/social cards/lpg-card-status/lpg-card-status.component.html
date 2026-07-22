@@ -1,0 +1,80 @@
+<div class="sc-page">
+
+  <!-- Search card -->
+  <div class="sc-search-card">
+    <div class="sc-search-head">
+      <h3><i class="fas fa-id-card me-2"></i> LPG Card Status Check</h3>
+      <p>আপনার NID নম্বর দিয়ে আবেদনের অবস্থা জানুন</p>
+    </div>
+    <div class="sc-search-body">
+      <label class="sc-label">জাতীয় পরিচয়পত্র নং</label>
+      <div class="sc-input-row">
+        <input class="sc-input" type="text" [(ngModel)]="nid" placeholder="১০ বা ১৭ ডিজিটের NID লিখুন" (keyup.enter)="check()">
+        <button class="sc-btn" (click)="check()" [disabled]="loading || !nid.trim()">
+          <span *ngIf="loading"><i class="fas fa-spinner fa-spin"></i></span>
+          <span *ngIf="!loading"><i class="fas fa-search"></i> খুঁজুন</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div class="sc-error" *ngIf="errorMsg">
+    <i class="fas fa-circle-xmark" style="font-size:18px;flex-shrink:0"></i>
+    {{ errorMsg }}
+  </div>
+
+  <!-- Result -->
+  <div class="sc-result" *ngIf="result">
+    <div class="sc-result-head" [class]="result.status?.toLowerCase()">
+      <div class="sc-status-icon">
+        <i class="fas"
+           [class.fa-clock]="result.status==='Pending'"
+           [class.fa-circle-check]="result.status==='Approved'"
+           [class.fa-circle-xmark]="result.status==='Rejected'"
+           [class.fa-ban]="result.status==='Suspended'"></i>
+      </div>
+      <div>
+        <div class="sc-name">{{ result.holderName }}</div>
+        <div class="sc-cardno">{{ result.cardNo || 'Card number not yet issued' }}</div>
+      </div>
+      <div class="sc-status-badge">
+        <span class="status-pill" [class]="result.status?.toLowerCase()">
+          {{ result.status === 'Pending'   ? '⏳ অপেক্ষমান' :
+             result.status === 'Approved'  ? '✅ অনুমোদিত' :
+             result.status === 'Rejected'  ? '❌ প্রত্যাখ্যাত' : '🚫 স্থগিত' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="sc-result-body">
+      <div class="sc-info-grid">
+        <div class="sc-info-item">
+          <span class="sc-info-label">কার্ড নং</span>
+          <span class="sc-info-value" style="font-family:monospace;color:#059669">{{ result.cardNo || '—' }}</span>
+        </div>
+        <div class="sc-info-item">
+          <span class="sc-info-label">স্ট্যাটাস</span>
+          <span class="sc-info-value">{{ result.status }}</span>
+        </div>
+      </div>
+
+      <ng-container *ngIf="result.status === 'Rejected'">
+        <hr class="sc-divider">
+        <div class="sc-rejection-note">
+          <i class="fas fa-circle-info me-2"></i>
+          <strong>প্রত্যাখ্যানের কারণ:</strong> {{ result.rejectionReason || 'কোনো কারণ উল্লেখ করা হয়নি' }}
+        </div>
+      </ng-container>
+
+      <!-- ✅ FIX: downloadUrl null-guarded — button only shows when resultId is set -->
+      <div class="sc-download-row" *ngIf="result.status === 'Approved' && downloadUrl">
+        <a class="sc-download-btn"
+           [href]="downloadUrl" target="_blank">
+          <i class="fas fa-download"></i> কার্ড ডাউনলোড করুন (PDF)
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>

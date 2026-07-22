@@ -1,0 +1,118 @@
+<div class="container">
+
+  <div class="page-header">
+    <div class="header-left">
+      <i class="fas fa-project-diagram header-icon"></i>
+      <div>
+        <h2>{{ ls.current === "bn" ? "উন্নয়ন প্রকল্প" : "Development Projects" }}</h2>
+        <p class="header-sub">উন্নয়ন প্রকল্পের তালিকা ও অগ্রগতি</p>
+      </div>
+    </div>
+    <!-- New Project button — শুধু staff -->
+    <button class="btn-add" *ngIf="canManage" (click)="editId = null; form = {}">
+      <i class="fas fa-plus"></i> New Project
+    </button>
+  </div>
+
+  <!-- ── Add / Edit Form — শুধু canManage ── -->
+  <div class="form-card" *ngIf="canManage">
+    <h3>{{ editId !== null ? 'Update Project' : 'Add New Project' }}</h3>
+    <div class="form-grid">
+      <input type="text"   [(ngModel)]="form.name"      placeholder="Project Name *">
+      <input type="text"   [(ngModel)]="form.location"  placeholder="Location *">
+      <input type="date"   [(ngModel)]="form.startDate" placeholder="Start Date *">
+      <input type="date"   [(ngModel)]="form.endDate"   placeholder="End Date *">
+      <input type="number" [(ngModel)]="form.progress"  placeholder="Progress % (0–100)" min="0" max="100">
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" (click)="saveProject()">
+        <i class="fas fa-save"></i> {{ editId !== null ? 'Update Project' : 'Add Project' }}
+      </button>
+      <button class="btn-cancel" *ngIf="editId !== null" (click)="editId = null; form = {}">
+        {{ ls.current === "bn" ? "বাতিল" : "Cancel" }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Project Table ── -->
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{{ ls.current === "bn" ? "প্রকল্পের নাম" : "Project Name" }}</th>
+          <th>{{ ls.current === "bn" ? "অবস্থান" : "Location" }}</th>
+          <th>Start</th>
+          <th>End</th>
+          <th>{{ ls.current === "bn" ? "অগ্রগতি" : "Progress" }}</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          <!-- Action column — শুধু canManage -->
+          <th *ngIf="canManage">{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let p of projects; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td class="project-name">{{ p.name }}</td>
+          <td>{{ p.location }}</td>
+          <td>{{ p.startDate | date:'dd MMM yy' }}</td>
+          <td>{{ p.endDate   | date:'dd MMM yy' }}</td>
+
+          <!-- Progress Bar — সবাই দেখবে (read-only for citizen) -->
+          <td class="progress-cell">
+            <div class="progress-track">
+              <div class="progress-fill"
+                   [style.width.%]="p.progress || 0"
+                   [ngClass]="{
+                     'fill-done': p.progress == 100,
+                     'fill-mid':  p.progress >= 50 && p.progress < 100,
+                     'fill-low':  p.progress < 50
+                   }">
+              </div>
+            </div>
+            <!-- Progress slider — শুধু canManage -->
+            <div class="progress-row">
+              <small class="pct-label">{{ p.progress || 0 }}%</small>
+              <input *ngIf="canManage"
+                     type="range" min="0" max="100"
+                     [value]="p.progress || 0"
+                     class="progress-slider"
+                     title="Drag to update progress"
+                     (input)="updateProgress(p, $any($event.target).value)" />
+            </div>
+          </td>
+
+          <!-- Status Badge -->
+          <td>
+            <span class="status-badge"
+                  [ngClass]="{
+                    'badge-done':    p.progress == 100,
+                    'badge-ongoing': p.progress > 0 && p.progress < 100,
+                    'badge-pending': !p.progress || p.progress == 0
+                  }">
+              {{ p.progress == 100 ? 'Completed' : p.progress > 0 ? 'In Progress' : 'Not Started' }}
+            </span>
+          </td>
+
+          <!-- Action buttons — শুধু canManage -->
+          <td class="action-cell" *ngIf="canManage">
+            <button class="icon-btn edit" (click)="editProject(p)" [title]="ls.current === 'bn' ? 'সম্পাদনা' : 'Edit'">
+              <i class="fas fa-pen"></i>
+            </button>
+            <button class="icon-btn delete" (click)="deleteProject(p.id)" [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="projects.length === 0">
+          <td [colSpan]="canManage ? 8 : 7" class="empty-row">
+            <i class="fas fa-inbox"></i> কোনো প্রকল্প পাওয়া যায়নি।
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

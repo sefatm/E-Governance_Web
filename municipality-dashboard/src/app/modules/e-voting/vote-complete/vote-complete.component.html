@@ -1,0 +1,67 @@
+<div class="vc-page">
+  <div class="vc-confetti">
+    <span></span><span></span><span></span>
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="vc-card">
+
+    <!-- Success icon -->
+    <div class="vc-icon-wrap">
+      <div class="vc-icon-ring"></div>
+      <div class="vc-icon">
+        <i class="fas fa-check"></i>
+      </div>
+    </div>
+
+    <!-- Heading -->
+    <h1 class="vc-title">{{ ls.current === "bn" ? "অভিনন্দন!" : "Congratulations!" }}</h1>
+    <p class="vc-sub">Your vote has been cast successfully.</p>
+    <p class="vc-congratulations">Congratulations! Your vote has been cast successfully.</p>
+
+    <!-- Voter info -->
+    <div class="vc-voter-badge" *ngIf="voterName">
+      <i class="fas fa-user-check"></i>
+      <span>{{ voterName }}</span>
+    </div>
+
+    <!-- Vote detail box -->
+    <div class="vc-detail-box">
+      <div class="vc-detail-row">
+        <span class="vc-detail-label"><i class="fas fa-user"></i> {{ ls.current === "bn" ? "প্রার্থীর নাম" : "Candidate Name" }}</span>
+        <strong class="vc-detail-val">{{ candidateName || '—' }}</strong>
+      </div>
+      <div class="vc-detail-row" *ngIf="party">
+        <span class="vc-detail-label"><i class="fas fa-flag"></i> Party Name</span>
+        <strong class="vc-detail-val">{{ party }}</strong>
+      </div>
+      <div class="vc-detail-row">
+        <span class="vc-detail-label"><i class="fas fa-shield-check"></i> Vote Status</span>
+        <span class="vc-badge">✅ Record saved</span>
+      </div>
+    </div>
+
+    <!-- Warning: cannot vote again -->
+    <div class="vc-warning">
+      <i class="fas fa-lock"></i>
+      <span>You cannot vote again in this election.</span>
+    </div>
+
+    <!-- Email notice -->
+    <div class="vc-email-note">
+      <i class="fas fa-envelope-circle-check"></i>
+      <span>Confirmation email has been sent to your registered email address.</span>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="vc-actions">
+      <button class="vc-btn vc-btn--result" (click)="goResult()">
+        <i class="fas fa-chart-bar"></i> View Results
+      </button>
+      <button class="vc-btn vc-btn--home" (click)="goHome()">
+        <i class="fas fa-house"></i> Go to Home Page
+      </button>
+    </div>
+
+  </div>
+</div>

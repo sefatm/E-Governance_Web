@@ -1,0 +1,490 @@
+<!-- Toast -->
+<div *ngIf="toast" class="toast-msg" [ngClass]="toast.type">
+  {{ toast.type === 'success' ? '✅' : '❌' }} {{ toast.msg }}
+</div>
+
+<div class="container">
+  <h2><i class="fas fa-file-contract"></i> E-Tender Management</h2>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <i class="fas fa-list-alt"></i>
+      <div class="sc-num">{{ notices.length }}</div>
+      <div class="sc-lbl">{{ ls.current === "bn" ? "মোট টেন্ডার" : "Total Tenders" }}</div>
+    </div>
+    <div class="stat-card sc-green">
+      <i class="fas fa-folder-open"></i>
+      <div class="sc-num">{{ openCount }}</div>
+      <div class="sc-lbl">{{ ls.current === "bn" ? "খোলা" : "Open" }}</div>
+    </div>
+    <div class="stat-card sc-blue">
+      <i class="fas fa-file-signature"></i>
+      <div class="sc-num">{{ bids.length }}</div>
+      <div class="sc-lbl">{{ ls.current === "bn" ? "মোট বিড" : "Total Bids" }}</div>
+    </div>
+    <div class="stat-card sc-gold">
+      <i class="fas fa-trophy"></i>
+      <div class="sc-num">{{ awardedCount }}</div>
+      <div class="sc-lbl">Awarded</div>
+    </div>
+
+    <div class="stat-card sc-red">
+      <i class="fas fa-ban"></i>
+      <div class="sc-num">{{ activeBlacklistCount }}</div>
+      <div class="sc-lbl">{{ ls.current === "bn" ? "ব্ল্যাকলিস্টেড" : "Blacklisted" }}</div>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab" [class.active]="activeTab==='notices'" (click)="activeTab='notices'">
+      <i class="fas fa-list-alt"></i> {{ ls.current === "bn" ? "টেন্ডার বিজ্ঞপ্তি" : "Tender Notices" }}
+    </button>
+    <button class="tab" [class.active]="activeTab==='bids'" (click)="activeTab='bids'">
+      <i class="fas fa-file-signature"></i> Bids
+    </button>
+    <button class="tab" [class.active]="activeTab==='awards'" (click)="activeTab='awards'">
+      <i class="fas fa-trophy"></i> Awards
+    </button>
+    <button class="tab" [class.active]="activeTab==='blacklist'" (click)="activeTab='blacklist'">
+      <i class="fas fa-ban"></i> Blacklist
+      <span class="tab-badge" *ngIf="activeBlacklistCount > 0">{{ activeBlacklistCount }}</span>
+    </button>
+  </div>
+
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+  </div>
+
+  <!-- ══ NOTICES TAB ══ -->
+  <div *ngIf="activeTab==='notices' && !isLoading">
+    <div class="toolbar">
+      <button class="btn-expired" (click)="closeExpired()" [disabled]="closeExpiredLoading">
+        <i class="fas fa-clock"></i>
+        {{ closeExpiredLoading ? 'Processing...' : 'Close Expired' }}
+      </button>
+      <button class="btn-add" (click)="openCreate()">
+        <i class="fas fa-plus"></i> New Tender
+      </button>
+    </div>
+
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Tender No</th>
+          <th>Title</th>
+          <th>{{ ls.current === "bn" ? "বিভাগ" : "Category" }}</th>
+          <th>Est. Cost</th>
+          <th>{{ ls.current === "bn" ? "সময়সীমা" : "Deadline" }}</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let n of notices; let i=index">
+          <td>{{ i+1 }}</td>
+          <td><span class="mono">{{ n.tenderNo }}</span></td>
+          <td class="td-title">{{ n.title }}</td>
+          <td>{{ n.category }}</td>
+          <td><span class="mono">{{ fmt(n.estimatedCost) }}</span></td>
+          <td>
+            <div style="display:flex;flex-direction:column;gap:3px">
+              <span class="mono" style="font-size:12px">{{ n.endDate | date:'dd/MM/yyyy' }}</span>
+              <span class="deadline-pill" [ngClass]="deadlinePillClass(n.endDate)" *ngIf="n.status==='Open'">
+                ⏰ {{ deadlineLabel(n.endDate) }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="statusClass(n.status!)">{{ n.status }}</span>
+          </td>
+          <td>
+            <div class="btn-group">
+              <button class="icon-btn" (click)="editNotice(n)" [title]="ls.current === 'bn' ? 'সম্পাদনা' : 'Edit'">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="icon-btn btn-warn" *ngIf="n.status==='Open'" (click)="closeNotice(n.id!)" [title]="ls.current === 'bn' ? 'বন্ধ করুন' : 'Close'">
+                <i class="fas fa-lock"></i>
+              </button>
+              <button class="icon-btn btn-award-btn" *ngIf="n.status==='Closed'" (click)="openAwardModal(n.id!)" title="Award">
+                <i class="fas fa-trophy"></i>
+              </button>
+              <button class="icon-btn btn-del" (click)="deleteNotice(n.id!)" [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="notices.length===0">
+          <td colspan="8" class="no-data"><i class="fas fa-inbox"></i> No tenders found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ BIDS TAB ══ -->
+  <div *ngIf="activeTab==='bids' && !isLoading">
+    <div class="filter-box">
+      <select [(ngModel)]="bidFilterTenderId" (change)="filterBids()">
+        <option [value]="0">— All Tenders —</option>
+        <option *ngFor="let n of notices" [value]="n.id">
+          {{ n.tenderNo }} — {{ n.title }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Gap Fix #4: Lowest bid summary card -->
+    <div class="lowest-card" *ngIf="bidFilterTenderId && getLowestForTender(+bidFilterTenderId) as lb">
+      <div class="lc-left">
+        <span class="lc-icon">🏆</span>
+        <div>
+          <div class="lc-label">Lowest Bid</div>
+          <div class="lc-company">{{ lb.companyName }}</div>
+        </div>
+      </div>
+      <div class="lc-amount">{{ fmt(lb.bidAmount) }}</div>
+      <div class="lc-days">{{ lb.completionDays }} দিন</div>
+    </div>
+
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Bidder</th>
+          <th>Company</th>
+          <th>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</th>
+          <th>{{ ls.current === "bn" ? "বিডের পরিমাণ" : "Bid Amount" }}</th>
+          <th>Days</th>
+          <th>Document</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let b of filteredBids; let i=index"
+            [class.row-lowest]="b.isLowest">
+          <td>
+            {{ i+1 }}
+            <span class="trophy-badge" *ngIf="b.isLowest" title="Lowest Bid">🏆</span>
+          </td>
+          <td>{{ b.bidderName }}</td>
+          <td>
+            {{ b.companyName }}
+            <span class="lowest-tag" *ngIf="b.isLowest">Lowest</span>
+          </td>
+          <td><span class="mono">{{ b.nid }}</span></td>
+          <td>
+            <span class="mono" [class.amount-lowest]="b.isLowest">{{ fmt(b.bidAmount) }}</span>
+          </td>
+          <td>{{ b.completionDays }}</td>
+          <td>
+            <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+              <span class="status-badge" [ngClass]="docStatusClass(b)">
+                {{ docStatusLabel(b) }}
+              </span>
+              <button class="icon-btn btn-review"
+                      *ngIf="b.documentUrl"
+                      (click)="openVerifyModal(b)"
+                      title="Verify the document">
+                <i class="fas fa-shield-alt"></i> {{ ls.current === "bn" ? "যাচাই করুন" : "Verify" }}
+              </button>
+              <span *ngIf="!b.documentUrl" class="no-doc">No doc</span>
+            </div>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="statusClass(b.status!)">{{ b.status }}</span>
+          </td>
+          <td>
+            <div class="btn-group">
+              <button class="icon-btn btn-review"
+                      *ngIf="b.status==='Submitted'"
+                      (click)="updateBidStatus(b.id!, 'Under Review')"
+                      title="Review">
+                <i class="fas fa-search"></i>
+              </button>
+              <button class="icon-btn btn-del"
+                      *ngIf="b.status!=='Rejected' && b.status!=='Selected'"
+                      (click)="updateBidStatus(b.id!, 'Rejected')"
+                      [title]="ls.current === 'bn' ? 'প্রত্যাখ্যান' : 'Reject'">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredBids.length===0">
+          <td colspan="9" class="no-data"><i class="fas fa-inbox"></i> No bids found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ══ AWARDS TAB ══ -->
+  <div *ngIf="activeTab==='awards' && !isLoading">
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Tender No</th><th>{{ ls.current === "bn" ? "টেন্ডারের শিরোনাম" : "Tender Title" }}</th>
+          <th>{{ ls.current === "bn" ? "পুরষ্কৃত" : "Awarded To" }}</th><th>{{ ls.current === "bn" ? "পরিমাণ" : "Amount" }}</th><th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th><th>{{ ls.current === "bn" ? "মন্তব্য" : "Remarks" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of awards; let i=index">
+          <td>{{ i+1 }}</td>
+          <td><span class="mono">{{ getTenderNo(a.tenderId) }}</span></td>
+          <td>{{ getTenderTitle(a.tenderId) }}</td>
+          <td>{{ a.awardedTo }}</td>
+          <td><span class="mono">{{ fmt(a.awardedAmount!) }}</span></td>
+          <td>{{ a.awardDate | date:'dd/MM/yyyy' }}</td>
+          <td>{{ a.remarks || '—' }}</td>
+        </tr>
+        <tr *ngIf="awards.length===0">
+          <td colspan="7" class="no-data"><i class="fas fa-inbox"></i> No awards yet</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BLACKLIST TAB -->
+  <div *ngIf="activeTab==='blacklist' && !isLoading">
+    <div class="toolbar">
+      <button class="btn-add btn-red" (click)="openBlacklistModal()">
+        <i class="fas fa-ban"></i> {{ ls.current === "bn" ? "বিক্রেতাকে ব্ল্যাকলিস্ট করুন" : "Blacklist the Vendor" }}
+      </button>
+    </div>
+
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Vendor</th><th>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</th><th>Contact</th>
+          <th>{{ ls.current === "bn" ? "কারণ" : "Reason" }}</th><th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th><th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th><th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of blacklist; let i=index" [class.row-inactive]="!v.active">
+          <td>{{ i+1 }}</td>
+          <td>
+            <div style="font-weight:600">{{ v.vendorName || '—' }}</div>
+            <div style="font-size:12px;color:#6b7280">{{ v.companyName }}</div>
+          </td>
+          <td><span class="mono">{{ v.nid || '—' }}</span></td>
+          <td>
+            <div style="font-size:12px">{{ v.email || '' }}</div>
+            <div style="font-size:12px">{{ v.mobile || '' }}</div>
+          </td>
+          <td style="max-width:180px;font-size:13px">{{ v.reason }}</td>
+          <td style="font-size:12px">{{ v.blacklistedAt | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="status-badge" [ngClass]="v.active ? 'status-closed' : 'status-open'">
+              {{ v.active ? 'Blocked' : 'Unblocked' }}
+            </span>
+          </td>
+          <td>
+            <button class="icon-btn btn-review" *ngIf="v.active" (click)="unblockVendor(v)" title="Unblock">
+              <i class="fas fa-unlock"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="blacklist.length===0">
+          <td colspan="8" class="no-data"><i class="fas fa-inbox"></i> No Blacklisted Vendors </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ CREATE / EDIT MODAL ══ -->
+<div class="modal-overlay" *ngIf="showForm" (click)="showForm=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ isEditing ? 'Edit Tender' : 'Create New Tender' }}</h3>
+      <button class="modal-close" (click)="showForm=false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="m-row">
+        <div class="m-field full">
+          <label>Title <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.title" placeholder="Full tender title">
+        </div>
+        <div class="m-field">
+          <label>{{ ls.current === "bn" ? "বিভাগ" : "Category" }} <span class="req">*</span></label>
+          <select [(ngModel)]="form.category">
+            <option *ngFor="let c of categories" [value]="c">{{ c }}</option>
+          </select>
+        </div>
+        <div class="m-field">
+          <label>Work Location</label>
+          <input type="text" [(ngModel)]="form.workLocation" placeholder="Ward No. / Area">
+        </div>
+        <div class="m-field">
+          <label>Estimated Cost (৳) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="form.estimatedCost" min="0">
+        </div>
+        <div class="m-field">
+          <label>EMD Amount (৳) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="form.emdAmount" min="0">
+        </div>
+        <div class="m-field">
+          <label>{{ ls.current === "bn" ? "শুরুর তারিখ" : "Start Date" }} <span class="req">*</span></label>
+          <input type="date" [(ngModel)]="form.startDate">
+        </div>
+        <div class="m-field">
+          <label>End Date (Deadline) <span class="req">*</span></label>
+          <input type="date" [(ngModel)]="form.endDate">
+        </div>
+        <div class="m-field full">
+          <label>{{ ls.current === "bn" ? "বিবরণ" : "Description" }}</label>
+          <textarea [(ngModel)]="form.description" rows="3" placeholder="Scope of work..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="showForm=false">{{ ls.current === "bn" ? "বাতিল" : "Cancel" }}</button>
+      <button class="btn-save" (click)="saveNotice()">
+        <i class="fas fa-save"></i> Save Tender
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ AWARD MODAL ══ -->
+<div class="modal-overlay" *ngIf="showAwardModal" (click)="showAwardModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header award-hdr">
+      <h3><i class="fas fa-trophy"></i> Award Tender</h3>
+      <button class="modal-close" (click)="showAwardModal=false">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="award-tender-title">
+        <i class="fas fa-file-alt"></i> {{ awardingTenderTitle }}
+      </div>
+      <div class="lowest-hint" *ngIf="getLowestForTender(awardingTenderId) as lb">
+        🏆 Lowest Bid: <strong>{{ lb.companyName }}</strong> — {{ fmt(lb.bidAmount) }}
+      </div>
+      <div class="no-bid-warn" *ngIf="awardBidOptions.length === 0">
+        <i class="fas fa-exclamation-triangle"></i> No eligible bids found.
+      </div>
+      <div *ngIf="awardBidOptions.length > 0">
+        <div class="m-field">
+          <label>Winning Bid <span class="req">*</span></label>
+          <select [(ngModel)]="selectedBidId" (change)="onAwardBidSelect()">
+            <option [value]="0">— Select bid —</option>
+            <option *ngFor="let b of awardBidOptions" [value]="b.id">
+              {{ b.isLowest ? '🏆 ' : '' }}{{ b.companyName }} — {{ fmt(b.bidAmount) }} ({{ b.completionDays }} days)
+            </option>
+          </select>
+        </div>
+        <div class="m-field">
+          <label>Awarded Amount (৳)</label>
+          <input type="number" [(ngModel)]="awardAmount">
+        </div>
+        <div class="m-field">
+          <label>{{ ls.current === "bn" ? "মন্তব্য" : "Remarks" }}</label>
+          <textarea [(ngModel)]="awardRemarks" rows="3"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="showAwardModal=false">{{ ls.current === "bn" ? "বাতিল" : "Cancel" }}</button>
+      <button class="btn-award-confirm" (click)="confirmAward()" [disabled]="awardBidOptions.length===0">
+        <i class="fas fa-trophy"></i> Confirm Award
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showVerifyModal" (click)="closeVerifyModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3><i class="fas fa-shield-alt"></i> Document Verification</h3>
+      <button class="modal-close" (click)="closeVerifyModal()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="verifyingBid">
+      <div class="verify-info">
+        <div class="vi-row"><span class="vi-lbl">Bidder</span><span>{{ verifyingBid.bidderName }}</span></div>
+        <div class="vi-row"><span class="vi-lbl">Company</span><span>{{ verifyingBid.companyName }}</span></div>
+        <div class="vi-row"><span class="vi-lbl">{{ ls.current === "bn" ? "বিডের পরিমাণ" : "Bid Amount" }}</span><span class="mono">{{ fmt(verifyingBid.bidAmount) }}</span></div>
+        <div class="vi-row" *ngIf="verifyingBid.documentUrl">
+          <span class="vi-lbl">Document</span>
+          <a [href]="serverUrl + '/' + verifyingBid.documentUrl" target="_blank" class="doc-link">
+            <i class="fas fa-file-pdf"></i> View Document
+          </a>
+        </div>
+      </div>
+
+      <div class="m-field" style="margin-top:20px">
+        <label>Decision <span class="req">*</span></label>
+        <div class="decision-btns">
+          <button class="decision-btn verify-btn" [class.selected]="verifyDecision===true"
+                  (click)="verifyDecision=true">
+            <i class="fas fa-check"></i> Verified ✅
+          </button>
+          <button class="decision-btn reject-btn" [class.selected]="verifyDecision===false"
+                  (click)="verifyDecision=false">
+            <i class="fas fa-times"></i> Rejected ❌
+          </button>
+        </div>
+      </div>
+
+      <div class="m-field">
+        <label>Admin Note / Rejection Reason</label>
+        <textarea [(ngModel)]="verifyRemark" rows="3"
+                  placeholder="Write a note (if rejected, write the reason))..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeVerifyModal()">{{ ls.current === "bn" ? "বাতিল" : "Cancel" }}</button>
+      <button class="btn-save" (click)="submitVerify()" [disabled]="verifyLoading || verifyDecision===null">
+        {{ verifyLoading ? 'Processing...' : 'Submit Decision' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="showBlacklistModal" (click)="closeBlacklistModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header" style="background:linear-gradient(135deg,#7f1d1d,#991b1b,#b91c1c)">
+      <h3><i class="fas fa-ban"></i> {{ ls.current === "bn" ? "বিক্রেতাকে ব্ল্যাকলিস্ট করুন" : "Blacklist the Vendor" }}</h3>
+      <button class="modal-close" (click)="closeBlacklistModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="bl-note">⚠️ NID, Email or Mobile — at least one day.</div>
+      <div class="m-row">
+        <div class="m-field">
+          <label>{{ ls.current === "bn" ? "বিক্রেতার নাম" : "Vendor Name" }}</label>
+          <input type="text" [(ngModel)]="newVendor.vendorName" [placeholder]="ls.current === 'bn' ? 'পূর্ণ নাম' : 'Full Name'">
+        </div>
+        <div class="m-field">
+          <label>Company Name</label>
+          <input type="text" [(ngModel)]="newVendor.companyName" placeholder="Company Name">
+        </div>
+        <div class="m-field">
+          <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }}</label>
+          <input type="text" [(ngModel)]="newVendor.nid" placeholder="National ID">
+        </div>
+        <div class="m-field">
+          <label>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}</label>
+          <input type="email" [(ngModel)]="newVendor.email" placeholder="email@example.com">
+        </div>
+        <div class="m-field">
+          <label>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</label>
+          <input type="text" [(ngModel)]="newVendor.mobile" placeholder="01XXXXXXXXX">
+        </div>
+        <div class="m-field">
+          <label>Blacklisted By</label>
+          <input type="text" [(ngModel)]="newVendor.blacklistedBy" placeholder="Admin Name">
+        </div>
+        <div class="m-field full">
+          <label>{{ ls.current === "bn" ? "ব্ল্যাকলিস্টের কারণ" : "Blacklist Reason" }} <span class="req">*</span></label>
+          <textarea [(ngModel)]="newVendor.reason" rows="3" placeholder="Why is the vendor blacklisted..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeBlacklistModal()">{{ ls.current === "bn" ? "বাতিল" : "Cancel" }}</button>
+      <button class="btn-save" style="background:#b91c1c" (click)="submitBlacklist()" [disabled]="blacklistLoading">
+        {{ blacklistLoading ? 'Processing...' : '🚫 Blacklist Vendor' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,182 @@
+<nav class="topbar">
+
+  <!-- ── LEFT: Hamburger ── -->
+  <div class="topbar-left topbar-left-flex">
+    <button class="hamburger" (click)="onToggle()" title="Toggle Sidebar">
+      <span class="hb-bar"></span>
+      <span class="hb-bar"></span>
+      <span class="hb-bar"></span>
+    </button>
+
+    <div class="page-info">
+      <span class="page-name">{{ ls.t('nav.eGovernance') }}</span>
+      <span class="page-breadcrumb">
+        <i class="fas fa-home"></i>
+        {{ ls.t('nav.dashboard') }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── RIGHT: Actions ── -->
+  <div class="topbar-right topbar-right-flex">
+
+    <!-- Search -->
+    <div class="search-wrap" (clickOutside)="clearSearch()">
+      <i class="fas fa-search search-icon"></i>
+      <input class="search-input" type="text"
+             [placeholder]="ls.t('nav.search')"
+             [(ngModel)]="searchText"
+             (input)="onSearch($any($event.target).value)"
+             (keydown.escape)="clearSearch()"
+             autocomplete="off">
+      <button class="search-clear" *ngIf="searchText" (click)="clearSearch()">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <!-- Search results dropdown -->
+      <div class="search-dropdown" *ngIf="showSearch">
+        <div class="sd-loading" *ngIf="searchLoading">
+          <i class="fas fa-spinner fa-spin"></i> {{ ls.t('nav.searching') }}
+        </div>
+        <ng-container *ngIf="!searchLoading">
+          <div class="sd-item" *ngFor="let r of searchResults" (click)="goTo(r.route)">
+            <div class="sd-ico"><i class="fas" [ngClass]="r.icon"></i></div>
+            <div class="sd-info">
+              <span class="sd-label">{{ r.label }}</span>
+              <span class="sd-sub" *ngIf="r.sub">{{ r.sub }}</span>
+            </div>
+            <i class="fas fa-arrow-right sd-arrow" *ngIf="r.route"></i>
+          </div>
+          <div class="sd-empty" *ngIf="searchResults.length === 0">
+            <i class="fas fa-magnifying-glass"></i>
+            <span>"{{ searchText }}" {{ ls.t('nav.nothingFound') }}</span>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- ── Language Toggle ── -->
+    <div class="lang-toggle" title="Switch Language">
+      <button class="lang-btn"
+              [class.lang-active]="currentLang === 'en'"
+              (click)="setLang('en')">EN</button>
+      <span class="lang-sep">|</span>
+      <button class="lang-btn"
+              [class.lang-active]="currentLang === 'bn'"
+              (click)="setLang('bn')">বাং</button>
+    </div>
+
+    <!-- Notification bell — real data from backend -->
+    <div class="icon-btn" title="Notifications" (click)="toggleNotif()">
+      <i class="fas fa-bell"></i>
+      <span class="badge-dot" *ngIf="unreadCount > 0">{{ unreadCount > 9 ? '9+' : unreadCount }}</span>
+
+      <div class="notif-dropdown" *ngIf="showNotif" (click)="$event.stopPropagation()">
+        <div class="nd-head">
+          <span>{{ ls.t('nav.notifications') }}</span>
+          <span class="nd-count" *ngIf="unreadCount > 0">{{ unreadCount }} {{ ls.t('nav.new') }}</span>
+        </div>
+
+        <!-- Loading state -->
+        <div class="nd-loading" *ngIf="notifLoading">
+          <i class="fas fa-spinner fa-spin"></i> {{ ls.t('nav.loading') }}
+        </div>
+
+        <!-- Notification items -->
+        <div class="nd-item"
+             *ngFor="let n of notifications"
+             [class.nd-expanded]="expandedNotifId === n.id"
+             [class.nd-unread]="isNotificationUnread(n)"
+             (click)="toggleNotifExpand(n.id)">
+          <div class="nd-ico">
+            <i class="fas" [ngClass]="getNotifIcon(n)"></i>
+          </div>
+          <div class="nd-info">
+            <span class="nd-title">{{ n.title || (n.message | slice:0:40) }}{{ !n.title && n.message?.length > 40 ? '...' : '' }} <b class="nd-new-dot" *ngIf="isNotificationUnread(n)">NEW</b></span>
+            <span class="nd-time">{{ timeAgo(n.createdAt) }}</span>
+            <!-- Expanded detail -->
+            <div class="nd-detail" *ngIf="expandedNotifId === n.id">
+              <p>{{ n.message }}</p>
+              <div class="nd-meta">
+                <span *ngIf="n.type"><i class="fas fa-tag"></i> {{ n.type }}</span>
+                <span *ngIf="n.serviceTag"><i class="fas fa-folder"></i> {{ n.serviceTag }}</span>
+                <span *ngIf="n.recipientType"><i class="fas fa-users"></i> {{ n.recipientType }}</span>
+              </div>
+            </div>
+          </div>
+          <i class="fas nd-chevron"
+             [ngClass]="expandedNotifId === n.id ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </div>
+
+        <!-- Empty state -->
+        <div class="nd-empty" *ngIf="!notifLoading && notifications.length === 0">
+          <i class="fas fa-bell-slash"></i>
+          <span>{{ ls.t('nav.noNotifications') }}</span>
+        </div>
+
+        <div class="nd-footer" (click)="$event.stopPropagation()" routerLink="/notifications">{{ ls.t('nav.seeAll') }}</div>
+      </div>
+    </div>
+
+    <!-- Full screen -->
+    <div class="icon-btn" title="Fullscreen" (click)="toggleFullscreen()">
+      <i class="fas fa-expand"></i>
+    </div>
+
+    <!-- Date chip -->
+    <div class="date-chip">
+      <i class="fas fa-calendar-alt"></i>
+      <span id="nb-date"></span>
+    </div>
+
+    <!-- Profile -->
+    <div class="profile-wrap" (click)="toggleProfile()">
+      <div class="avatar-ring">
+        <img *ngIf="photoUrl" [src]="photoUrl" alt="Profile" class="avatar-img">
+        <div *ngIf="!photoUrl" class="avatar-fallback" style="display:flex">{{ getInitials() }}</div>
+      </div>
+      <!-- Role icon: visible only on mobile when profile-meta is hidden -->
+      <span class="mobile-role-badge" *ngIf="currentUser?.role" [title]="currentUser?.role || ''">
+        <i class="fas" [ngClass]="{
+          'fa-shield-halved': (currentUser?.role || '').toLowerCase().includes('admin'),
+          'fa-user-tie':      (currentUser?.role || '').toLowerCase().includes('officer'),
+          'fa-user':          !(currentUser?.role || '').toLowerCase().includes('admin') && !(currentUser?.role || '').toLowerCase().includes('officer')
+        }"></i>
+      </span>
+      <div class="profile-meta">
+        <span class="profile-name">{{ currentUser?.name || 'User' }}</span>
+        <span class="profile-role">{{ currentUser?.role || '' }}</span>
+      </div>
+      <i class="fas fa-chevron-down profile-arrow" [class.rotated]="showProfile"></i>
+
+      <!-- Profile dropdown -->
+      <div class="profile-dropdown" *ngIf="showProfile">
+        <div class="pd-header">
+          <div class="pd-av">
+            <img *ngIf="photoUrl" [src]="photoUrl" class="pd-av-img" alt="">
+            <span *ngIf="!photoUrl">{{ getInitials() }}</span>
+          </div>
+          <div>
+            <div class="pd-name">{{ currentUser?.name }}</div>
+            <div class="pd-email">{{ currentUser?.email }}</div>
+          </div>
+        </div>
+        <hr class="pd-divider">
+        <a class="pd-item" routerLink="/profile">
+          <i class="fas fa-user-circle"></i> {{ ls.t('nav.profile') }}
+        </a>
+        <a class="pd-item" routerLink="/settings">
+          <i class="fas fa-cog"></i> {{ ls.t('nav.settings') }}
+        </a>
+        <hr class="pd-divider">
+        <a class="pd-item pd-logout" (click)="logout()">
+          <i class="fas fa-sign-out-alt"></i> {{ ls.t('nav.logout') }}
+        </a>
+      </div>
+    </div>
+
+  </div>
+</nav>
+
+<!-- Backdrop -->
+<div class="nb-backdrop" *ngIf="showProfile || showNotif" (click)="closeAll()"></div>

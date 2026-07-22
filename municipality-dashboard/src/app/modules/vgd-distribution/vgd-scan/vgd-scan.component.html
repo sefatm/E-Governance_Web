@@ -1,0 +1,175 @@
+<!-- vgd-scan.component.html -->
+<div class="fd-wrap">
+
+  <!-- SESSION SETUP -->
+  <div *ngIf="!sessionOpen" class="setup-card">
+    <div class="setup-head">
+      <div class="setup-icon" style="background:#ede9fe;color:#5b21b6">
+        <i class="fas fa-hands-helping"></i>
+      </div>
+      <div>
+        <h2>VGD/VGF বিতরণ Session</h2>
+        <p>বিতরণ শুরু করতে নিচের তথ্য পূরণ করুন</p>
+      </div>
+    </div>
+    <div class="setup-grid">
+      <div class="field-group">
+        <label>Card Type <span class="req">*</span></label>
+        <select [(ngModel)]="cardType">
+          <option value="VGD">VGD (চাল/গম)</option>
+          <option value="VGF">VGF (নগদ)</option>
+          <option value="ALL">উভয়</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>বিতরণকারীর নাম <span class="req">*</span></label>
+        <input [(ngModel)]="officerName" placeholder="অফিসার / ডিলার">
+      </div>
+      <div class="field-group">
+        <label>{{ ls.current === "bn" ? "ওয়ার্ড নং" : "Ward No." }}<span class="req">*</span></label>
+        <input [(ngModel)]="ward" placeholder="যেমন: 02">
+      </div>
+      <div class="field-group">
+        <label>চক্র (মাস) <span class="req">*</span></label>
+        <input [(ngModel)]="cycleMonth" type="month">
+      </div>
+    </div>
+    <div class="setup-foot">
+      <button class="btn-start" (click)="startSession()" [disabled]="startLoading" style="background:#5b21b6">
+        <i class="fas" [class.fa-play]="!startLoading" [class.fa-spinner]="startLoading" [class.fa-spin]="startLoading"></i>
+        {{ startLoading ? 'শুরু হচ্ছে...' : 'বিতরণ শুরু করুন' }}
+      </button>
+      <div class="setup-err" *ngIf="setupError">
+        <i class="fas fa-triangle-exclamation"></i> {{ setupError }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE SESSION -->
+  <div *ngIf="sessionOpen">
+    <div class="session-bar" style="border-left:4px solid #5b21b6">
+      <div class="sb-left">
+        <span class="badge-open" style="background:#ede9fe;color:#5b21b6">
+          <span class="dot" style="background:#7c3aed"></span> OPEN
+        </span>
+        <span class="type-pill" [class.vgd]="cardType==='VGD'" [class.vgf]="cardType==='VGF'">{{ cardType }}</span>
+        <span class="sb-ward">ওয়ার্ড {{ ward }}</span>
+        <span class="sb-cycle">{{ cycleMonth }}</span>
+        <span class="sb-count">বিতরণ: <b>{{ totalDistributed }}</b></span>
+      </div>
+      <div class="sb-right">
+        <button class="btn-close-session" (click)="closeSession()">
+          <i class="fas fa-stop-circle"></i> {{ ls.current === "bn" ? "বন্ধ করুন" : "Close" }}</button>
+      </div>
+    </div>
+
+    <div class="scan-layout">
+      <!-- Scanner -->
+      <div class="scan-panel">
+        <div class="scan-tabs">
+          <button [class.active]="scanMode==='qr'" (click)="switchMode('qr')">
+            <i class="fas fa-qrcode"></i> QR স্ক্যান
+          </button>
+          <button [class.active]="scanMode==='manual'" (click)="switchMode('manual')">
+            <i class="fas fa-keyboard"></i> Manual
+          </button>
+        </div>
+
+        <div *ngIf="scanMode==='qr'" class="qr-container">
+          <div id="vgd-qr-reader" class="qr-reader"></div>
+          <div class="qr-controls">
+            <button class="btn-cam" *ngIf="!scannerActive" (click)="startScanner()">
+              <i class="fas fa-camera"></i> ক্যামেরা চালু
+            </button>
+            <button class="btn-cam stop" *ngIf="scannerActive" (click)="stopScanner()">
+              <i class="fas fa-stop"></i> {{ ls.current === "bn" ? "বন্ধ" : "Closed" }}</button>
+          </div>
+          <p class="qr-hint" *ngIf="!scannerActive">
+            <i class="fas fa-info-circle"></i> VGD/VGF কার্ডের QR কোড ধরুন
+          </p>
+        </div>
+
+        <div *ngIf="scanMode==='manual'" class="manual-area">
+          <label>কার্ড নম্বর লিখুন</label>
+          <div class="manual-input-row">
+            <input [(ngModel)]="manualCardNo" placeholder="VGD-02-2025-XXXXX"
+                   (keydown.enter)="submitManual()" [disabled]="scanning">
+            <button class="btn-submit-manual" (click)="submitManual()"
+                    [disabled]="scanning||!manualCardNo.trim()" style="background:#5b21b6">
+              <i class="fas fa-check" *ngIf="!scanning"></i>
+              <i class="fas fa-spinner fa-spin" *ngIf="scanning"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-panel">
+        <div class="scanning-state" *ngIf="scanning">
+          <i class="fas fa-spinner fa-spin" style="color:#5b21b6"></i>
+          <span>তথ্য যাচাই হচ্ছে...</span>
+        </div>
+
+        <div class="result-box success" *ngIf="lastResult?.success && !scanning"
+             style="border-color:#c4b5fd;background:#faf5ff">
+          <div class="res-check" style="color:#7c3aed"><i class="fas fa-circle-check"></i></div>
+          <div class="res-name">{{ lastResult.holderName }}</div>
+          <div class="res-card">{{ lastResult.cardNo }}</div>
+          <div class="res-items">
+            <div class="res-item" *ngIf="lastResult.riceKg > 0">
+              <span class="ri-label">চাল</span>
+              <span class="ri-val" style="color:#5b21b6">{{ lastResult.riceKg }} কেজি</span>
+            </div>
+            <div class="res-item" *ngIf="lastResult.wheatKg > 0">
+              <span class="ri-label">গম</span>
+              <span class="ri-val" style="color:#5b21b6">{{ lastResult.wheatKg }} কেজি</span>
+            </div>
+            <div class="res-item" *ngIf="lastResult.cashAmount > 0">
+              <span class="ri-label">{{ ls.current === "bn" ? "নগদ" : "Cash" }}</span>
+              <span class="ri-val" style="color:#5b21b6">৳{{ lastResult.cashAmount }}</span>
+            </div>
+          </div>
+          <div class="res-msg" style="color:#5b21b6">{{ lastResult.message }}</div>
+        </div>
+
+        <div class="result-box fail" *ngIf="lastResult && !lastResult.success && !scanning">
+          <div class="res-fail-icon"><i class="fas fa-circle-xmark"></i></div>
+          <div class="res-fail-msg">{{ lastResult.message }}</div>
+        </div>
+
+        <div class="result-empty" *ngIf="!lastResult && !scanning">
+          <i class="fas fa-id-card"></i>
+          <p>কার্ড স্ক্যান করুন বা নম্বর লিখুন</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Session log -->
+    <div class="log-section" *ngIf="sessionLogs.length>0">
+      <div class="log-head">
+        <h3><i class="fas fa-list-check me-2"></i>এই session-এর বিতরণ</h3>
+        <span class="log-count">{{ sessionLogs.length }} জন</span>
+      </div>
+      <div class="table-wrap">
+        <table class="log-table">
+          <thead><tr>
+            <th>#</th><th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th><th>কার্ড নং</th><th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+            <th>চাল</th><th>গম</th><th>{{ ls.current === "bn" ? "নগদ" : "Cash" }}</th><th>সময়</th>
+          </tr></thead>
+          <tbody>
+            <tr *ngFor="let l of sessionLogs; let i=index">
+              <td class="td-num">{{ i+1 }}</td>
+              <td class="td-name">{{ l.holderName }}</td>
+              <td><code>{{ l.cardNo }}</code></td>
+              <td><span class="type-pill" [class.vgd]="l.cardType==='VGD'" [class.vgf]="l.cardType==='VGF'">{{ l.cardType }}</span></td>
+              <td class="td-val">{{ l.riceKg > 0 ? l.riceKg+'kg' : '—' }}</td>
+              <td class="td-val">{{ l.wheatKg > 0 ? l.wheatKg+'kg' : '—' }}</td>
+              <td class="td-val">{{ l.cashAmount > 0 ? '৳'+l.cashAmount : '—' }}</td>
+              <td class="td-time">{{ l.time | date:'hh:mm a' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

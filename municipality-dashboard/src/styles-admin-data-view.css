@@ -1,0 +1,131 @@
+/* Unified Admin Data View System - inspired by Citizen Service Admin Applications */
+:root{
+  --egov-green:#064e3b; --egov-green2:#059669; --egov-soft:#f0fdf4;
+  --egov-border:#e5e7eb; --egov-text:#111827; --egov-muted:#6b7280;
+}
+
+/* Page shells used across admin modules */
+.aa-page,.page-wrapper,.container,.admin-container,.admin-page,.dashboard-container,.payment-admin,.report-page,.history-page,.management-page,.approval-page,
+[class*="-admin-page"],[class*="admin-"]{
+  font-family:'Segoe UI','Inter',Arial,sans-serif;
+}
+
+/* Standard page header */
+.page-wrapper>h2,.container>h2,.admin-container>h2,.admin-page>h2,.payment-admin>h2,.history-page>h2,.report-page>h2,
+.voter-approval-title,.management-title{
+  margin:0 0 14px!important;
+  padding:16px 18px!important;
+  border-radius:16px!important;
+  background:linear-gradient(135deg,#064e3b,#087a38)!important;
+  color:#fff!important;
+  font-size:20px!important;
+  font-weight:800!important;
+  box-shadow:0 8px 24px rgba(6,78,59,.18)!important;
+}
+
+/* Filter/search bars */
+.filter-bar,.filter-box,.search-filter,.filter-row,.toolbar,.admin-toolbar,.table-toolbar,.top-filter{
+  display:flex!important;gap:8px!important;align-items:center!important;flex-wrap:wrap!important;
+  margin:0 0 14px!important;padding:12px!important;background:#fff!important;
+  border:1.5px solid var(--egov-border)!important;border-radius:14px!important;
+  box-shadow:0 2px 10px rgba(0,0,0,.04)!important;
+}
+.filter-bar input,.filter-box input,.search-filter input,.filter-row input,.toolbar input,.admin-toolbar input,
+.filter-bar select,.filter-box select,.search-filter select,.filter-row select,.toolbar select,.admin-toolbar select{
+  border:1.5px solid var(--egov-border)!important;border-radius:9px!important;padding:9px 12px!important;
+  outline:none!important;background:#fff!important;color:#374151!important;font-size:13px!important;
+}
+.filter-bar input:focus,.filter-box input:focus,.search-filter input:focus,.filter-row input:focus,.toolbar input:focus,.admin-toolbar input:focus,
+.filter-bar select:focus,.filter-box select:focus,.search-filter select:focus,.filter-row select:focus,.toolbar select:focus,.admin-toolbar select:focus{
+  border-color:var(--egov-green2)!important;box-shadow:0 0 0 3px rgba(5,150,105,.12)!important;
+}
+
+/* Standard table card */
+.table-wrap,.table-wrapper,.table-container,.table-box,.data-table-wrap,.result-table-wrap,
+table.app-table,table.table,table.result-table,table.admin-table,table.data-table{
+  background:#fff!important;border:1.5px solid var(--egov-border)!important;border-radius:14px!important;
+  overflow:hidden!important;box-shadow:0 2px 12px rgba(0,0,0,.05)!important;
+}
+.table-wrap table,.table-wrapper table,.table-container table,.table-box table,.data-table-wrap table,.result-table-wrap table,
+table.app-table,table.table,table.result-table,table.admin-table,table.data-table{
+  width:100%!important;border-collapse:collapse!important;background:#fff!important;
+}
+.table-wrap thead tr,.table-wrapper thead tr,.table-container thead tr,.table-box thead tr,.data-table-wrap thead tr,.result-table-wrap thead tr,
+table.app-table thead tr,table.table thead tr,table.result-table thead tr,table.admin-table thead tr,table.data-table thead tr{
+  background:#064e3b!important;
+}
+.table-wrap th,.table-wrapper th,.table-container th,.table-box th,.data-table-wrap th,.result-table-wrap th,
+table.app-table th,table.table th,table.result-table th,table.admin-table th,table.data-table th{
+  padding:12px 14px!important;text-align:left!important;color:#d1fae5!important;font-size:11px!important;
+  font-weight:800!important;letter-spacing:.06em!important;text-transform:uppercase!important;border:none!important;
+}
+.table-wrap td,.table-wrapper td,.table-container td,.table-box td,.data-table-wrap td,.result-table-wrap td,
+table.app-table td,table.table td,table.result-table td,table.admin-table td,table.data-table td{
+  padding:11px 14px!important;border-bottom:1px solid #f3f4f6!important;vertical-align:middle!important;color:#111827!important;font-size:13px!important;
+}
+.table-wrap tr:hover td,.table-wrapper tr:hover td,.table-container tr:hover td,.table-box tr:hover td,.data-table-wrap tr:hover td,.result-table-wrap tr:hover td,
+table.app-table tr:hover td,table.table tr:hover td,table.result-table tr:hover td,table.admin-table tr:hover td,table.data-table tr:hover td{
+  background:#f8fafc!important;
+}
+
+/* Badges */
+.status-badge,[class*="badge-"],.badge,.status,.status-pill{
+  display:inline-flex!important;align-items:center!important;gap:5px!important;border-radius:20px!important;
+  padding:4px 10px!important;font-size:11px!important;font-weight:800!important;line-height:1.2!important;
+}
+.badge-pending,.status-pending,.s-pending,.Pending,.status-badge.pending{background:#fffbeb!important;color:#92400e!important}
+.badge-approved,.status-approved,.s-approved,.Approved,.status-badge.approved{background:#d1fae5!important;color:#065f46!important}
+.badge-rejected,.status-rejected,.s-rejected,.Rejected,.status-badge.rejected{background:#fee2e2!important;color:#991b1b!important}
+.badge-active,.status-active{background:#dbeafe!important;color:#1e40af!important}
+
+/* Action buttons - make all admin actions look like Citizen Service */
+.action-cell,.action-col,.actions,.act-row,.button-group{display:flex!important;gap:6px!important;align-items:center!important;flex-wrap:wrap!important}
+button.btn-view,button.view,button.icon-btn.view,button.act-btn.view-btn,
+button.btn-approve,button.approve,button.icon-btn.approve,button.act-btn.approve-btn,
+button.btn-reject,button.reject,button.icon-btn.reject,button.act-btn.reject-btn,
+button.btn-edit,button.edit,button.icon-btn.edit,
+button.btn-delete,button.delete,button.icon-btn.delete,
+button.btn-pdf,button.pdf,button.icon-btn.pdf{
+  border:0!important;border-radius:8px!important;min-width:32px!important;min-height:30px!important;padding:7px 10px!important;
+  font-size:12px!important;font-weight:800!important;cursor:pointer!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;
+  transition:all .15s ease!important;
+}
+button.btn-view,button.view,button.icon-btn.view,button.act-btn.view-btn{background:#e0f2fe!important;color:#0369a1!important}
+button.btn-approve,button.approve,button.icon-btn.approve,button.act-btn.approve-btn{background:#d1fae5!important;color:#065f46!important}
+button.btn-reject,button.reject,button.icon-btn.reject,button.act-btn.reject-btn{background:#fee2e2!important;color:#dc2626!important}
+button.btn-edit,button.edit,button.icon-btn.edit{background:#fef3c7!important;color:#92400e!important}
+button.btn-delete,button.delete,button.icon-btn.delete{background:#fee2e2!important;color:#991b1b!important}
+button.btn-pdf,button.pdf,button.icon-btn.pdf{background:#ede9fe!important;color:#5b21b6!important}
+button:hover{transform:translateY(-1px)}
+
+/* Details boxes/modal body follow citizen detail grid */
+.details-box,.detail-box,.details-panel,.view-details,.expanded-details,.modal-body,.detail-card{
+  padding:18px!important;background:#f8fafb!important;border:1px solid #d1fae5!important;border-radius:12px!important;
+}
+.detail-grid,.details-grid,.info-grid,.modal-grid{
+  display:grid!important;grid-template-columns:repeat(auto-fill,minmax(200px,1fr))!important;gap:10px!important;
+}
+.detail-item,.dg-item,.info-item,.field-item{
+  display:flex!important;flex-direction:column!important;gap:3px!important;padding:9px 12px!important;background:#fff!important;
+  border:1px solid #e5e7eb!important;border-radius:8px!important;
+}
+.detail-key,.dg-key,.info-label,.field-label{font-size:10px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:.05em!important;color:#9ca3af!important}
+.detail-value,.dg-val,.info-value,.field-value{font-size:13px!important;color:#111827!important;word-break:break-word!important}
+
+/* E-voting pages specifically */
+app-candidate-approval .page-wrapper,
+app-voter-approval .page-wrapper,
+app-e-management .page-wrapper,
+app-e-voting-audit-logs .page-wrapper,
+app-analytics-dashboard .analytics-page{max-width:1200px;margin:0 auto;padding-bottom:60px}
+app-candidate-approval .modal,
+app-voter-approval .modal,
+app-e-management .modal{border-radius:18px!important;border:1.5px solid #d1fae5!important;box-shadow:0 24px 70px rgba(15,23,42,.28)!important}
+app-candidate-approval .modal-header,
+app-voter-approval .modal-header,
+app-e-management .modal-header{background:#064e3b!important;color:#fff!important;border-radius:16px 16px 0 0!important;padding:14px 18px!important}
+
+@media(max-width:768px){
+  .table-wrap,.table-wrapper,.table-container,.table-box,.data-table-wrap,.result-table-wrap{overflow-x:auto!important}
+  .filter-bar,.filter-box,.search-filter,.filter-row,.toolbar,.admin-toolbar{flex-direction:column!important;align-items:stretch!important}
+}

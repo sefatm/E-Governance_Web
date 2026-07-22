@@ -1,0 +1,231 @@
+<!-- ─── Toast Notification ─────────────────────────────────────────────────── -->
+<div *ngIf="toast" class="toast" [ngClass]="toast.type">
+  <span class="toast-icon">{{ toast.type === 'success' ? '✅' : '❌' }}</span>
+  {{ toast.msg }}
+</div>
+
+<!-- ─── Page Header ────────────────────────────────────────────────────────── -->
+<div class="page-header">
+  <div class="header-left">
+    <h1 class="page-title">🚫 Vendor Blacklist</h1>
+    <p class="page-sub">{{ ls.current === "bn" ? "ই-টেন্ডারে বিড করা থেকে বাধাপ্রাপ্ত বিক্রেতার তালিকা" : "List of vendors barred from bidding in E-Tender" }}</p>
+  </div>
+  <button class="btn-add" (click)="openAddModal()">
+    + Blacklist the Vendor
+  </button>
+</div>
+
+<!-- ─── Stats Cards ────────────────────────────────────────────────────────── -->
+<div class="stats-row">
+  <div class="stat-card red">
+    <div class="stat-num">{{ activeCount }}</div>
+    <div class="stat-label">🔴 Currently Blocked</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-num">{{ unblockedCount }}</div>
+    <div class="stat-label">🟢 Unblocked</div>
+  </div>
+  <div class="stat-card gray">
+    <div class="stat-num">{{ totalCount }}</div>
+    <div class="stat-label">📋 Total Records</div>
+  </div>
+</div>
+
+<!-- ─── Filter & Search ────────────────────────────────────────────────────── -->
+<div class="toolbar">
+  <div class="filter-tabs">
+    <button [class.active]="filterActive==='all'"
+            (click)="filterActive='all'; onFilterChange()">{{ ls.current === "bn" ? "সকল" : "All" }}</button>
+    <button [class.active]="filterActive==='active'"
+            (click)="filterActive='active'; onFilterChange()">🔴 Blocked</button>
+    <button [class.active]="filterActive==='unblocked'"
+            (click)="filterActive='unblocked'; onFilterChange()">🟢 Unblocked</button>
+  </div>
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" placeholder="Vendor Blacklist Search by Name, NID, Email or Mobile..."
+           [(ngModel)]="searchText" (input)="onSearch()" />
+  </div>
+</div>
+
+<!-- ─── Loading ────────────────────────────────────────────────────────────── -->
+<div *ngIf="loading" class="loading-wrap">
+  <div class="spinner"></div>
+  <p>{{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</p>
+</div>
+
+<!-- ─── Empty State ────────────────────────────────────────────────────────── -->
+<div *ngIf="!loading && filteredVendors.length === 0" class="empty-state">
+  <div class="empty-icon">🚫</div>
+  <p>No Blacklisted Vendors found.</p>
+</div>
+
+<!-- ─── Table ─────────────────────────────────────────────────────────────── -->
+<div *ngIf="!loading && filteredVendors.length > 0" class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Vendor Info</th>
+        <th>Contact</th>
+        <th>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</th>
+        <th>{{ ls.current === "bn" ? "ব্ল্যাকলিস্টের কারণ" : "Blacklist Reason" }}</th>
+        <th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th>
+        <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+        <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let v of filteredVendors; let i = index"
+          [class.row-inactive]="!v.active">
+        <td class="td-num">{{ i + 1 }}</td>
+
+        <!-- Vendor Info -->
+        <td>
+          <div class="vendor-name">{{ v.vendorName || '—' }}</div>
+          <div class="vendor-company" *ngIf="v.companyName">🏢 {{ v.companyName }}</div>
+        </td>
+
+        <!-- Contact -->
+        <td>
+          <div *ngIf="v.email" class="contact-row">📧 {{ v.email }}</div>
+          <div *ngIf="v.mobile" class="contact-row">📱 {{ v.mobile }}</div>
+          <span *ngIf="!v.email && !v.mobile" class="na">—</span>
+        </td>
+
+        <!-- NID -->
+        <td>
+          <span class="nid-badge" *ngIf="v.nid">{{ v.nid }}</span>
+          <span *ngIf="!v.nid" class="na">—</span>
+        </td>
+
+        <!-- Reason -->
+        <td>
+          <div class="reason-text">{{ v.reason || '—' }}</div>
+          <div class="by-text" *ngIf="v.blacklistedBy">By: {{ v.blacklistedBy }}</div>
+        </td>
+
+        <!-- Date -->
+        <td class="td-date">
+          {{ v.blacklistedAt ? (v.blacklistedAt | date:'dd MMM yyyy') : '—' }}
+        </td>
+
+        <!-- Status Badge -->
+        <td>
+          <span class="status-badge" [ngClass]="v.active ? 'blocked' : 'unblocked'">
+            {{ v.active ? '🔴 Blocked' : '🟢 Unblocked' }}
+          </span>
+        </td>
+
+        <!-- Actions -->
+        <td>
+          <div class="action-btns">
+            <button *ngIf="v.active"
+                    class="btn-unblock"
+                    (click)="openConfirm('unblock', v)"
+                    title="Unblock">
+              🔓 Unblock
+            </button>
+            <button class="btn-delete" (click)="openConfirm('delete', v)" [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ─── Add Modal ──────────────────────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="showAddModal" (click)="closeAddModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>🚫 Blacklist the Vendor</h2>
+      <button class="modal-close" (click)="closeAddModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-note">
+        ⚠️ NID, Email or Mobile — at least one is required.
+        If any of these matches during Bid submission, the bid will be blocked.
+      </div>
+
+      <div class="form-row two-col">
+        <div class="form-group">
+          <label>{{ ls.current === "bn" ? "বিক্রেতার নাম" : "Vendor Name" }}</label>
+          <input type="text" [(ngModel)]="newVendor.vendorName"
+                 [placeholder]="ls.current === 'bn' ? 'পূর্ণ নাম' : 'Full Name'" />
+        </div>
+        <div class="form-group">
+          <label>Company Name</label>
+          <input type="text" [(ngModel)]="newVendor.companyName"
+                 placeholder="Company Name" />
+        </div>
+      </div>
+
+      <div class="form-row three-col">
+        <div class="form-group">
+          <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }}</label>
+          <input type="text" [(ngModel)]="newVendor.nid"
+                 placeholder="National ID Number" />
+        </div>
+        <div class="form-group">
+          <label>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}</label>
+          <input type="email" [(ngModel)]="newVendor.email"
+                 placeholder="email@example.com" />
+        </div>
+        <div class="form-group">
+          <label>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</label>
+          <input type="text" [(ngModel)]="newVendor.mobile"
+                 placeholder="01XXXXXXXXX" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>{{ ls.current === "bn" ? "ব্ল্যাকলিস্টের কারণ" : "Blacklist Reason" }} <span class="required">*</span></label>
+        <textarea [(ngModel)]="newVendor.reason" rows="3"
+                  placeholder="Why is this Vendor blacklisted?"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Blacklisted By (Admin's Name)</label>
+        <input type="text" [(ngModel)]="newVendor.blacklistedBy"
+               placeholder="Admin's Name or ID" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeAddModal()">{{ ls.current === "bn" ? "বাতিল" : "Cancel" }}</button>
+      <button class="btn-submit-red" (click)="submitAdd()" [disabled]="addLoading">
+        <span *ngIf="!addLoading">🚫 Blacklist Vendor</span>
+        <span *ngIf="addLoading">Please wait...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Confirm Modal ──────────────────────────────────────────────────────── -->
+<div class="modal-overlay" *ngIf="confirmAction" (click)="closeConfirm()">
+  <div class="modal-box confirm-box" (click)="$event.stopPropagation()">
+    <div class="confirm-icon">
+      {{ confirmAction === 'unblock' ? '🔓' : '🗑️' }}
+    </div>
+    <h3>{{ ls.current === "bn" ? "নিশ্চিত করুন" : "Confirm" }}</h3>
+    <p *ngIf="confirmAction === 'unblock'">
+      <strong>{{ confirmVendor?.vendorName || 'This Vendor' }}</strong> to unblock?
+      Once unblocked, they can submit bids again.
+    </p>
+    <p *ngIf="confirmAction === 'delete'">
+      <strong>{{ confirmVendor?.vendorName || 'This Vendor' }}</strong> 's blacklist record
+      will be permanently deleted.
+    </p>
+    <div class="confirm-actions">
+      <button class="btn-cancel" (click)="closeConfirm()">No, Cancel</button>
+      <button [class]="confirmAction === 'unblock' ? 'btn-unblock-lg' : 'btn-delete-lg'"
+              (click)="doConfirm()" [disabled]="confirmLoading">
+        <span *ngIf="!confirmLoading">
+          {{ confirmAction === 'unblock' ? '🔓 Yes, Unblock' : '🗑️ Yes, Delete' }}
+        </span>
+        <span *ngIf="confirmLoading">Processing...</span>
+      </button>
+    </div>
+  </div>
+</div>

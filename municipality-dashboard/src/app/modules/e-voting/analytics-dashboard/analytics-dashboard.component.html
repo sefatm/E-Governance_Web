@@ -1,0 +1,95 @@
+<div class="analytics-page">
+
+  <div class="page-header" style="background:linear-gradient(135deg,#1565C0,#0D47A1)">
+    <div class="ph-icon"><i class="fas fa-chart-pie"></i></div>
+    <div>
+      <h2 class="ph-title">Election Analytics</h2>
+      <p class="ph-sub">Turnout, votes and candidate performance</p>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <label>Select Election</label>
+    <select [(ngModel)]="selectedElectionId" (change)="loadAnalytics()">
+      <option [value]="null">-- Select Election --</option>
+      <option *ngFor="let e of elections" [value]="e.id">{{e.name}} ({{e.type}})</option>
+    </select>
+  </div>
+
+  <div class="loading-box" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> Loading analytics...
+  </div>
+
+  <div *ngIf="!isLoading && selectedElectionId">
+
+    <!-- KPI Cards -->
+    <div class="kpi-row">
+      <div class="kpi-card" style="border-left-color:#0f7a3f">
+        <div class="kpi-ico" style="color:#0f7a3f"><i class="fas fa-vote-yea"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Total Votes</span>
+          <span class="kpi-val">{{totalVotes}}</span>
+        </div>
+      </div>
+      <div class="kpi-card" style="border-left-color:#1565C0">
+        <div class="kpi-ico" style="color:#1565C0"><i class="fas fa-users"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Approved Voters</span>
+          <span class="kpi-val">{{totalApprovedVoters}}</span>
+        </div>
+      </div>
+      <div class="kpi-card" style="border-left-color:#E65100">
+        <div class="kpi-ico" style="color:#E65100"><i class="fas fa-user-tie"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Candidates</span>
+          <span class="kpi-val">{{totalCandidates}}</span>
+        </div>
+      </div>
+      <div class="kpi-card" style="border-left-color:#6A1B9A">
+        <div class="kpi-ico" style="color:#6A1B9A"><i class="fas fa-percent"></i></div>
+        <div class="kpi-body">
+          <span class="kpi-label">Voter Turnout</span>
+          <span class="kpi-val">{{turnout}}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h4 class="chart-title">Candidate Wise Votes</h4>
+        <div style="height:240px;position:relative"><canvas id="barChart"></canvas></div>
+      </div>
+      <div class="chart-card donut-card">
+        <h4 class="chart-title">Voter Turnout</h4>
+        <div style="height:200px;position:relative"><canvas id="donutChart"></canvas></div>
+        <div class="donut-info">
+          <span class="di-item"><span class="di-dot" style="background:#0f7a3f"></span>Voted {{turnout}}%</span>
+          <span class="di-item"><span class="di-dot" style="background:#e0e8e0"></span>Not voted {{100 - turnout}}%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Table -->
+    <div class="result-table-wrap">
+      <table class="result-table">
+        <thead><tr><th>#</th><th>Candidate</th><th>{{ ls.current === "bn" ? "দল" : "Party" }}</th><th>Votes</th><th>Percentage</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of results; let i = index">
+            <td>{{i+1}}</td>
+            <td><strong>{{r.name}}</strong></td>
+            <td>{{r.party}}</td>
+            <td><strong>{{r.votes}}</strong></td>
+            <td>
+              <div class="progress-wrap">
+                <div class="progress-bar" [style.width]="r.percent + '%'"></div>
+                <span>{{r.percent}}%</span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

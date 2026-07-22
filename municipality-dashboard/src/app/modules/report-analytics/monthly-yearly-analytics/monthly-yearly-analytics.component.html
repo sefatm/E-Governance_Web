@@ -1,0 +1,103 @@
+<div class="analytics-page">
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h2 class="page-title">
+      <span class="icon">📊</span> Analytics Overview
+    </h2>
+    <p class="page-sub">Monitor service request trends and municipal performance metrics.</p>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div *ngIf="loading" class="loading-bar">Loading data…</div>
+
+  <div class="kpi-grid" *ngIf="!loading">
+    <div class="kpi-card blue">
+      <div class="kpi-icon">👥</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ summary.totalCitizens | number }}</div>
+        <div class="kpi-label">{{ ls.current === "bn" ? "মোট নাগরিক" : "Total Citizens" }}</div>
+      </div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ summary.totalServices | number }}</div>
+        <div class="kpi-label">Total Services</div>
+      </div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-icon">⏳</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ summary.pendingRequests | number }}</div>
+        <div class="kpi-label">Pending Requests</div>
+      </div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-icon">✅</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ summary.completedThisMonth | number }}</div>
+        <div class="kpi-label">Completed This Month</div>
+      </div>
+    </div>
+    <div class="kpi-card indigo">
+      <div class="kpi-icon">💰</div>
+      <div class="kpi-body">
+        <div class="kpi-value">৳ {{ summary.totalRevenue | number:'1.0-0' }}</div>
+        <div class="kpi-label">Total Revenue</div>
+      </div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon">🏠</div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ summary.taxDueCount | number }}</div>
+        <div class="kpi-label">Tax Due Holdings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Bar Chart -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <h3 class="chart-title">Service Request Trend</h3>
+      <div class="chart-controls">
+        <!-- Range Toggle -->
+        <div class="toggle-group">
+          <button [class.active]="selectedRange === 'month'" (click)="selectedRange='month'; onRangeChange()">Monthly</button>
+          <button [class.active]="selectedRange === 'year'" (click)="selectedRange='year'; onRangeChange()">Yearly</button>
+        </div>
+        <!-- Year Picker (only for monthly) -->
+        <select *ngIf="selectedRange === 'month'" [(ngModel)]="selectedYear" (ngModelChange)="onYearChange()">
+          <option *ngFor="let y of availableYears" [value]="y">{{ y }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="chart-body">
+      <canvas id="mainChart" height="100"></canvas>
+    </div>
+  </div>
+
+  <!-- Bottom Charts Row -->
+  <div class="charts-row">
+
+    <!-- Service Status Doughnut -->
+    <div class="chart-card half">
+      <div class="chart-header">
+        <h3 class="chart-title">Requests by Status</h3>
+      </div>
+      <div class="chart-body doughnut-wrap">
+        <canvas id="statusChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Service Type Horizontal Bar -->
+    <div class="chart-card half">
+      <div class="chart-header">
+        <h3 class="chart-title">Requests by Service Type</h3>
+      </div>
+      <div class="chart-body">
+        <canvas id="serviceChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+</div>

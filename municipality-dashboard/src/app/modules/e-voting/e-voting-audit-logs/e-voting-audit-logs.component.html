@@ -1,0 +1,67 @@
+<div class="audit-page">
+
+  <div class="page-header" style="background:linear-gradient(135deg,#37474F,#263238)">
+    <div class="ph-icon"><i class="fas fa-shield-alt"></i></div>
+    <div>
+      <h2 class="ph-title">{{ ls.current === "bn" ? "অডিট লগ" : "Audit Logs" }}</h2>
+      <p class="ph-sub">All e-voting system actions tracked here</p>
+    </div>
+    <div class="ph-count" *ngIf="logs.length > 0">{{logs.length}} records</div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by NID or details..."
+             [(ngModel)]="searchText" (input)="applyFilter()">
+    </div>
+    <select [(ngModel)]="filterAction" (change)="applyFilter()">
+      <option value="">All Actions</option>
+      <option *ngFor="let a of actions" [value]="a">{{a}}</option>
+    </select>
+    <button class="refresh-btn" (click)="loadLogs()">
+      <i class="fas fa-sync-alt"></i> {{ ls.current === "bn" ? "রিফ্রেশ" : "Refresh" }}
+    </button>
+  </div>
+
+  <div class="loading-box" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> Loading logs...
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!isLoading">
+    <table class="audit-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+          <th>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</th>
+          <th>Election ID</th>
+          <th>{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of filtered; let i = index">
+          <td class="td-num">{{i + 1}}</td>
+          <td>
+            <span class="badge" [ngClass]="badgeClass(log.action)">
+              {{log.action}}
+            </span>
+          </td>
+          <td class="td-nid">{{log.nid || '—'}}</td>
+          <td class="td-center">{{log.electionId || '—'}}</td>
+          <td class="td-details">{{log.details}}</td>
+          <td class="td-time">{{formatTime(log.createdAt)}}</td>
+        </tr>
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="6" class="no-data">
+            <i class="fas fa-inbox"></i> No logs found
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

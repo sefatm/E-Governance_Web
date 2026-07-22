@@ -1,0 +1,87 @@
+<div class="report-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title"><span>📋</span> {{ ls.current === "bn" ? "সেবা প্রতিবেদন" : "Service Report" }}</h2>
+      <p class="page-sub">Track all citizen service requests across every department.</p>
+    </div>
+    <button class="btn-export" (click)="exportCSV()">⬇ Export CSV</button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <input
+      type="text"
+      placeholder="🔍 Search citizen name…"
+      [(ngModel)]="searchText"
+      (input)="applyFilter()"
+      class="search-input"
+    />
+
+    <select [(ngModel)]="selectedType" (change)="applyFilter()" class="filter-select">
+      <option value="">All Service Types</option>
+      <option *ngFor="let t of serviceTypes" [value]="t">{{ t }}</option>
+    </select>
+
+    <select [(ngModel)]="selectedStatus" (change)="applyFilter()" class="filter-select">
+      <option value="">All Statuses</option>
+      <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+    </select>
+
+    <!-- ✅ FIX Warning #3: Clear filter button -->
+    <button
+      class="btn-clear"
+      *ngIf="isFiltered"
+      (click)="clearFilter()"
+      title="Clear all filters"
+    >
+      ✕ Clear
+    </button>
+
+    <span class="result-count">{{ filteredServices.length }} records</span>
+  </div>
+
+  <div *ngIf="loading" class="loading-msg">
+    <span class="spinner"></span> Loading service data…
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap" *ngIf="!loading">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Citizen Name</th>
+          <th>{{ ls.current === "bn" ? "সেবার ধরন" : "Service Type" }}</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          <th>Applied Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of paged; let i = index">
+          <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+          <td class="name-cell">{{ s.citizenName }}</td>
+          <td><span class="service-tag">{{ s.serviceType }}</span></td>
+          <td><span class="badge" [ngClass]="statusClass(s.status)">{{ s.status }}</span></td>
+          <td>{{ s.appliedDate }}</td>
+        </tr>
+        <tr *ngIf="paged.length === 0">
+          <td colspan="5" class="empty-row">No records found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination" *ngIf="totalPages > 1">
+    <button (click)="currentPage = currentPage - 1" [disabled]="currentPage === 1">‹</button>
+    <button
+      *ngFor="let p of pages"
+      [class.active]="p === currentPage"
+      (click)="currentPage = p"
+    >{{ p }}</button>
+    <button (click)="currentPage = currentPage + 1" [disabled]="currentPage === totalPages">›</button>
+  </div>
+
+</div>

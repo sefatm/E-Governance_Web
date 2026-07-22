@@ -1,0 +1,94 @@
+<div class="vote-page">
+
+  <!-- Header -->
+  <div class="vote-header">
+    <div class="vh-icon"><i class="fas fa-vote-yea"></i></div>
+    <div>
+      <h2 class="vh-title">Cast Your Vote</h2>
+      <p class="vh-sub" *ngIf="voterName">Voter: <strong>{{voterName}}</strong></p>
+    </div>
+  </div>
+
+  <!-- Step 1: Election Select -->
+  <div class="step-card">
+    <div class="step-num">01</div>
+    <div class="step-body">
+      <label class="step-label">Select Election</label>
+      <select class="v-select" [(ngModel)]="selectedElectionId" (change)="onElectionChange()">
+        <option [value]="null">-- Select Active Election --</option>
+        <option *ngFor="let e of elections" [value]="e.id">
+          {{e.name}} &nbsp;|&nbsp; {{e.type}} &nbsp;|&nbsp; {{e.area}}
+        </option>
+      </select>
+      <p class="no-data" *ngIf="elections.length === 0">There is no active election.</p>
+    </div>
+  </div>
+
+  <!-- Already Voted Warning -->
+  <div class="already-voted" *ngIf="alreadyVoted">
+    <i class="fas fa-check-circle"></i>
+    You have already voted in this election.
+  </div>
+
+  <!-- Step 2: Candidate Select -->
+  <div class="step-card" *ngIf="selectedElectionId && !alreadyVoted">
+    <div class="step-num">02</div>
+    <div class="step-body">
+      <label class="step-label">Choose Candidate</label>
+
+      <div class="loading" *ngIf="isLoadingCandidates">
+        <i class="fas fa-spinner fa-spin"></i> Loading candidates...
+      </div>
+
+      <div class="candidate-grid" *ngIf="!isLoadingCandidates">
+        <label class="c-card" *ngFor="let c of candidates"
+               [class.selected]="selectedCandidateId === c.id">
+          <input type="radio" name="candidate"
+                 [(ngModel)]="selectedCandidateId" [value]="c.id">
+          <div class="c-body">
+
+            <div class="c-symbol-box">
+              <img *ngIf="c.symbolFileUrl"
+                   [src]="apiBaseUrl + '/' + c.symbolFileUrl"
+                   [alt]="c.symbol || 'symbol'"
+                   class="c-symbol-img">
+              <div *ngIf="!c.symbolFileUrl" class="c-avatar">
+                <span *ngIf="c.symbol" style="font-size:13px;font-weight:500;">{{c.symbol}}</span>
+                <i *ngIf="!c.symbol" class="fas fa-user"></i>
+              </div>
+            </div>
+
+            <div class="c-info">
+              <span class="c-name">{{c.name}}</span>
+              <span class="c-party"><i class="fas fa-flag"></i> {{c.party}}</span>
+              <span class="c-area"><i class="fas fa-map-marker-alt"></i> {{c.area}}</span>
+            </div>
+
+            <div class="c-check" *ngIf="selectedCandidateId === c.id">
+              <i class="fas fa-check-circle"></i>
+            </div>
+
+          </div>
+        </label>
+
+        <p class="no-data" *ngIf="candidates.length === 0 && !isLoadingCandidates">
+          There are no approved candidates in this election.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Submit -->
+  <div class="submit-area" *ngIf="selectedElectionId && selectedCandidateId && !alreadyVoted">
+    <div class="submit-confirm">
+      <i class="fas fa-exclamation-triangle"></i>
+      Once you cast your vote, you cannot change it. Please confirm before submitting.
+    </div>
+    <button class="submit-btn" (click)="submitVote()" [disabled]="isSubmitting">
+      <i class="fas fa-paper-plane" *ngIf="!isSubmitting"></i>
+      <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+      {{ isSubmitting ? 'Submitting...' : 'Submit Vote' }}
+    </button>
+  </div>
+
+</div>

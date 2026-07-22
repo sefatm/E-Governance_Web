@@ -1,0 +1,73 @@
+<div class="wu-page">
+
+  <!-- Header -->
+  <div class="wu-header">
+    <div class="wu-header__icon"><i class="fas fa-chart-bar"></i></div>
+    <div>
+      <h2 class="wu-header__title">Water Usage Analytics</h2>
+      <p class="wu-header__sub">Monthly consumption and billing summary</p>
+    </div>
+    <button class="wu-refresh-btn" (click)="loadUsageData()" [disabled]="isLoading">
+      <i class="fas fa-rotate" [class.fa-spin]="isLoading"></i> {{ ls.current === "bn" ? "রিফ্রেশ" : "Refresh" }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="wu-loading" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> Loading usage data...
+  </div>
+
+  <!-- Error -->
+  <div class="wu-error" *ngIf="errorMsg && !isLoading">
+    <i class="fas fa-triangle-exclamation"></i> {{ errorMsg }}
+  </div>
+
+  <ng-container *ngIf="!isLoading && !errorMsg">
+
+    <!-- Stats row -->
+    <div class="wu-stats">
+      <div class="wu-stat-card">
+        <div class="wu-stat-icon wu-stat-icon--blue"><i class="fas fa-droplet"></i></div>
+        <div class="wu-stat-val">{{ formatNumber(totalUnits) }}</div>
+        <div class="wu-stat-label">Total Units (L)</div>
+      </div>
+      <div class="wu-stat-card">
+        <div class="wu-stat-icon wu-stat-icon--green"><i class="fas fa-bangladeshi-taka-sign"></i></div>
+        <div class="wu-stat-val">{{ formatNumber(totalBilled) }}</div>
+        <div class="wu-stat-label">Total Billed (BDT)</div>
+      </div>
+      <div class="wu-stat-card">
+        <div class="wu-stat-icon wu-stat-icon--amber"><i class="fas fa-circle-check"></i></div>
+        <div class="wu-stat-val">{{ formatNumber(totalPaid) }}</div>
+        <div class="wu-stat-label">Total Paid (BDT)</div>
+      </div>
+      <div class="wu-stat-card">
+        <div class="wu-stat-icon wu-stat-icon--teal"><i class="fas fa-chart-line"></i></div>
+        <div class="wu-stat-val">{{ formatNumber(avgMonthly) }}</div>
+        <div class="wu-stat-label">Avg Monthly Units</div>
+      </div>
+    </div>
+
+    <div class="wu-chart-card" *ngIf="chartLabels.length > 0">
+      <div class="wu-chart-title">
+        <i class="fas fa-chart-column"></i> Monthly Consumption Breakdown
+      </div>
+      <div class="wu-bar-list">
+        <div *ngFor="let label of chartLabels; let i = index" class="wu-bar-row">
+          <span class="wu-bar-label">{{ label }}</span>
+          <div class="wu-bar-track">
+            <div class="wu-bar-fill" [style.width.%]="chartData[i] / (totalUnits || 1) * 100">
+            </div>
+          </div>
+          <span class="wu-bar-val">{{ formatNumber(chartData[i]) }} L</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="wu-empty" *ngIf="chartLabels.length === 0">
+      <i class="fas fa-inbox"></i>
+      <p>No billing data available yet.</p>
+    </div>
+  </ng-container>
+</div>

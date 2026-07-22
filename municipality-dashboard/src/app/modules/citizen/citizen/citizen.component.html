@@ -1,0 +1,369 @@
+<!-- ══ Toast ═══════════════════════════════════════════════════ -->
+<div class="toast-area" *ngIf="toasts.length > 0">
+  <div *ngFor="let t of toasts" class="toast-item"
+       [class.ok]="t.type==='success'" [class.fail]="t.type==='error'" [class.bye]="t.removing">
+    <i class="fas t-icon" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="cit-page">
+
+  <!-- Header -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">GOVERNMENT OF THE PEOPLE'S REPUBLIC OF BANGLADESH</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">নাগরিক সনদপত্র আবেদন ফরম</h2>
+        <span class="tl-header__title-en">Municipal Authority · Citizen Certificate Application Form</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- ── Step Progress ── -->
+  <div class="step-bar">
+    <ng-container *ngFor="let s of steps; let i = index">
+      <div class="sb-item"
+           [class.sb-done]="currentStep > i+1"
+           [class.sb-active]="currentStep === i+1">
+        <div class="sb-circle">
+          <i class="fas fa-check" *ngIf="currentStep > i+1"></i>
+          <span *ngIf="currentStep <= i+1">{{ i+1 }}</span>
+        </div>
+        <span class="sb-label">{{ s }}</span>
+      </div>
+      <div class="sb-line" *ngIf="i < steps.length - 1"
+           [class.sb-line-done]="currentStep > i+1"></div>
+    </ng-container>
+  </div>
+
+  <!-- FORM CARD -->
+  <div class="form-card">
+    <form [formGroup]="form" (ngSubmit)="submitForm()" novalidate enctype="multipart/form-data">
+
+      <!-- STEP 1 — Personal Information -->
+      <div class="step-panel" [class.active]="currentStep === 1">
+
+        <div class="panel-head">
+          <div class="ph-icon"><i class="fas fa-user"></i></div>
+          <div>
+            <h3>{{ ls.current === "bn" ? "ব্যক্তিগত তথ্য" : "Personal Information" }}</h3>
+            <p>Enter your official details as per NID</p>
+          </div>
+          <span class="ph-step-tag">Step 1 of 3</span>
+        </div>
+
+        <div class="field">
+          <label>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }} <span class="req">*</span></label>
+          <div class="input-wrap">
+            <i class="fas fa-user input-ico"></i>
+            <input type="text" formControlName="name"
+                   [class.invalid]="submitted && f.name.invalid"
+                   placeholder="Full name as per NID">
+          </div>
+          <div class="ferr" *ngIf="submitted && f.name.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          <div class="ferr" *ngIf="submitted && f.name.errors?.['minlength']"><i class="fas fa-circle-exclamation"></i> Minimum 3 characters</div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Father's Name <span class="req">*</span></label>
+            <input type="text" formControlName="fatherName"
+                   [class.invalid]="submitted && f.fatherName.invalid" placeholder="Father's full name">
+            <div class="ferr" *ngIf="submitted && f.fatherName.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+          <div class="field">
+            <label>Mother's Name <span class="req">*</span></label>
+            <input type="text" formControlName="motherName"
+                   [class.invalid]="submitted && f.motherName.invalid" placeholder="Mother's full name">
+            <div class="ferr" *ngIf="submitted && f.motherName.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }} <span class="req">*</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-id-card input-ico"></i>
+              <input type="text" formControlName="nid" maxlength="17"
+                     [class.invalid]="submitted && f.nid.invalid"
+                     placeholder="10, 13 or 17 digits"
+                     (input)="onNidInput($event)">
+            </div>
+            <div class="fhint">Accepts 10, 13 or 17 digit NID</div>
+            <div class="ferr" *ngIf="submitted && f.nid.errors?.['required']"><i class="fas fa-circle-exclamation"></i> NID required</div>
+            <div class="ferr" *ngIf="submitted && f.nid.errors?.['pattern']"><i class="fas fa-circle-exclamation"></i> Invalid NID format</div>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }} <span class="req">*</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-calendar input-ico"></i>
+              <input type="date" formControlName="dateOfBirth"
+                     [class.invalid]="submitted && f.dateOfBirth.invalid">
+            </div>
+            <div class="ferr" *ngIf="submitted && f.dateOfBirth.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }} <span class="req">*</span></label>
+            <select formControlName="gender" [class.invalid]="submitted && f.gender.invalid">
+              <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+              <option value="Male">{{ ls.current === "bn" ? "পুরুষ" : "Male" }}</option>
+              <option value="Female">{{ ls.current === "bn" ? "মহিলা" : "Female" }}</option>
+              <option value="Other">{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+            </select>
+            <div class="ferr" *ngIf="submitted && f.gender.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "রক্তের গ্রুপ" : "Blood Group" }}</label>
+            <select formControlName="bloodGroup">
+              <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "ধর্ম" : "Religion" }}</label>
+            <select formControlName="religion">
+              <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+              <option value="islam">{{ ls.current === "bn" ? "ইসলাম" : "Islam" }}</option>
+              <option value="hindu">{{ ls.current === "bn" ? "হিন্দু" : "Hinduism" }}</option>
+              <option value="christian">{{ ls.current === "bn" ? "খ্রিস্টান" : "Christianity" }}</option>
+              <option value="buddhist">{{ ls.current === "bn" ? "বৌদ্ধ" : "Buddhism" }}</option>
+              <option value="other">{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "বৈবাহিক অবস্থা" : "Marital Status" }}</label>
+            <select formControlName="maritalStatus">
+              <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+              <option value="unmarried">{{ ls.current === "bn" ? "অবিবাহিত" : "Unmarried" }}</option>
+              <option value="married">{{ ls.current === "bn" ? "বিবাহিত" : "Married" }}</option>
+              <option value="widowed">{{ ls.current === "bn" ? "বিধবা/বিধুর" : "Widowed" }}</option>
+              <option value="divorced">{{ ls.current === "bn" ? "তালাকপ্রাপ্ত" : "Divorced" }}</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পেশা" : "Occupation" }}</label>
+            <input type="text" formControlName="occupation" placeholder="e.g. Service, Business, Farming">
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <div></div>
+          <button type="button" class="btn-next" (click)="nextStep()">
+            Next Step <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 — Contact & Address -->
+      <div class="step-panel" [class.active]="currentStep === 2">
+
+        <div class="panel-head">
+          <div class="ph-icon ph-teal"><i class="fas fa-location-dot"></i></div>
+          <div>
+            <h3>Contact & Address</h3>
+            <p>Where can we reach you?</p>
+          </div>
+          <span class="ph-step-tag">Step 2 of 3</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }} <span class="req">*</span></label>
+            <div class="input-wrap">
+              <span class="input-prefix">+88</span>
+              <input type="tel" formControlName="contact" maxlength="11"
+                     [class.invalid]="submitted && f.contact.invalid"
+                     placeholder="01XXXXXXXXX" (input)="onMobileInput($event)"
+                     style="padding-left:52px">
+            </div>
+            <div class="ferr" *ngIf="submitted && f.contact.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+            <div class="ferr" *ngIf="submitted && f.contact.errors?.['pattern']"><i class="fas fa-circle-exclamation"></i> Invalid mobile number</div>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "ইমেইল ঠিকানা" : "Email Address" }}</label>
+            <div class="input-wrap">
+              <i class="fas fa-envelope input-ico"></i>
+              <input type="email" formControlName="email"
+                     [class.invalid]="submitted && f.email.invalid"
+                     placeholder="example@mail.com">
+            </div>
+            <div class="ferr" *ngIf="submitted && f.email.errors?.['email']"><i class="fas fa-circle-exclamation"></i> Invalid email</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>{{ ls.current === "bn" ? "বর্তমান ঠিকানা" : "Present Address" }} <span class="req">*</span></label>
+          <textarea formControlName="address" rows="3"
+                    [class.invalid]="submitted && f.address.invalid"
+                    placeholder="House No, Road, Area, Upazila, Post Office"></textarea>
+          <div class="ferr" *ngIf="submitted && f.address.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+        </div>
+
+        <div class="field">
+          <label>{{ ls.current === "bn" ? "স্থায়ী ঠিকানা" : "Permanent Address" }}</label>
+          <textarea formControlName="permanentAddress" rows="2"
+                    placeholder="Leave blank if same as present address"></textarea>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Division <span class="req">*</span></label>
+            <select formControlName="division" [class.invalid]="submitted && f.division.invalid">
+              <option value="">Select Division</option>
+              <option>Dhaka</option><option>Chattogram</option><option>Rajshahi</option>
+              <option>Khulna</option><option>Barishal</option><option>Sylhet</option>
+              <option>Rangpur</option><option>Mymensingh</option>
+            </select>
+            <div class="ferr" *ngIf="submitted && f.division.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+          <div class="field">
+            <label>District <span class="req">*</span></label>
+            <input type="text" formControlName="district"
+                   [class.invalid]="submitted && f.district.invalid" placeholder="District name">
+            <div class="ferr" *ngIf="submitted && f.district.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn-back" (click)="prevStep()">
+            <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+          </button>
+          <button type="button" class="btn-next" (click)="nextStep()">
+            Next Step <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3 — Certificate & Documents -->
+      <div class="step-panel" [class.active]="currentStep === 3">
+
+        <div class="panel-head">
+          <div class="ph-icon ph-blue"><i class="fas fa-file-lines"></i></div>
+          <div>
+            <h3>Certificate & Documents</h3>
+            <p>Select type and upload required files</p>
+          </div>
+          <span class="ph-step-tag">Step 3 of 3</span>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <label>Certificate Type <span class="req">*</span></label>
+            <select formControlName="certificateType"
+                    [class.invalid]="submitted && f.certificateType.invalid">
+              <option value="">Select Type</option>
+              <option value="chairman">Chairman Certificate</option>
+              <option value="citizenship">Citizenship Certificate</option>
+              <option value="guardian">Guardian Certificate</option>
+              <option value="heir">Succession Certificate</option>
+              <option value="poverty">Poverty Certificate</option>
+              <option value="other">{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+            </select>
+            <div class="ferr" *ngIf="submitted && f.certificateType.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+          <div class="field">
+            <label>Purpose <span class="req">*</span></label>
+            <input type="text" formControlName="purpose"
+                   [class.invalid]="submitted && f.purpose.invalid"
+                   placeholder="e.g. Passport, Job Application">
+            <div class="ferr" *ngIf="submitted && f.purpose.errors?.['required']"><i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+            <div class="ferr" *ngIf="submitted && f.purpose.errors?.['minlength']"><i class="fas fa-circle-exclamation"></i> Minimum 3 characters</div>
+          </div>
+        </div>
+
+        <!-- Upload section -->
+        <div class="upload-section-title">
+          <i class="fas fa-cloud-arrow-up"></i> Document Upload
+        </div>
+
+        <div class="grid-2">
+          <!-- Photo upload -->
+          <div class="upload-card" [class.uc-done]="photoFile">
+            <input type="file" accept="image/png,image/jpeg" (change)="onFileChange($event,'photo')">
+            <ng-container *ngIf="!photoFile">
+              <div class="uc-icon-wrap photo-bg"><i class="fas fa-camera"></i></div>
+              <p class="uc-name">Passport Size Photo</p>
+              <p class="uc-hint">PNG / JPG &nbsp;·&nbsp; max 300 KB</p>
+              <span class="uc-btn"><i class="fas fa-upload"></i> Choose File</span>
+            </ng-container>
+            <ng-container *ngIf="photoFile">
+              <div class="uc-preview" *ngIf="photoPreview">
+                <img [src]="photoPreview" alt="Photo Preview">
+              </div>
+              <div class="uc-ok"><i class="fas fa-circle-check"></i> {{ photoFile.name }}</div>
+              <span class="uc-change">Change</span>
+            </ng-container>
+          </div>
+
+          <!-- NID upload -->
+          <div class="upload-card" [class.uc-done]="nidFile">
+            <input type="file" accept="image/png,image/jpeg,application/pdf" (change)="onFileChange($event,'nid')">
+            <ng-container *ngIf="!nidFile">
+              <div class="uc-icon-wrap nid-bg"><i class="fas fa-id-card"></i></div>
+              <p class="uc-name">NID Copy</p>
+              <p class="uc-hint">PNG / JPG / PDF &nbsp;·&nbsp; max 1 MB</p>
+              <span class="uc-btn"><i class="fas fa-upload"></i> Choose File</span>
+            </ng-container>
+            <ng-container *ngIf="nidFile">
+              <div class="uc-icon-wrap nid-bg" style="margin-bottom:8px"><i class="fas fa-file-check"></i></div>
+              <div class="uc-ok"><i class="fas fa-circle-check"></i> {{ nidFile.name }}</div>
+              <span class="uc-change">Change</span>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Declaration -->
+        <div class="decl-box">
+          <input type="checkbox" formControlName="declaration" id="decl">
+          <label for="decl">
+            <strong>I hereby declare</strong> that all information provided above is true and correct to the best of my knowledge. If any information is found false or fabricated, my application will be cancelled and I shall be liable to legal action.
+            <span class="req">*</span>
+          </label>
+        </div>
+        <div class="ferr" *ngIf="submitted && f.declaration.errors?.['required']" style="margin-top:6px">
+          <i class="fas fa-circle-exclamation"></i> You must accept the declaration
+        </div>
+
+        <!-- Summary strip -->
+        <div class="summary-strip" *ngIf="form.get('name')?.value">
+          <div class="ss-title"><i class="fas fa-clipboard-check"></i> Application Summary</div>
+          <div class="ss-grid">
+            <div class="ss-item"><span>{{ ls.current === "bn" ? "নাম" : "Name" }}</span><strong>{{ form.get('name')?.value }}</strong></div>
+            <div class="ss-item"><span>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</span><strong>{{ form.get('nid')?.value }}</strong></div>
+            <div class="ss-item"><span>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</span><strong>{{ form.get('contact')?.value }}</strong></div>
+            <div class="ss-item"><span>District</span><strong>{{ form.get('district')?.value }}</strong></div>
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button type="button" class="btn-back" (click)="prevStep()">
+            <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+          </button>
+          <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+            <ng-container *ngIf="!isSubmitting">
+              <i class="fas fa-paper-plane"></i> {{ ls.current === "bn" ? "আবেদন জমা দিন" : "Submit Application" }}
+            </ng-container>
+            <div class="spinner" *ngIf="isSubmitting"></div>
+          </button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>

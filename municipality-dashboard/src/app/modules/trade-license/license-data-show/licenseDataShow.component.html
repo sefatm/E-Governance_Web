@@ -1,0 +1,206 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="toasts.length">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--info]="t.type==='info'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success'?'fa-circle-check':t.type==='error'?'fa-circle-xmark':'fa-circle-info'"></i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="data-page">
+  <div class="page-header">
+    <div class="ph-icon"><i class="fas fa-id-card"></i></div>
+    <div>
+      <h2 class="ph-title">Trade License Management</h2>
+      <p class="ph-sub">View, approve, reject and download trade license applications</p>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab" [class.active]="activeTab==='license'" (click)="activeTab='license'">
+      <i class="fas fa-file-alt"></i> New License ({{licenses.length}})
+    </button>
+    <button class="tab" [class.active]="activeTab==='renewal'" (click)="activeTab='renewal'">
+      <i class="fas fa-sync-alt"></i> Renewal ({{renewals.length}})
+    </button>
+  </div>
+
+  <div class="loading-box" *ngIf="isLoading"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+
+  <div class="admin-card" *ngIf="!isLoading">
+    <div class="admin-card-head">
+      <div>
+        <h3>{{ activeTitle }}</h3>
+        <p>Citizen-service style admin view with photo, documents, details and actions</p>
+      </div>
+      <span class="count-pill">{{ activeItems.length }} Records</span>
+    </div>
+
+    <table class="standard-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Applicant</th>
+          <th>Business</th>
+          <th>License No.</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let item of activeItems; let i = index">
+          <tr>
+            <td>{{ i + 1 }}</td>
+            <td>
+              <div class="applicant-cell">
+                <div class="photo-box" *ngIf="getPhoto(item); else noPhoto" (click)="openLightbox(getPhoto(item), getPhotoLabel(item))">
+                  <img [src]="fileUrl(getPhoto(item))" alt="Applicant photo">
+                </div>
+                <ng-template #noPhoto>
+                  <div class="avatar-fallback">{{ getDisplayName(item).charAt(0) }}</div>
+                </ng-template>
+                <div>
+                  <strong>{{ getDisplayName(item) }}</strong>
+                  <small>{{ getMobile(item) }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              <strong>{{ getBusinessName(item) }}</strong>
+              <small>{{ getBusinessType(item) }}</small>
+            </td>
+            <td class="mono">{{ getLicenseNo(item) }}</td>
+            <td>{{ getAppliedDate(item) | date:'dd/MM/yyyy' }}</td>
+            <td><span class="badge" [ngClass]="badgeClass(item.status)">{{ item.status || 'Pending' }}</span></td>
+            <td>
+              <div class="action-row">
+                <button class="btn-view" (click)="viewDetail(item, activeTab)" title="View Details"><i class="fas fa-eye"></i></button>
+
+                <ng-container *ngIf="activeTab === 'license'">
+                  <input #licenseSig type="file" accept="image/*" hidden (change)="onLicenseSignatureSelected($event, item)">
+                  <button class="btn-approve" *ngIf="canApproveLicense(item)" (click)="licenseSig.click()" [title]="licenseApprovalLabel(item)"><i class="fas fa-check"></i></button>
+                  <button class="btn-reject" *ngIf="canRejectLicense(item)" (click)="openReject(item.id, 'license')" title="Reject"><i class="fas fa-times"></i></button>
+                  <button class="btn-pdf" *ngIf="item.status?.toLowerCase()==='approved'" (click)="downloadLicense(item.id)" title="Download Certificate"><i class="fas fa-file-pdf"></i></button>
+                </ng-container>
+
+                <ng-container *ngIf="activeTab === 'renewal'">
+                  <input #renewSig type="file" accept="image/*" hidden (change)="onRenewalSignatureSelected($event, item)">
+                  <button class="btn-approve" *ngIf="canApproveRenewal(item)" (click)="renewSig.click()" [title]="renewalApprovalLabel(item)"><i class="fas fa-check"></i></button>
+                  <button class="btn-reject" *ngIf="item.status?.toLowerCase()!=='approved' && item.status?.toLowerCase()!=='rejected'" (click)="openReject(item.id, 'renewal')" title="Reject"><i class="fas fa-times"></i></button>
+                  <button class="btn-pdf" *ngIf="item.status?.toLowerCase()==='approved'" (click)="downloadRenewal(item.id)" title="Download Certificate"><i class="fas fa-file-pdf"></i></button>
+                </ng-container>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+        <tr *ngIf="activeItems.length === 0">
+          <td colspan="7" class="no-data"><i class="fas fa-inbox"></i> No records found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal-backdrop" *ngIf="showDetail" (click)="closeDetail()">
+    <div class="modal-box detail-modal" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h3><i class="fas fa-id-card"></i> Application Details</h3>
+        <button class="modal-close" (click)="closeDetail()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedItem">
+        <div class="summary-strip">
+          <div class="photo-box detail-photo-box" *ngIf="getPhoto(selectedItem); else detailNoPhoto" (click)="openLightbox(getPhoto(selectedItem), getPhotoLabel(selectedItem))">
+            <img [src]="fileUrl(getPhoto(selectedItem))" alt="Applicant photo">
+          </div>
+          <ng-template #detailNoPhoto>
+            <div class="avatar-fallback big">{{ getDisplayName(selectedItem).charAt(0) }}</div>
+          </ng-template>
+          <div>
+            <h3>{{ getDisplayName(selectedItem) }}</h3>
+            <p>{{ getBusinessName(selectedItem) }} • {{ getLicenseNo(selectedItem) }}</p>
+            <span class="badge" [ngClass]="badgeClass(selectedItem.status)">{{ selectedItem.status || 'Pending' }}</span>
+          </div>
+        </div>
+
+        <div class="detail-grid citizen-style-grid">
+          <div class="info-card" *ngFor="let row of getDetailRows(selectedItem)">
+            <span>{{ row.label }}</span>
+            <strong>{{ row.value || '—' }}</strong>
+          </div>
+        </div>
+
+        <div class="detail-files" *ngIf="getDocuments(selectedItem).length">
+          <div class="files-title"><i class="fas fa-paperclip"></i> Uploaded Documents</div>
+          <div class="files-row">
+            <div class="file-card" *ngFor="let doc of getDocuments(selectedItem)">
+              <span class="file-label">{{ doc.label }}</span>
+              <div class="fc-preview-wrap" *ngIf="isImage(doc.path)" (click)="openLightbox(doc.path, doc.label)">
+                <img [src]="fileUrl(doc.path)" alt="Document" class="file-img">
+                <div class="fc-overlay"><i class="fas fa-search-plus"></i><span>View</span></div>
+              </div>
+              <div class="fc-pdf-thumb" *ngIf="isPdf(doc.path)">
+                <i class="fas fa-file-pdf"></i><span>PDF</span>
+              </div>
+              <div class="fc-pdf-thumb" *ngIf="!isPdf(doc.path) && !isImage(doc.path)">
+                <i class="fas fa-file-alt"></i><span>File</span>
+              </div>
+              <div class="fc-btns">
+                <button class="fc-view-btn" *ngIf="isImage(doc.path)" (click)="openLightbox(doc.path, doc.label)">
+                  <i class="fas fa-eye"></i> View
+                </button>
+                <a class="fc-dl-btn" [href]="fileUrl(doc.path)" target="_blank" download>
+                  <i class="fas fa-download"></i> Download
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div class="modal-backdrop" *ngIf="showRejectModal" (click)="showRejectModal=false">
+    <div class="modal-box modal-box--sm" (click)="$event.stopPropagation()">
+      <div class="modal-head">
+        <h3><i class="fas fa-times-circle"></i> Reject Application</h3>
+        <button class="modal-close" (click)="showRejectModal=false"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <label class="reject-label">Rejection Reason</label>
+        <textarea [(ngModel)]="rejectReason" rows="4" placeholder="Reason for rejection..."></textarea>
+        <div class="reject-actions">
+          <button class="btn-view" (click)="showRejectModal=false">Cancel</button>
+          <button class="btn-reject" (click)="confirmReject()"><i class="fas fa-times"></i> Confirm Reject</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox-backdrop" *ngIf="lightbox" (click)="closeLightbox()">
+  <div class="lightbox-box" (click)="$event.stopPropagation()">
+    <div class="lightbox-head">
+      <span class="lightbox-label"><i class="fas fa-image"></i> {{ lightbox.label }}</span>
+      <div class="lightbox-actions">
+        <a class="lb-btn lb-dl" [href]="lightbox.url" target="_blank" download><i class="fas fa-download"></i> Download</a>
+        <a class="lb-btn lb-open" [href]="lightbox.url" target="_blank"><i class="fas fa-external-link-alt"></i> Open</a>
+        <button class="lb-close" (click)="closeLightbox()"><i class="fas fa-times"></i></button>
+      </div>
+    </div>
+    <div class="lightbox-img-wrap" *ngIf="lightbox.isImage">
+      <img [src]="lightbox.url" [alt]="lightbox.label" class="lightbox-img">
+    </div>
+    <div class="lightbox-pdf-msg" *ngIf="!lightbox.isImage">
+      <i class="fas fa-file-pdf"></i>
+      <p>PDF document</p>
+      <a [href]="lightbox.url" target="_blank" class="lb-btn lb-open"><i class="fas fa-external-link-alt"></i> Open PDF</a>
+    </div>
+    <div class="lightbox-hint">Click outside or press <kbd>Esc</kbd> to close</div>
+  </div>
+</div>

@@ -1,0 +1,80 @@
+<div class="container">
+
+  <h2><i class="fas fa-bullhorn"></i> {{ ls.current === "bn" ? "নোটিশ বোর্ড" : "Notice Board" }}</h2>
+
+  <!--EMERGENCY ALERT BANNER -->
+  <div class="emergency-banner" *ngIf="emergencyNotices.length > 0">
+    <i class="fas fa-exclamation-triangle"></i>
+    <strong>জরুরি বিজ্ঞপ্তি:</strong>
+    <span *ngFor="let e of emergencyNotices; let last = last">
+      {{ e.title }}<span *ngIf="!last"> | </span>
+    </span>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button *ngFor="let f of filterOptions" [class.active]="activeFilter === f" (click)="applyFilter(f)">
+      <i [class]="typeIcon(f)" *ngIf="f !== 'All'"></i>
+      <i class="fas fa-th-list" *ngIf="f === 'All'"></i>
+      {{ f }}
+    </button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+
+  <!-- NOTICE CARDS -->
+  <div class="notice-grid" *ngIf="!isLoading">
+    <div class="notice-card" *ngFor="let n of filteredNotices" [class.card-emergency]="n.type === 'Emergency'" (click)="viewDetails(n)">
+
+      <div class="card-header">
+        <span class="type-tag type-{{ n.type | lowercase }}">
+          <i [class]="typeIcon(n.type)"></i> {{ n.type }}
+        </span>
+        <span [class]="'prio ' + priorityClass(n.priority || '')">{{ n.priority }}</span>
+      </div>
+
+      <h4 class="card-title">{{ n.title }}</h4>
+      <p class="card-desc">{{ n.description | slice:0:120 }}{{ n.description.length > 120 ? '...' : '' }}</p>
+
+      <div class="card-footer">
+        <span><i class="fas fa-calendar-day"></i> {{ n.publishDate }}</span>
+        <span *ngIf="n.expiryDate" class="expiry">
+          <i class="fas fa-hourglass-end"></i> {{ n.expiryDate }} পর্যন্ত
+        </span>
+        <button class="read-more">{{ ls.current === "bn" ? "বিস্তারিত" : "View Details" }}<i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" *ngIf="filteredNotices.length === 0">
+      <i class="fas fa-inbox"></i>
+      <p>এই ক্যাটাগরিতে কোনো নোটিশ নেই।</p>
+    </div>
+  </div>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="type-tag type-{{ selectedNotice?.type | lowercase }}">
+          <i [class]="typeIcon(selectedNotice?.type || '')"></i> {{ selectedNotice?.type }}
+        </span>
+        <button class="modal-close" (click)="closeModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <h3 class="modal-title">{{ selectedNotice?.title }}</h3>
+      <p class="modal-desc">{{ selectedNotice?.description }}</p>
+      <div class="modal-meta">
+        <span><i class="fas fa-calendar"></i> প্রকাশ: {{ selectedNotice?.publishDate }}</span>
+        <span *ngIf="selectedNotice?.expiryDate">
+          <i class="fas fa-hourglass-end"></i> মেয়াদ: {{ selectedNotice?.expiryDate }}
+        </span>
+      </div>
+      <a *ngIf="selectedNotice?.attachmentUrl" [href]="selectedNotice?.attachmentUrl" target="_blank" class="attachment-link">
+        <i class="fas fa-paperclip"></i> সংযুক্তি ডাউনলোড করুন
+      </a>
+    </div>
+  </div>
+
+</div>

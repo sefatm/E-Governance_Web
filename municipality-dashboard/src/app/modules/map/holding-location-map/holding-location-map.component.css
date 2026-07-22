@@ -1,0 +1,169 @@
+/* ============================================================
+   holding-location-map.component.css
+   FIX: #holding-map-container এ explicit pixel height দেওয়া হয়েছে।
+   Leaflet-এ flex:1 কাজ করে না — parent height explicit না হলে
+   Leaflet container size 0 দেখে এবং map blank থাকে।
+   ============================================================ */
+
+.map-page {
+  display: flex; flex-direction: column;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  background: #f0fdf4;
+  min-height: calc(100vh - 130px);
+}
+
+/* ── HEADER ── */
+.page-header {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+  padding: 16px 24px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 4px solid #f59e0b;
+}
+.ph-left { display: flex; align-items: center; gap: 14px; }
+.ph-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: #fde68a;
+}
+.ph-left h2 { margin: 0 0 4px; font-size: 17px; font-weight: 700; color: #fff; }
+.ph-left p  { margin: 0; font-size: 12px; color: rgba(255,255,255,.65); }
+.header-stats { display: flex; align-items: center; gap: 16px; }
+.hs-item      { display: flex; flex-direction: column; align-items: center; }
+.hs-val       { font-size: 20px; font-weight: 800; color: #fff; line-height: 1; }
+.hs-label     { font-size: 10px; color: rgba(255,255,255,.65); margin-top: 2px; }
+.hs-div       { width: 1px; height: 32px; background: rgba(255,255,255,.25); }
+
+/* ── BODY ── */
+.map-body { display: flex; height: 600px; }
+
+/* ── MAP WRAP ── */
+.map-wrap { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+/* FIX: explicit pixel height — flex:1 দিলে Leaflet 0px পায় → blank map */
+#holding-map-container {
+  width: 100%;
+  height: 560px;   /* explicit — Leaflet needs this */
+  z-index: 1;
+}
+#holding-map-container.pin-cursor { cursor: crosshair !important; }
+
+/* ── PIN MODE BANNER ── */
+.pin-mode-banner {
+  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
+  z-index: 500; background: #fffbeb; border: 1.5px solid #fbbf24;
+  border-radius: 10px; padding: 10px 18px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 500; color: #92400e;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12); white-space: nowrap;
+}
+.pin-mode-actions { display: flex; gap: 8px; margin-left: 8px; }
+
+.btn-save-pin {
+  padding: 6px 14px; border: none; border-radius: 7px;
+  background: #059669; color: #fff; font-size: 12px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+}
+.btn-save-pin:disabled { opacity: .6; cursor: not-allowed; }
+.btn-cancel-pin {
+  padding: 6px 14px; border: 1px solid #fbbf24; border-radius: 7px;
+  background: #fef3c7; color: #92400e; font-size: 12px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+}
+
+/* ── SIDE PANEL ── */
+.side-panel {
+  width: 320px; display: flex; flex-direction: column;
+  border-left: 1px solid #bbf7d0; background: #fff; overflow: hidden;
+}
+.sp-title {
+  padding: 12px 16px; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .5px;
+  color: #065f46; border-bottom: 1px solid #e2e8f0;
+  display: flex; align-items: center; gap: 7px;
+}
+
+/* ── FILTER ── */
+.filter-section { border-bottom: 1px solid #e2e8f0; }
+.filter-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.search-input {
+  width: 100%; padding: 8px 12px; border: 1.5px solid #e5e7eb;
+  border-radius: 8px; font-size: 13px; background: #f9fafb; box-sizing: border-box;
+}
+.search-input:focus { outline: none; border-color: #059669; background: #fff; }
+.filter-row { display: flex; gap: 8px; }
+.filter-row select {
+  flex: 1; padding: 7px 10px; border: 1.5px solid #e5e7eb;
+  border-radius: 8px; font-size: 12px; background: #f9fafb; cursor: pointer;
+}
+.filter-row select:focus { outline: none; border-color: #059669; }
+.reset-btn {
+  padding: 7px; border: none; border-radius: 8px;
+  background: #fee2e2; color: #dc2626; cursor: pointer; font-size: 12px;
+}
+
+/* ── HOLDING LIST ── */
+.holding-list-section { flex: 1; overflow-y: auto; }
+.holding-list { padding: 8px; }
+.holding-card {
+  padding: 10px 12px; border-radius: 9px; cursor: pointer; margin-bottom: 6px;
+  border: 1.5px solid transparent; transition: all .15s; background: #f8fafc;
+}
+.holding-card:hover  { background: #f0fdf4; border-color: #86efac; }
+.holding-card.active { background: #f0fdf4; border-color: #059669; }
+.hc-top    { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.hc-no     { font-size: 13px; font-weight: 700; color: #0f172a; }
+.hc-ward   { font-size: 11px; font-weight: 600; color: #fff; padding: 2px 8px; border-radius: 10px; }
+.hc-owner  { font-size: 12px; color: #475569; }
+.hc-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+.hc-usage  { font-size: 11px; color: #64748b; }
+.pin-badge { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 8px; }
+.pin-badge.pinned   { background: #dcfce7; color: #166534; }
+.pin-badge.unpinned { background: #f1f5f9; color: #94a3b8; }
+
+/* ── PIN CTA ── */
+.pin-cta { padding: 12px; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 8px; }
+.pin-cta-info { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px; }
+.btn-enable-pin {
+  padding: 9px 16px; border: none; border-radius: 9px;
+  background: linear-gradient(135deg, #059669, #047857);
+  color: #fff; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 7px; justify-content: center;
+}
+.btn-enable-pin:hover { background: linear-gradient(135deg, #047857, #065f46); }
+
+/* ── SUCCESS / ERROR MSG ── */
+.hlm-msg { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 13px; font-weight: 500; margin: 8px 16px; border-radius: 8px; }
+.hlm-msg--ok   { background: #f0fdf4; border-left: 4px solid #16a34a; color: #166534; }
+.hlm-msg--fail { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+
+/* ── MAP PINS ── */
+.holding-pin {
+  width: 34px; height: 34px; border-radius: 50% 50% 50% 0;
+  display: flex; align-items: center; justify-content: center;
+  transform: rotate(-45deg); border: 2px solid rgba(255,255,255,.9);
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+}
+.pin-icon { transform: rotate(45deg); font-size: 14px; }
+.temp-pin { font-size: 28px; line-height: 1; }
+
+/* ── POPUP ── */
+.holding-popup { min-width: 200px; }
+.hpp-header {
+  padding: 8px 12px; border-radius: 6px 6px 0 0;
+  display: flex; justify-content: space-between;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.hpp-ward { font-size: 11px; opacity: .85; }
+.hpp-body { padding: 8px 12px; }
+.hpp-row  { font-size: 12px; color: #374151; margin-bottom: 4px; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  .map-body              { flex-direction: column; height: auto; }
+  .side-panel            { width: 100%; height: 260px; border-left: none; border-top: 1px solid #d1fae5; }
+  .holding-list          { flex-direction: row; display: flex; overflow-x: auto; }
+  .holding-card          { min-width: 200px; margin-right: 8px; margin-bottom: 0; }
+  .pin-cta               { display: none; }
+  #holding-map-container { height: 320px; }
+}

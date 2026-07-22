@@ -1,0 +1,462 @@
+<div class="dash">
+
+  <!-- ── Page Header ── -->
+  <div class="greet-bar">
+    <div class="greet-left">
+      <div class="greet-icon"><i class="fas fa-tachometer-alt"></i></div>
+      <div>
+        <h1 class="greet-title">{{ ls.current === "bn" ? "সামগ্রিক ড্যাশবোর্ড" : "Overview Dashboard" }}</h1>
+        <p class="greet-sub">{{ ls.current === "bn" ? "মাদারীপুর পৌরসভা — ই-গভর্ন্যান্স" : "Madaripur Municipality — E-Governance Management System" }}</p>
+      </div>
+    </div>
+    <div class="greet-right">
+      <!-- Role Badge -->
+      <div class="greet-role-badge" *ngIf="role" [ngClass]="getRoleBadgeClass()">
+        <i class="fas" [ngClass]="getRoleIcon()"></i>
+        <span class="greet-role-text">{{ role }}</span>
+      </div>
+      <div class="status-chip online"><span class="status-dot"></span> {{ ls.current === "bn" ? "সিস্টেম সক্রিয়" : "System Online" }}</div>
+      <div class="status-chip"><i class="fas fa-server"></i> {{ ls.current === "bn" ? "সকল সেবা সক্রিয়" : "All Services Active" }}</div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════
+       CITIZEN VIEW — Only Quick Access + Notice Board
+  ════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="isCitizen">
+
+    <!-- Welcome Banner for Citizen -->
+    <div class="citizen-welcome">
+      <div class="cw-icon"><i class="fas fa-user-circle"></i></div>
+      <div class="cw-text">
+        <h2>{{ ls.current === "bn" ? "স্বাগতম!" : "Welcome!" }}</h2>
+        <p>{{ ls.current === "bn" ? "নিচের সেবাগুলি ব্যবহার করুন বা নোটিশ বোর্ড দেখুন।" : "Use the services below or check the Notice Board." }}</p>
+      </div>
+    </div>
+
+    <!-- Quick Access — Citizen only items -->
+    <div class="card-box quick-box">
+      <div class="box-head">
+        <div class="box-title-wrap">
+          <div class="box-icon"><i class="fas fa-th"></i></div>
+          <h3 class="box-title">{{ ls.current === "bn" ? "দ্রুত প্রবেশ" : "Quick Access" }}</h3>
+        </div>
+      </div>
+      <div class="quick-grid">
+        <div class="qcard" routerLink="/birth-death"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-certificate"></i></div><span>{{ ls.current === "bn" ? "জন্ম / মৃত্যু" : "Birth / Death" }}</span></div>
+        <div class="qcard" routerLink="/citizen"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-user"></i></div><span>{{ ls.current === "bn" ? "নাগরিক সনদ" : "Citizen Cert." }}</span></div>
+        <div class="qcard" routerLink="/family"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-users"></i></div><span>{{ ls.current === "bn" ? "পারিবারিক সনদ" : "Family Cert." }}</span></div>
+        <div class="qcard" routerLink="/passport"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-passport"></i></div><span>Passport</span></div>
+        <div class="qcard" routerLink="/status"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-search"></i></div><span>{{ ls.current === "bn" ? "আবেদনের অবস্থা" : "App. Status" }}</span></div>
+        <div class="qcard" routerLink="/trade-license"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-id-card"></i></div><span>{{ ls.current === "bn" ? "ট্রেড লাইসেন্স" : "Trade License" }}</span></div>
+        <div class="qcard" routerLink="/license-renewal"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-sync-alt"></i></div><span>{{ ls.current === "bn" ? "নবায়ন" : "Renewal" }}</span></div>
+        <div class="qcard" routerLink="/new-registration"><div class="q-ico" style="--qc:#E65100"><i class="fas fa-money-bill"></i></div><span>{{ ls.current === "bn" ? "হোল্ডিং ট্যাক্স" : "Holding Tax" }}</span></div>
+        <div class="qcard" routerLink="/tax-payment"><div class="q-ico" style="--qc:#E65100"><i class="fas fa-credit-card"></i></div><span>{{ ls.current === "bn" ? "কর পরিশোধ" : "Tax Payment" }}</span></div>
+        <div class="qcard" routerLink="/complaint-submit"><div class="q-ico" style="--qc:#C62828"><i class="fas fa-exclamation-circle"></i></div><span>{{ ls.current === "bn" ? "অভিযোগ" : "Complaint" }}</span></div>
+        <div class="qcard" routerLink="/health-notices"><div class="q-ico" style="--qc:#AD1457"><i class="fas fa-heartbeat"></i></div><span>{{ ls.current === "bn" ? "স্বাস্থ্য তথ্য" : "Health Info" }}</span></div>
+        <div class="qcard" routerLink="/connection"><div class="q-ico" style="--qc:#0277BD"><i class="fas fa-tint"></i></div><span>{{ ls.current === "bn" ? "পানি সরবরাহ" : "Water Supply" }}</span></div>
+        <div class="qcard" routerLink="/schedule"><div class="q-ico" style="--qc:#558B2F"><i class="fas fa-trash"></i></div><span>{{ ls.current === "bn" ? "বর্জ্য ব্যবস্থাপনা" : "Waste Mgmt." }}</span></div>
+        <div class="qcard" routerLink="/family-card/apply"><div class="q-ico" style="--qc:#6A1B9A"><i class="fas fa-users"></i></div><span>{{ ls.current === "bn" ? "পারিবারিক কার্ড" : "Family Card" }}</span></div>
+        <div class="qcard" routerLink="/farmer-card/apply"><div class="q-ico" style="--qc:#558B2F"><i class="fas fa-seedling"></i></div><span>{{ ls.current === "bn" ? "কৃষক কার্ড" : "Farmer Card" }}</span></div>
+        <div class="qcard" routerLink="/lpg-card/apply"><div class="q-ico" style="--qc:#E65100"><i class="fas fa-fire"></i></div><span>LPG Card</span></div>
+        <div class="qcard" routerLink="/vgd-card/apply"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-hands-helping"></i></div><span>VGD / VGF</span></div>
+        <div class="qcard" routerLink="/payment"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-credit-card"></i></div><span>{{ ls.current === "bn" ? "অনলাইন পেমেন্ট" : "Online Payment" }}</span></div>
+        <div class="qcard" routerLink="/voter-registration"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-vote-yea"></i></div><span>Voter Reg.</span></div>
+        <div class="qcard" routerLink="/list"><div class="q-ico" style="--qc:#4527A0"><i class="fas fa-project-diagram"></i></div><span>Dev. Projects</span></div>
+        <div class="qcard" routerLink="/etender-notices"><div class="q-ico" style="--qc:#6A1B9A"><i class="fas fa-gavel"></i></div><span>{{ ls.current === "bn" ? "টেন্ডার বিজ্ঞপ্তি" : "Tender Notices" }}</span></div>
+      </div>
+    </div>
+
+    <!-- Notice Board -->
+    <div class="card-box">
+      <div class="box-head">
+        <div class="box-title-wrap">
+          <div class="box-icon" style="background:#fff8e1;color:#D84315;"><i class="fas fa-bullhorn"></i></div>
+          <h3 class="box-title">{{ ls.current === "bn" ? "নোটিশ বোর্ড" : "Notice Board" }}</h3>
+        </div>
+        <span class="notice-badge">{{ kpi.noticeCount }} active</span>
+      </div>
+      <ul class="notice-list">
+        <li class="notice-item" *ngFor="let n of notices; let i = index"
+            (click)="openNotice(n)">
+          <span class="n-num">{{ i + 1 }}</span>
+          <span class="n-txt">{{ n.text }}</span>
+          <i class="fas fa-angle-right n-arr"></i>
+        </li>
+        <li class="notice-item" *ngIf="!loading && notices.length === 0">
+          <span class="n-txt" style="color:#94a3b8">No active notices.</span>
+        </li>
+      </ul>
+      <a class="see-all notice-see-all" routerLink="/notice/public">View all notices &rarr;</a>
+    </div>
+
+  </ng-container>
+
+  <!-- ════════════════════════════════════════════════════
+       STAFF / OFFICER VIEW — Full Dashboard
+  ════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="isStaff">
+
+    <!-- KPI Cards -->
+    <div class="kpi-row">
+
+      <!-- সবাই দেখবে -->
+      <div class="kpi kpi-blue" (click)="navigate('/applications')">
+        <div class="kpi-left">
+          <span class="kpi-label">{{ ls.current === "bn" ? "মোট আবেদন" : "Total Applications" }}</span>
+          <span class="kpi-val">
+            <span *ngIf="kpiLoading" class="kpi-skeleton"></span>
+            <span *ngIf="!kpiLoading">{{ kpi.applicationCount | number }}</span>
+          </span>
+          <span class="kpi-trend warn"><i class="fas fa-clock"></i> Pending review</span>
+        </div>
+        <div class="kpi-ico"><i class="fas fa-file-alt"></i></div>
+      </div>
+
+      <!-- Admin + Complaint Officer -->
+      <div class="kpi kpi-orange" (click)="navigate('/complaint-resolution')">
+        <div class="kpi-left">
+          <span class="kpi-label">Open Complaints</span>
+          <span class="kpi-val">
+            <span *ngIf="kpiLoading" class="kpi-skeleton"></span>
+            <span *ngIf="!kpiLoading">{{ kpi.complaintCount | number }}</span>
+          </span>
+          <span class="kpi-trend down"><i class="fas fa-arrow-down"></i> This week</span>
+        </div>
+        <div class="kpi-ico"><i class="fas fa-exclamation-circle"></i></div>
+      </div>
+
+      <!-- Admin + Finance -->
+      <div class="kpi kpi-purple" *ngIf="isFinance" (click)="navigate('/report/analytics')">
+        <div class="kpi-left">
+          <span class="kpi-label">Tax Collected (Tk.)</span>
+          <span class="kpi-val">
+            <span *ngIf="kpiLoading" class="kpi-skeleton"></span>
+            <span *ngIf="!kpiLoading">{{ kpi.taxCollected | number }}</span>
+          </span>
+          <span class="kpi-trend up"><i class="fas fa-arrow-up"></i> This year</span>
+        </div>
+        <div class="kpi-ico"><i class="fas fa-money-bill-wave"></i></div>
+      </div>
+
+      <!-- Admin level -->
+      <div class="kpi kpi-green" *ngIf="isAdminLevel" (click)="navigate('/applications')">
+        <div class="kpi-left">
+          <span class="kpi-label">{{ ls.current === "bn" ? "মোট নাগরিক" : "Total Citizens" }}</span>
+          <span class="kpi-val">
+            <span *ngIf="kpiLoading" class="kpi-skeleton"></span>
+            <span *ngIf="!kpiLoading">{{ kpi.citizenCount | number }}</span>
+          </span>
+          <span class="kpi-trend up"><i class="fas fa-arrow-up"></i> Live data</span>
+        </div>
+        <div class="kpi-ico"><i class="fas fa-users"></i></div>
+      </div>
+
+      <!-- সবাই -->
+      <div class="kpi kpi-teal" (click)="navigate('/etender-notices')">
+        <div class="kpi-left">
+          <span class="kpi-label">{{ ls.current === "bn" ? "খোলা টেন্ডার" : "Open Tenders" }}</span>
+          <span class="kpi-val">
+            <span *ngIf="kpiLoading" class="kpi-skeleton"></span>
+            <span *ngIf="!kpiLoading">{{ kpi.tenderOpenCount }}</span>
+          </span>
+          <span class="kpi-trend up"><i class="fas fa-file-contract"></i> Active tenders</span>
+        </div>
+        <div class="kpi-ico"><i class="fas fa-gavel"></i></div>
+      </div>
+
+      <!-- সবাই -->
+      <div class="kpi kpi-notice" (click)="navigate('/notice/public')">
+        <div class="kpi-left">
+          <span class="kpi-label">{{ ls.current === "bn" ? "সক্রিয় নোটিশ" : "Active Notices" }}</span>
+          <span class="kpi-val">
+            <span *ngIf="kpiLoading" class="kpi-skeleton"></span>
+            <span *ngIf="!kpiLoading">{{ kpi.noticeCount }}</span>
+          </span>
+          <span class="kpi-trend up"><i class="fas fa-bullhorn"></i> {{ ls.current === "bn" ? "প্রকাশিত" : "Published" }}</span>
+        </div>
+        <div class="kpi-ico"><i class="fas fa-bullhorn"></i></div>
+      </div>
+
+    </div>
+
+    <!-- Body Grid -->
+    <div class="body-grid">
+
+      <!-- LEFT: Charts -->
+      <div class="col-left">
+
+        <!-- Tax Collection Trend — Finance only -->
+        <div class="card-box" *ngIf="isFinance">
+          <div class="box-head">
+            <div class="box-title-wrap">
+              <div class="box-icon"><i class="fas fa-chart-line"></i></div>
+              <div>
+                <h3 class="box-title">Tax Collection Trend</h3>
+                <p class="box-sub">Revenue overview by period</p>
+              </div>
+            </div>
+            <div class="range-group">
+              <button class="rbtn active" (click)="setRange('week', $event)">Week</button>
+              <button class="rbtn" (click)="setRange('month', $event)">Month</button>
+              <button class="rbtn" (click)="setRange('year', $event)">Year</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="taxChart"></canvas></div>
+        </div>
+
+        <!-- Service Requests — Admin + Dept Officer -->
+        <div class="card-box" *ngIf="isAdminLevel || isInfra">
+          <div class="box-head">
+            <div class="box-title-wrap">
+              <div class="box-icon"><i class="fas fa-chart-bar"></i></div>
+              <div>
+                <h3 class="box-title">Service Requests</h3>
+                <p class="box-sub">Monthly breakdown by type</p>
+              </div>
+            </div>
+            <div class="legend-row">
+              <span class="leg"><i class="fas fa-circle" style="color:#0f7a3f;font-size:8px"></i> {{ ls.current === "bn" ? "নাগরিক সনদ" : "Citizen Cert." }}</span>
+              <span class="leg"><i class="fas fa-circle" style="color:#1565C0;font-size:8px"></i> {{ ls.current === "bn" ? "ট্রেড লাইসেন্স" : "Trade License" }}</span>
+              <span class="leg"><i class="fas fa-circle" style="color:#E65100;font-size:8px"></i> {{ ls.current === "bn" ? "হোল্ডিং ট্যাক্স" : "Holding Tax" }}</span>
+              <span class="leg"><i class="fas fa-circle" style="color:#6A1B9A;font-size:8px"></i> {{ ls.current === "bn" ? "ই-টেন্ডার" : "E-Tender" }}</span>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="serviceChart"></canvas></div>
+        </div>
+
+        <!-- Social Cards Distribution — Social Admin -->
+        <div class="card-box" *ngIf="isSocial">
+          <div class="box-head">
+            <div class="box-title-wrap">
+              <div class="box-icon social-icon"><i class="fas fa-id-card"></i></div>
+              <div>
+                <h3 class="box-title">Social Cards Distribution</h3>
+                <p class="box-sub">Card issuance by type — real-time data</p>
+              </div>
+            </div>
+            <div class="legend-row">
+              <span class="leg"><i class="fas fa-circle" style="color:#0f7a3f;font-size:8px"></i> Family (TCB)</span>
+              <span class="leg"><i class="fas fa-circle" style="color:#558B2F;font-size:8px"></i> Farmer</span>
+              <span class="leg"><i class="fas fa-circle" style="color:#E65100;font-size:8px"></i> LPG</span>
+              <span class="leg"><i class="fas fa-circle" style="color:#1565C0;font-size:8px"></i> VGD/VGF</span>
+            </div>
+          </div>
+          <div class="chart-wrap-tall"><canvas id="socialChart"></canvas></div>
+          <div class="social-summary">
+            <div class="sc-item"><span class="sc-dot" style="background:#0f7a3f;"></span><div class="sc-info"><span class="sc-label">Family (TCB)</span><span class="sc-val">{{ socialStats.familyCard | number }}</span></div></div>
+            <div class="sc-item"><span class="sc-dot" style="background:#558B2F;"></span><div class="sc-info"><span class="sc-label">{{ ls.current === "bn" ? "কৃষক কার্ড" : "Farmer Card" }}</span><span class="sc-val">{{ socialStats.farmerCard | number }}</span></div></div>
+            <div class="sc-item"><span class="sc-dot" style="background:#E65100;"></span><div class="sc-info"><span class="sc-label">LPG Card</span><span class="sc-val">{{ socialStats.lpgCard | number }}</span></div></div>
+            <div class="sc-item"><span class="sc-dot" style="background:#1565C0;"></span><div class="sc-info"><span class="sc-label">VGD / VGF</span><span class="sc-val">{{ socialStats.vgdCard | number }}</span></div></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Widgets -->
+      <div class="col-right">
+
+        <!-- Complaint Status Donut — Admin + Dept -->
+        <div class="card-box" *ngIf="isAdminLevel || isInfra">
+          <div class="box-head">
+            <div class="box-title-wrap">
+              <div class="box-icon" style="background:#fff3e0;color:#E65100;"><i class="fas fa-exclamation-triangle"></i></div>
+              <div>
+                <h3 class="box-title">{{ ls.current === "bn" ? "অভিযোগের অবস্থা" : "Complaint Status" }}</h3>
+                <p class="box-sub">Current distribution</p>
+              </div>
+            </div>
+          </div>
+          <div class="donut-area">
+            <canvas id="complaintChart"></canvas>
+            <div class="donut-mid">
+              <span class="dm-num">{{ complaintStats.total }}</span>
+              <span class="dm-lbl">{{ ls.current === "bn" ? "মোট" : "Total" }}</span>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="dl"><span class="dl-dot" style="background:#EF9F27"></span><span class="dl-lbl">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</span><span class="dl-val">{{ complaintStats.pending }}</span></div>
+            <div class="dl"><span class="dl-dot" style="background:#1565C0"></span><span class="dl-lbl">{{ ls.current === "bn" ? "চলমান" : "In Progress" }}</span><span class="dl-val">{{ complaintStats.inProgress }}</span></div>
+            <div class="dl"><span class="dl-dot" style="background:#0f7a3f"></span><span class="dl-lbl">{{ ls.current === "bn" ? "সমাধান হয়েছে" : "Resolved" }}</span><span class="dl-val">{{ complaintStats.resolved }}</span></div>
+          </div>
+        </div>
+
+        <!-- Recent Applications — Admin + Dept Officer -->
+        <div class="card-box" *ngIf="isAdminLevel || isInfra">
+          <div class="box-head">
+            <div class="box-title-wrap">
+              <div class="box-icon"><i class="fas fa-file-signature"></i></div>
+              <h3 class="box-title">{{ ls.current === "bn" ? "সাম্প্রতিক আবেদন" : "Recent Applications" }}</h3>
+            </div>
+            <a class="see-all" routerLink="/applications">View All &rarr;</a>
+          </div>
+          <div class="app-list">
+            <ng-container *ngIf="kpiLoading">
+              <div class="app-item" *ngFor="let i of [1,2,3,4,5]">
+                <div class="app-av skel-av"></div>
+                <div class="app-info">
+                  <span class="skel-line wide"></span>
+                  <span class="skel-line narrow"></span>
+                </div>
+              </div>
+            </ng-container>
+            <div class="app-item" *ngFor="let a of applications">
+              <div class="app-av"><i class="fas fa-user-circle"></i></div>
+              <div class="app-info">
+                <span class="app-name">{{ a.name }}</span>
+                <span class="app-svc">{{ a.service }}</span>
+              </div>
+              <div class="app-right">
+                <span class="app-time">{{ a.time }}</span>
+                <span class="tag-pending">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</span>
+              </div>
+            </div>
+            <div class="empty-state" *ngIf="!kpiLoading && applications.length === 0">
+              <i class="fas fa-inbox"></i> No recent applications
+            </div>
+          </div>
+        </div>
+
+        <!-- Notice Board — সবাই -->
+        <div class="card-box">
+          <div class="box-head">
+            <div class="box-title-wrap">
+              <div class="box-icon" style="background:#fff8e1;color:#D84315;"><i class="fas fa-bullhorn"></i></div>
+              <h3 class="box-title">{{ ls.current === "bn" ? "নোটিশ বোর্ড" : "Notice Board" }}</h3>
+            </div>
+            <span class="notice-badge">{{ kpi.noticeCount }} active</span>
+          </div>
+          <ul class="notice-list">
+            <li class="notice-item" *ngFor="let n of notices; let i = index"
+                (click)="openNotice(n)">
+              <span class="n-num">{{ i + 1 }}</span>
+              <span class="n-txt">{{ n.text }}</span>
+              <i class="fas fa-angle-right n-arr"></i>
+            </li>
+          </ul>
+          <a class="see-all notice-see-all" routerLink="/notice/public">All Notices &rarr;</a>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Quick Access — role-based ── -->
+    <div class="card-box quick-box">
+      <div class="box-head">
+        <div class="box-title-wrap">
+          <div class="box-icon"><i class="fas fa-th"></i></div>
+          <h3 class="box-title">{{ ls.current === "bn" ? "দ্রুত প্রবেশ" : "Quick Access" }}</h3>
+        </div>
+      </div>
+      <div class="quick-grid">
+
+        <!-- Citizen Services — সবাই -->
+        <div class="qcard" routerLink="/birth-death"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-certificate"></i></div><span>{{ ls.current === "bn" ? "জন্ম / মৃত্যু" : "Birth / Death" }}</span></div>
+        <div class="qcard" routerLink="/citizen"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-user"></i></div><span>{{ ls.current === "bn" ? "নাগরিক সনদ" : "Citizen Cert." }}</span></div>
+        <div class="qcard" routerLink="/family"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-users"></i></div><span>{{ ls.current === "bn" ? "পারিবারিক সনদ" : "Family Cert." }}</span></div>
+        <div class="qcard" routerLink="/status"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-search"></i></div><span>{{ ls.current === "bn" ? "আবেদনের অবস্থা" : "App. Status" }}</span></div>
+
+        <!-- Admin applications -->
+        <div class="qcard" *ngIf="isAdminLevel" routerLink="/applications"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-list"></i></div><span>{{ ls.current === "bn" ? "সব আবেদন তথ্য" : "All Apply Data" }}</span></div>
+
+        <!-- Trade License -->
+        <div class="qcard" routerLink="/trade-license"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-id-card"></i></div><span>{{ ls.current === "bn" ? "ট্রেড লাইসেন্স" : "Trade License" }}</span></div>
+        <div class="qcard" routerLink="/license-renewal"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-sync-alt"></i></div><span>{{ ls.current === "bn" ? "নবায়ন" : "Renewal" }}</span></div>
+        <div class="qcard" *ngIf="isAdminLevel" routerLink="/licenseDataShow"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-list"></i></div><span>License Admin</span></div>
+
+        <!-- Holding Tax -->
+        <div class="qcard" routerLink="/new-registration"><div class="q-ico" style="--qc:#E65100"><i class="fas fa-money-bill"></i></div><span>{{ ls.current === "bn" ? "হোল্ডিং ট্যাক্স" : "Holding Tax" }}</span></div>
+        <div class="qcard" routerLink="/tax-payment"><div class="q-ico" style="--qc:#E65100"><i class="fas fa-credit-card"></i></div><span>{{ ls.current === "bn" ? "কর পরিশোধ" : "Tax Payment" }}</span></div>
+        <div class="qcard" *ngIf="isFinance" routerLink="/tax-assessment"><div class="q-ico" style="--qc:#E65100"><i class="fas fa-calculator"></i></div><span>{{ ls.current === "bn" ? "কর নির্ধারণ" : "Tax Assessment" }}</span></div>
+        <div class="qcard" *ngIf="isFinance" routerLink="/tax-collection-report"><div class="q-ico" style="--qc:#E65100"><i class="fas fa-chart-bar"></i></div><span>Collection Rpt.</span></div>
+
+        <!-- Complaint -->
+        <div class="qcard" routerLink="/complaint-submit"><div class="q-ico" style="--qc:#C62828"><i class="fas fa-exclamation-circle"></i></div><span>{{ ls.current === "bn" ? "অভিযোগ" : "Complaint" }}</span></div>
+        <div class="qcard" *ngIf="isAdminLevel" routerLink="/complaint-resolution"><div class="q-ico" style="--qc:#C62828"><i class="fas fa-check"></i></div><span>Resolution</span></div>
+
+        <!-- Infrastructure — Infra roles -->
+        <div class="qcard" *ngIf="isInfra" routerLink="/road"><div class="q-ico" style="--qc:#00695C"><i class="fas fa-road"></i></div><span>{{ ls.current === "bn" ? "রাস্তা" : "Road" }}</span></div>
+        <div class="qcard" *ngIf="isInfra" routerLink="/construction-permission"><div class="q-ico" style="--qc:#00695C"><i class="fas fa-hard-hat"></i></div><span>{{ ls.current === "bn" ? "নির্মাণ" : "Construction" }}</span></div>
+        <div class="qcard" *ngIf="isInfra" routerLink="/infrastructure-status"><div class="q-ico" style="--qc:#00695C"><i class="fas fa-list-alt"></i></div><span>Infra Status</span></div>
+
+        <!-- Health -->
+        <div class="qcard" routerLink="/health-notices"><div class="q-ico" style="--qc:#AD1457"><i class="fas fa-heartbeat"></i></div><span>Health</span></div>
+        <div class="qcard" *ngIf="isHealth" routerLink="/epi-admin"><div class="q-ico" style="--qc:#AD1457"><i class="fas fa-syringe"></i></div><span>{{ ls.current === "bn" ? "ইপিআই অ্যাডমিন" : "EPI Admin" }}</span></div>
+        <div class="qcard" *ngIf="isHealth" routerLink="/sanitation-monitoring"><div class="q-ico" style="--qc:#AD1457"><i class="fas fa-broom"></i></div><span>Sanitation</span></div>
+
+        <!-- Water & Waste — সবাই -->
+        <div class="qcard" routerLink="/connection"><div class="q-ico" style="--qc:#0277BD"><i class="fas fa-tint"></i></div><span>{{ ls.current === "bn" ? "পানি সরবরাহ" : "Water Supply" }}</span></div>
+        <div class="qcard" routerLink="/schedule"><div class="q-ico" style="--qc:#558B2F"><i class="fas fa-trash"></i></div><span>{{ ls.current === "bn" ? "বর্জ্য ব্যবস্থাপনা" : "Waste Mgmt." }}</span></div>
+
+        <!-- Social Cards -->
+        <div class="qcard" routerLink="/family-card/apply"><div class="q-ico" style="--qc:#6A1B9A"><i class="fas fa-users"></i></div><span>{{ ls.current === "bn" ? "পারিবারিক কার্ড" : "Family Card" }}</span></div>
+        <div class="qcard" routerLink="/farmer-card/apply"><div class="q-ico" style="--qc:#558B2F"><i class="fas fa-seedling"></i></div><span>{{ ls.current === "bn" ? "কৃষক কার্ড" : "Farmer Card" }}</span></div>
+        <div class="qcard" routerLink="/lpg-card/apply"><div class="q-ico" style="--qc:#E65100"><i class="fas fa-fire"></i></div><span>LPG Card</span></div>
+        <div class="qcard" routerLink="/vgd-card/apply"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-hands-helping"></i></div><span>VGD / VGF</span></div>
+        <div class="qcard" *ngIf="isSocial" routerLink="/family-card/admin"><div class="q-ico" style="--qc:#6A1B9A"><i class="fas fa-tasks"></i></div><span>Cards Admin</span></div>
+
+        <!-- Project — Infra roles -->
+        <div class="qcard" routerLink="/list"><div class="q-ico" style="--qc:#4527A0"><i class="fas fa-project-diagram"></i></div><span>Dev. Projects</span></div>
+        <div class="qcard" *ngIf="isFinance" routerLink="/budget"><div class="q-ico" style="--qc:#4527A0"><i class="fas fa-wallet"></i></div><span>{{ ls.current === "bn" ? "প্রকল্প বাজেট" : "Project Budget" }}</span></div>
+
+        <!-- E-Tender — সবাই -->
+        <div class="qcard qcard-highlight" routerLink="/etender-notices"><div class="q-ico" style="--qc:#6A1B9A"><i class="fas fa-gavel"></i></div><span>{{ ls.current === "bn" ? "টেন্ডার বিজ্ঞপ্তি" : "Tender Notices" }}</span><span class="new-badge">NEW</span></div>
+
+        <!-- GIS — সবাই -->
+        <div class="qcard" routerLink="/map/wards"><div class="q-ico" style="--qc:#00838F"><i class="fas fa-map-marked-alt"></i></div><span>{{ ls.current === "bn" ? "জিআইএস / মানচিত্র" : "GIS / Map" }}</span></div>
+
+        <!-- E-Voting -->
+        <div class="qcard" routerLink="/voter-registration"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-vote-yea"></i></div><span>E-Voting</span></div>
+        <div class="qcard" *ngIf="isElection" routerLink="/election"><div class="q-ico" style="--qc:#1565C0"><i class="fas fa-landmark"></i></div><span>Election Mgmt.</span></div>
+
+        <!-- Payment -->
+        <div class="qcard" routerLink="/payment"><div class="q-ico" style="--qc:#0f7a3f"><i class="fas fa-credit-card"></i></div><span>{{ ls.current === "bn" ? "অনলাইন পেমেন্ট" : "Online Payment" }}</span></div>
+
+        <!-- Reports — Finance/Admin -->
+        <div class="qcard" *ngIf="isAdminLevel || isFinance" routerLink="/report/analytics"><div class="q-ico" style="--qc:#6A1B9A"><i class="fas fa-chart-line"></i></div><span>Reports</span></div>
+
+        <!-- System Settings — Admin only -->
+        <div class="qcard" *ngIf="isAdminLevel" routerLink="/system-settings"><div class="q-ico" style="--qc:#37474F"><i class="fas fa-cogs"></i></div><span>Settings</span></div>
+        <div class="qcard" *ngIf="isAdminLevel" routerLink="/user-approval"><div class="q-ico" style="--qc:#37474F"><i class="fas fa-user-check"></i></div><span>{{ ls.current === "bn" ? "ব্যবহারকারী অনুমোদন" : "User Approval" }}</span></div>
+
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ── Notice Detail Modal ── -->
+  <div class="dash-modal-backdrop" *ngIf="showNoticeModal" (click)="closeNoticeModal()">
+    <div class="dash-modal-card" (click)="$event.stopPropagation()">
+      <div class="dash-modal-header">
+        <div class="dash-modal-type">
+          <i class="fas fa-bullhorn"></i>
+          <span>{{ selectedNotice?.type || 'Notice' }}</span>
+        </div>
+        <button class="dash-modal-close" (click)="closeNoticeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <h3 class="dash-modal-title">{{ selectedNotice?.text }}</h3>
+      <p class="dash-modal-desc" *ngIf="selectedNotice?.description">{{ selectedNotice?.description }}</p>
+      <div class="dash-modal-meta">
+        <span *ngIf="selectedNotice?.publishDate"><i class="fas fa-calendar"></i> {{ selectedNotice?.publishDate }}</span>
+        <span *ngIf="selectedNotice?.expiryDate"><i class="fas fa-hourglass-end"></i> Expires: {{ selectedNotice?.expiryDate }}</span>
+        <span *ngIf="selectedNotice?.priority" [ngClass]="'nprio-' + (selectedNotice?.priority | lowercase)">
+          <i class="fas fa-flag"></i> {{ selectedNotice?.priority }}
+        </span>
+      </div>
+      <a *ngIf="selectedNotice?.attachmentUrl" [href]="selectedNotice?.attachmentUrl" target="_blank" class="dash-modal-attach">
+        <i class="fas fa-paperclip"></i> Download Attachment
+      </a>
+      <div class="dash-modal-footer">
+        <button class="dash-modal-btn-secondary" (click)="closeNoticeModal()">
+          <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </button>
+        <a class="dash-modal-btn-primary" routerLink="/notice/public" (click)="closeNoticeModal()">
+          All Notices <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,159 @@
+/* ============================================================
+   tax-payment.component.css  (updated — search + due info)
+   ============================================================ */
+
+.form-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 0 20px 80px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #1e293b;
+}
+
+.form-card {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.04), 0 10px 25px -5px rgba(0,0,0,0.06);
+}
+
+/* ── HEADER ── */
+.card-header {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+  padding: 28px 36px;
+  border-bottom: 5px solid #f59e0b;
+  display: flex; align-items: center; gap: 16px;
+}
+.header-icon {
+  width: 46px; height: 46px; background: rgba(255,255,255,0.18);
+  border-radius: 12px; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.card-header h2 { font-size: 20px; font-weight: 800; color: #fff; margin: 0 0 4px; }
+.card-header p  { font-size: 13px; color: rgba(255,255,255,0.75); margin: 0; }
+
+/* ── FORM ── */
+.gov-form { padding: 32px 36px 40px; }
+
+.section-label {
+  font-size: 11px; font-weight: 700; color: #059669;
+  text-transform: uppercase; letter-spacing: 1px;
+  margin: 22px 0 14px; padding-left: 12px;
+  border-left: 4px solid #059669;
+}
+.section-label:first-child { margin-top: 0; }
+
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+
+.input-group { margin-bottom: 20px; }
+.input-group label {
+  display: block; font-size: 13px; font-weight: 600;
+  color: #374151; margin-bottom: 6px;
+}
+.req { color: #ef4444; }
+.hint { font-size: 12px; color: #6b7280; margin-top: 4px; display: block; }
+
+.gov-form input {
+  width: 100%; padding: 11px 16px;
+  font-size: 14px; font-family: inherit; color: #111827;
+  background: #f9fafb; border: 1.5px solid #d1d5db;
+  border-radius: 8px; transition: all 0.2s; box-sizing: border-box;
+}
+.gov-form input::placeholder { color: #9ca3af; }
+.gov-form input:hover  { background: #fff; border-color: #9ca3af; }
+.gov-form input:focus  {
+  outline: none; background: #fff;
+  border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.08);
+}
+.gov-form input[type="number"] { -moz-appearance: textfield; }
+.gov-form input[type="number"]::-webkit-inner-spin-button,
+.gov-form input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* ── SEARCH ROW ── */
+.search-row {
+  display: flex; align-items: flex-end; gap: 12px; margin-bottom: 20px;
+}
+.btn-search {
+  flex-shrink: 0; padding: 11px 22px;
+  background: #059669; color: #fff;
+  border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 600; font-family: inherit;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: all 0.2s;
+}
+.btn-search:hover:not(:disabled) { background: #047857; }
+.btn-search:disabled { opacity: 0.65; cursor: not-allowed; }
+
+/* ── ALERT ── */
+.alert-error {
+  background: #fef2f2; border: 1px solid #fecaca;
+  border-radius: 8px; padding: 12px 16px;
+  color: #dc2626; font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 16px; animation: slideUp 0.25s ease;
+}
+
+/* ── DUE CARD ── */
+.due-card {
+  background: #f0fdf4; border: 2px solid #86efac;
+  border-radius: 12px; overflow: hidden;
+  margin-bottom: 8px; animation: slideUp 0.3s ease;
+}
+.due-card__header {
+  background: #dcfce7; padding: 12px 18px;
+  font-size: 13px; font-weight: 600; color: #065f46;
+  display: flex; align-items: center; gap: 8px;
+}
+.due-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: #bbf7d0;
+}
+.due-item {
+  background: #fff; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 3px;
+}
+.dl { font-size: 11px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; }
+.dv { font-size: 15px; font-weight: 700; color: #111827; }
+.dv.paid { color: #059669; }
+.dv.due  { color: #dc2626; }
+
+/* ── BUTTON ROW ── */
+.btn-row {
+  display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;
+}
+.btn-outline {
+  padding: 12px 20px; background: #f1f5f9; color: #475569;
+  border: 1px solid #e2e8f0; border-radius: 8px;
+  font-size: 14px; font-weight: 600; font-family: inherit;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: all 0.2s;
+}
+.btn-outline:hover { background: #e2e8f0; }
+
+.btn-submit {
+  padding: 12px 24px; background: #059669; color: #fff;
+  border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 700; font-family: inherit;
+  cursor: pointer; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 2px 8px rgba(5,150,105,0.25); transition: all 0.2s;
+}
+.btn-submit:hover:not(:disabled) {
+  background: #047857; transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+}
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .form-container { margin: 16px auto; padding: 0 12px 60px; }
+  .gov-form { padding: 24px 20px 32px; }
+  .row, .due-grid { grid-template-columns: 1fr; }
+  .search-row { flex-direction: column; align-items: stretch; }
+  .btn-row { flex-direction: column; }
+  .btn-submit, .btn-outline { width: 100%; justify-content: center; }
+}

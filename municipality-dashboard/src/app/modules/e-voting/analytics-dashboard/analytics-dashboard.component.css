@@ -1,0 +1,65 @@
+/* ── Layout ── */
+.dashboard {
+  width: 80%;
+  margin: auto;
+}
+
+.filter select {
+  width: 100%;
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 8px;
+}
+
+.cards {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  flex: 1;
+  background: #f6fbf8;
+  padding: 15px;
+  text-align: center;
+  border-radius: 10px;
+  border-left: 5px solid #1b7f4b;
+}
+
+.charts {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+
+.analytics-page{max-width:1000px;margin:0 auto}
+.page-header{display:flex;align-items:center;gap:14px;border-radius:13px;padding:18px 22px;margin-bottom:20px;color:#fff}
+.ph-icon{width:48px;height:48px;background:rgba(255,255,255,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.ph-title{font-size:18px;font-weight:700;margin:0 0 3px}
+.ph-sub{font-size:13px;color:rgba(255,255,255,.75);margin:0}
+.filter-bar{background:#fff;border:1px solid #dce8dc;border-radius:12px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.filter-bar label{font-size:13px;font-weight:600;color:#1a2e1a;white-space:nowrap}
+.filter-bar select{flex:1;padding:9px 12px;border:1.5px solid #dce8dc;border-radius:8px;font-size:13px;outline:none;font-family:inherit}
+.filter-bar select:focus{border-color:#1565C0}
+.loading-box{text-align:center;padding:40px;color:#5a7a5a;font-size:14px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.kpi-card{background:#fff;border:1px solid #dce8dc;border-left:4px solid;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.kpi-ico{font-size:22px;opacity:.8}
+.kpi-label{display:block;font-size:11px;font-weight:600;color:#5a7a5a;text-transform:uppercase;letter-spacing:.4px}
+.kpi-val{display:block;font-size:24px;font-weight:700;color:#1a2e1a}
+.charts-grid{display:grid;grid-template-columns:1fr 320px;gap:14px;margin-bottom:14px}
+.chart-card{background:#fff;border:1px solid #dce8dc;border-radius:13px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.chart-title{font-size:13px;font-weight:600;color:#1a2e1a;margin:0 0 12px}
+.donut-info{display:flex;gap:16px;margin-top:10px;justify-content:center}
+.di-item{display:flex;align-items:center;gap:6px;font-size:12px;color:#5a7a5a}
+.di-dot{width:10px;height:10px;border-radius:50%}
+.result-table-wrap{background:#fff;border:1px solid #dce8dc;border-radius:13px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.result-table{width:100%;border-collapse:collapse}
+.result-table th{background:#1565C0;color:#fff;padding:11px 14px;font-size:12px;font-weight:600;text-align:left}
+.result-table td{padding:10px 14px;font-size:13px;color:#1a2e1a;border-bottom:1px solid #f0f4f0}
+.result-table tr:last-child td{border-bottom:none}
+.result-table tr:hover td{background:#f5f8ff}
+.progress-wrap{display:flex;align-items:center;gap:8px}
+.progress-bar{height:6px;background:#1565C0;border-radius:3px;min-width:4px;max-width:120px;transition:.3s}
+@media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr)}.charts-grid{grid-template-columns:1fr}}

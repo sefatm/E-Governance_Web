@@ -1,0 +1,397 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="toasts.length > 0">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- Header -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">ট্রেড লাইসেন্স নবায়ন ফরম</h2>
+        <span class="tl-header__title-en">Trade License Renewal Form</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- Step Bar -->
+  <div class="tl-steps">
+    <ng-container *ngFor="let s of steps; let i = index">
+      <div class="tl-step" [class.tl-step--done]="currentStep > i+1" [class.tl-step--active]="currentStep === i+1">
+        <div class="tl-step__circle">
+          <i class="fas fa-check" *ngIf="currentStep > i+1"></i>
+          <span *ngIf="currentStep <= i+1">{{ i+1 }}</span>
+        </div>
+        <span class="tl-step__label">{{ s }}</span>
+      </div>
+      <div class="tl-step__line" *ngIf="i < steps.length - 1" [class.tl-step__line--done]="currentStep > i+1"></div>
+    </ng-container>
+  </div>
+
+  <!-- Form Card -->
+  <div class="tl-card">
+    <form [formGroup]="renewForm" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- STEP 1 — License & Business-->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 1">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-file-certificate"></i></div>
+          <div>
+            <h3>License &amp; Business Info</h3>
+            <p>Enter your existing license details and business information</p>
+          </div>
+          <span class="tl-step-tag">Step 1 of 3</span>
+        </div>
+
+        <!-- License info row -->
+        <div class="tl-section-label">
+          <i class="fas fa-id-badge"></i> Existing License Details
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "লাইসেন্স নম্বর" : "License Number" }} <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-hashtag tl-ico"></i>
+              <input type="text" formControlName="licenseNumber" [class.tl-invalid]="submitted && f.licenseNumber.invalid" placeholder="e.g. TL-2024-84731">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.licenseNumber.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>License Expiry Date <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-calendar-xmark tl-ico"></i>
+              <input type="date" formControlName="licenseExpiry" [class.tl-invalid]="submitted && f.licenseExpiry.invalid">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.licenseExpiry.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>Issuing Authority <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-building-columns tl-ico"></i>
+              <input type="text" formControlName="issuingAuthority" [class.tl-invalid]="submitted && f.issuingAuthority.invalid" placeholder="e.g. City Corporation / Municipality">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.issuingAuthority.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+        </div>
+
+        <!-- Business info row -->
+        <div class="tl-section-label" style="margin-top:28px;">
+          <i class="fas fa-store"></i> Business Details
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ব্যবসার নাম" : "Business Name" }} <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-briefcase tl-ico"></i>
+              <input type="text" formControlName="businessName" [class.tl-invalid]="submitted && f.businessName.invalid" placeholder="Registered business name">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.businessName.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ব্যবসার ধরন" : "Business Type" }} <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-tag tl-ico"></i>
+              <select formControlName="businessType" [class.tl-invalid]="submitted && f.businessType.invalid">
+                <option value="">Select type</option>
+                <option>Grocery</option>
+                <option>Electronics</option>
+                <option>Pharmacy</option>
+                <option>Restaurant</option>
+                <option>Clothing</option>
+                <option>Hardware</option>
+                <option>Service</option>
+                <option>{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+              </select>
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.businessType.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ওয়ার্ড নং" : "Ward No" }} <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-map-pin tl-ico"></i>
+              <input type="text" formControlName="wardNo" [class.tl-invalid]="submitted && f.wardNo.invalid" placeholder="Ward number">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.wardNo.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>Holding No <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-home tl-ico"></i>
+              <input type="text" formControlName="holdingNo" [class.tl-invalid]="submitted && f.holdingNo.invalid" placeholder="Holding number">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.holdingNo.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+        </div>
+
+        <div class="tl-field tl-field--full">
+          <label>{{ ls.current === "bn" ? "ব্যবসার ঠিকানা" : "Business Address" }} <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-location-dot tl-ico tl-ico--top"></i>
+            <textarea formControlName="address" rows="3" [class.tl-invalid]="submitted && f.address.invalid" placeholder="Full business address"></textarea>
+          </div>
+          <div class="tl-err" *ngIf="submitted && f.address.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+        </div>
+
+        <div class="tl-nav">
+          <span></span>
+          <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">
+            {{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2 — Applicant Details -->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 2">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-user-tie"></i></div>
+          <div>
+            <h3>Applicant Details</h3>
+            <p>Enter the business owner / applicant's personal information</p>
+          </div>
+          <span class="tl-step-tag">Step 2 of 3</span>
+        </div>
+
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "আবেদনকারীর নাম" : "Applicant Name" }} <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-user tl-ico"></i>
+              <input type="text" formControlName="applicantName" [class.tl-invalid]="submitted && f.applicantName.invalid" placeholder="Full name as per NID">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.applicantName.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }} <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-calendar-days tl-ico"></i>
+              <input type="date" formControlName="dateOfBirth" [class.tl-invalid]="submitted && f.dateOfBirth.invalid">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.dateOfBirth.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>Father's Name <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-user tl-ico"></i>
+              <input type="text" formControlName="fatherName" [class.tl-invalid]="submitted && f.fatherName.invalid" placeholder="Father's full name">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.fatherName.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>Mother's Name <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-user tl-ico"></i>
+              <input type="text" formControlName="motherName" [class.tl-invalid]="submitted && f.motherName.invalid" placeholder="Mother's full name">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.motherName.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>NID / TIN <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-id-card tl-ico"></i>
+              <input type="text" formControlName="nid" [class.tl-invalid]="submitted && f.nid.invalid" placeholder="10, 13 or 17 digit NID">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.nid.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+            <div class="tl-err" *ngIf="submitted && f.nid.errors?.['pattern']">Enter valid NID (10/13/17 digits)</div>
+          </div>
+
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "যোগাযোগ নম্বর" : "Contact Number" }} <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-mobile-screen tl-ico"></i>
+              <input type="text" formControlName="contact" [class.tl-invalid]="submitted && f.contact.invalid" placeholder="01XXXXXXXXX" (input)="onContactInput($event)">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.contact.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+            <div class="tl-err" *ngIf="submitted && f.contact.errors?.['pattern']">Enter valid BD mobile number</div>
+          </div>
+
+          <div class="tl-field">
+            <label>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-envelope tl-ico"></i>
+              <input type="email" formControlName="email" placeholder="Optional email address">
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-nav">
+          <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()">
+            <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+          </button>
+          <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">
+            {{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 3 — Documents & Payment -->
+      <div class="tl-panel" [class.tl-panel--active]="currentStep === 3">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-file-invoice-dollar"></i></div>
+          <div>
+            <h3>Documents &amp; Payment</h3>
+            <p>Upload required documents and enter renewal payment details</p>
+          </div>
+          <span class="tl-step-tag">Step 3 of 3</span>
+        </div>
+
+        <!-- Upload Zones -->
+        <div class="tl-section-label"><i class="fas fa-cloud-arrow-up"></i> Required Documents</div>
+        <div class="tl-uploads">
+
+          <!-- NID / TIN Copy -->
+          <div class="tl-upload-card">
+            <div class="tl-upload-label">
+              <i class="fas fa-id-card"></i> NID / TIN Copy
+              <span class="tl-upload-hint">JPG, PNG, PDF · Max 2 MB</span>
+            </div>
+            <div class="tl-upload-zone" *ngIf="!nidFile" (click)="nidInput.click()">
+              <input #nidInput type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onNidFileChange($event)" hidden>
+              <i class="fas fa-cloud-arrow-up tl-upload-icon"></i>
+              <span>Click to upload</span>
+            </div>
+            <div class="tl-file-preview" *ngIf="nidFile">
+              <i class="fas fa-file-lines"></i>
+              <span>{{ nidFile.name }}</span>
+              <button type="button" class="tl-remove-btn" (click)="removeFile('nid')">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Owner Photo -->
+          <div class="tl-upload-card">
+            <div class="tl-upload-label">
+              <i class="fas fa-camera"></i> Owner Photo
+              <span class="tl-upload-hint">JPG, PNG · Max 1 MB</span>
+            </div>
+            <div class="tl-upload-zone tl-upload-zone--photo" *ngIf="!photoFile" (click)="photoInput.click()">
+              <input #photoInput type="file" accept="image/*" (change)="onPhotoChange($event)" hidden>
+              <i class="fas fa-user-circle tl-upload-icon"></i>
+              <span>Click to upload</span>
+            </div>
+            <div class="tl-photo-preview" *ngIf="photoFile">
+              <img [src]="photoPreview" alt="Owner photo">
+              <button type="button" class="tl-remove-btn" (click)="removeFile('photo')">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Previous License Copy -->
+          <div class="tl-upload-card">
+            <div class="tl-upload-label">
+              <i class="fas fa-file-contract"></i> Previous License
+              <span class="tl-upload-hint">JPG, PNG, PDF · Max 5 MB</span>
+            </div>
+            <div class="tl-upload-zone" *ngIf="!licenseFile" (click)="licenseInput.click()">
+              <input #licenseInput type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onLicenseFileChange($event)" hidden>
+              <i class="fas fa-cloud-arrow-up tl-upload-icon"></i>
+              <span>Click to upload</span>
+            </div>
+            <div class="tl-file-preview" *ngIf="licenseFile">
+              <i class="fas fa-file-lines"></i>
+              <span>{{ licenseFile.name }}</span>
+              <button type="button" class="tl-remove-btn" (click)="removeFile('license')">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment & Renewal Info -->
+        <div class="tl-section-label" style="margin-top:28px;">
+          <i class="fas fa-bangladeshi-taka-sign"></i> Renewal & Payment Details
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>Renewal Period (Years) <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-calendar-check tl-ico"></i>
+              <input type="number" formControlName="renewalPeriod" min="1" max="10" [class.tl-invalid]="submitted && f.renewalPeriod.invalid" placeholder="e.g. 1">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.renewalPeriod.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>Annual Income (BDT) <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-bangladeshi-taka-sign tl-ico"></i>
+              <input type="number" formControlName="annualIncome" min="0"
+                     [class.tl-invalid]="submitted && f.annualIncome.invalid"
+                     placeholder="0.00">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.annualIncome.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+
+          <div class="tl-field">
+            <label>Tax Paid (BDT) <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-bangladeshi-taka-sign tl-ico"></i>
+              <input type="number" formControlName="taxPaid" min="0" [class.tl-invalid]="submitted && f.taxPaid.invalid" placeholder="0.00">
+            </div>
+            <div class="tl-err" *ngIf="submitted && f.taxPaid.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+          </div>
+        </div>
+
+        <div class="tl-field tl-field--full" style="margin-top:20px;">
+          <label>Purpose / Remarks <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-pen-to-square tl-ico tl-ico--top"></i>
+            <textarea formControlName="purpose" rows="3" [class.tl-invalid]="submitted && f.purpose.invalid" placeholder="Reason for renewal..."></textarea>
+          </div>
+          <div class="tl-err" *ngIf="submitted && f.purpose.errors?.['required']">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</div>
+        </div>
+
+        <!-- Declaration -->
+        <div class="tl-declaration">
+          <label class="tl-check-label">
+            <input type="checkbox" formControlName="declaration">
+            <span>
+              I hereby declare that all information provided is true and correct.
+              Any false information may result in cancellation of the license renewal.
+            </span>
+          </label>
+          <div class="tl-err" *ngIf="submitted && f.declaration.errors?.['required']">
+            You must accept the declaration to proceed
+          </div>
+        </div>
+
+        <div class="tl-nav">
+          <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()">
+            <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+          </button>
+          <button type="submit" class="tl-btn tl-btn--submit" [disabled]="isSubmitting">
+            <i class="fas fa-rotate" *ngIf="!isSubmitting"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+            {{ isSubmitting ? 'Submitting...' : 'Apply Renewal' }}
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>

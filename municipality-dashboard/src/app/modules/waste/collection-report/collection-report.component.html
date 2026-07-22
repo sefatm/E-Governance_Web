@@ -1,0 +1,150 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="errorMsg">
+  <div class="tl-toast tl-toast--fail">
+    <i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span>
+    <button class="tl-toast-retry" (click)="loadData()">{{ ls.current === "bn" ? "পুনরায় চেষ্টা" : "Retry" }}</button>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- ── Header ── -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">{{ ls.current === "bn" ? "বর্জ্য সংগ্রহ প্রতিবেদন" : "Waste Collection Report" }}</h2>
+        <span class="tl-header__title-en">Waste Collection Report — Waste Management Division</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- ── Loading ── -->
+  <div class="tl-loading" *ngIf="isLoading">
+    <div class="tl-spinner"></div>
+    <span>তথ্য লোড হচ্ছে...</span>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+
+    <!-- ── Summary chips ── -->
+    <div class="tl-summary-row">
+      <div class="sum-chip sum-total">
+        <div class="sum-icon"><i class="fas fa-clipboard-list"></i></div>
+        <div><div class="sum-label">{{ ls.current === "bn" ? "মোট রেকর্ড" : "Total Records" }}</div><div class="sum-val">{{ totalCollections }}</div></div>
+      </div>
+      <div class="sum-chip sum-done">
+        <div class="sum-icon"><i class="fas fa-circle-check"></i></div>
+        <div><div class="sum-label">{{ ls.current === "bn" ? "সম্পন্ন" : "Completed" }}</div><div class="sum-val">{{ completedCount }}</div></div>
+      </div>
+      <div class="sum-chip sum-progress">
+        <div class="sum-icon"><i class="fas fa-spinner"></i></div>
+        <div><div class="sum-label">{{ ls.current === "bn" ? "চলমান" : "In Progress" }}</div><div class="sum-val">{{ inProgressCount }}</div></div>
+      </div>
+      <div class="sum-chip sum-pending">
+        <div class="sum-icon"><i class="fas fa-clock"></i></div>
+        <div><div class="sum-label">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</div><div class="sum-val">{{ pendingCount }}</div></div>
+      </div>
+    </div>
+
+    <!-- ── Filter bar ── -->
+    <div class="tl-filter-bar">
+      <div class="tl-filter-input">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="text" [(ngModel)]="searchText" (input)="applyFilter()"
+               placeholder="এলাকা / ওয়ার্ড / ধরন দিয়ে খুঁজুন...">
+      </div>
+      <div class="tl-filter-input">
+        <i class="fas fa-calendar"></i>
+        <input type="date" [(ngModel)]="fromDate" (change)="applyFilter()" placeholder="শুরু">
+      </div>
+      <div class="tl-filter-input">
+        <i class="fas fa-calendar-check"></i>
+        <input type="date" [(ngModel)]="toDate" (change)="applyFilter()" placeholder="শেষ">
+      </div>
+      <div class="tl-filter-select">
+        <i class="fas fa-filter"></i>
+        <select [(ngModel)]="selectedStatus" (change)="applyFilter()">
+          <option value="">সকল স্ট্যাটাস</option>
+          <option>{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</option>
+          <option>{{ ls.current === "bn" ? "চলমান" : "In Progress" }}</option>
+          <option>{{ ls.current === "bn" ? "সম্পন্ন" : "Completed" }}</option>
+          <option>{{ ls.current === "bn" ? "বাতিল" : "Cancelled" }}</option>
+          <option>{{ ls.current === "bn" ? "সক্রিয়" : "Active" }}</option>
+        </select>
+      </div>
+      <button class="tl-btn-clear" (click)="clearFilter()">
+        <i class="fas fa-rotate-left"></i> ফিল্টার মুছুন
+      </button>
+    </div>
+
+    <!-- ── Table ── -->
+    <div class="tl-records-section">
+      <div class="tl-records-head">
+        <h3><i class="fas fa-table"></i> সংগ্রহ প্রতিবেদন</h3>
+        <span class="tl-count-badge">{{ filteredData.length }} টি রেকর্ড</span>
+      </div>
+      <div class="tl-table-wrap">
+        <table class="tl-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+              <th>এলাকা</th>
+              <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+              <th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th>
+              <th>স্ট্যাটাস</th>
+              <th>{{ ls.current === "bn" ? "আপডেট করুন" : "Update" }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of filteredData; let i = index">
+              <td class="td-num">{{ i + 1 }}</td>
+              <td>
+                <span class="type-badge">
+                  <i class="fas fa-recycle"></i> {{ r.type }}
+                </span>
+              </td>
+              <td><strong>{{ r.area }}</strong></td>
+              <td><span class="ward-chip">{{ r.ward }}</span></td>
+              <td class="td-date"><i class="fas fa-calendar-days" style="color:#9ca3af;margin-right:4px"></i>{{ r.date }}</td>
+              <td>
+                <span class="status-pill" [ngClass]="'s-'+r.status.toLowerCase().replace(' ','-')">
+                  <span class="s-dot"></span>{{ r.status }}
+                </span>
+              </td>
+              <td>
+                <div class="tl-filter-select" style="min-width:140px" *ngIf="r.source === 'pickup'; else readonlyWasteStatus">
+                  <i class="fas fa-pen-to-square"></i>
+                  <select #sel (change)="updateStatus(r, sel.value); sel.value=''">
+                    <option value="">স্ট্যাটাস পরিবর্তন...</option>
+                    <option value="Pending">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</option>
+                    <option value="In Progress">{{ ls.current === "bn" ? "চলমান" : "In Progress" }}</option>
+                    <option value="Completed">{{ ls.current === "bn" ? "সম্পন্ন" : "Completed" }}</option>
+                    <option value="Cancelled">{{ ls.current === "bn" ? "বাতিল" : "Cancelled" }}</option>
+                  </select>
+                </div>
+                <ng-template #readonlyWasteStatus>
+                  <span class="status-pill s-completed"><span class="s-dot"></span>Recorded</span>
+                </ng-template>
+              </td>
+            </tr>
+            <tr *ngIf="filteredData.length === 0">
+              <td colspan="7" class="no-data">
+                <i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#d1d5db"></i>
+                কোনো রেকর্ড পাওয়া যায়নি
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

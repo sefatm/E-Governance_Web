@@ -1,0 +1,148 @@
+<div class="tl-toast-area" *ngIf="toasts.length">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success'?'fa-circle-check':'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <div class="tl-tabs">
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='settings'" (click)="switchTab('settings')">
+      <i class="fas fa-cog"></i> {{ ls.current === "bn" ? "সিস্টেম সেটিংস" : "System Settings" }}
+    </button>
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='audit'" (click)="switchTab('audit')">
+      <i class="fas fa-clock-rotate-left"></i> {{ ls.current === "bn" ? "অডিট লগ" : "Audit Logs" }}
+      <span class="tl-tab-count" *ngIf="logs.length">{{ logs.length }}</span>
+    </button>
+  </div>
+
+  <!-- SYSTEM SETTINGS -->
+  <ng-container *ngIf="activeTab==='settings'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">{{ ls.current === "bn" ? "সিস্টেম সেটিংস" : "System Settings" }}</h2>
+          <span class="tl-header__sub">Manage municipal system configuration</span>
+        </div>
+      </div>
+      <!-- Category filter -->
+      <div class="cat-pills">
+        <button *ngFor="let cat of categories" class="cat-pill"
+                [class.cat-pill--active]="activeCategory===cat"
+                (click)="filterByCategory(cat)">{{ cat }}</button>
+      </div>
+    </div>
+
+    <div class="tl-card tl-card--list">
+      <div class="tl-loading" *ngIf="isLoading"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+
+      <div class="tl-empty" *ngIf="!isLoading && filteredSettings.length===0">
+        <i class="fas fa-gear"></i>
+        <p>No settings found. Insert default settings using the SQL below.</p>
+        <div class="seed-sql">
+          <pre>{{ seedSql }}</pre>
+          <button class="btn-copy" (click)="copySql()"><i class="fas fa-copy"></i> Copy SQL</button>
+        </div>
+      </div>
+
+      <table class="tl-table" *ngIf="!isLoading && filteredSettings.length > 0">
+        <thead>
+          <tr>
+            <th>#</th><th>{{ ls.current === "bn" ? "বিভাগ" : "Category" }}</th><th>Setting Name</th>
+            <th>Current Value</th><th>Last Updated</th><th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of filteredSettings; let i=index">
+            <td>{{ i+1 }}</td>
+            <td><span class="cat-badge cat-badge--{{ s.category?.toLowerCase() }}">{{ s.category }}</span></td>
+            <td><strong>{{ s.label }}</strong><div class="setting-key">{{ s.settingKey }}</div></td>
+            <td>
+              <span *ngIf="editingId !== s.id" class="setting-val">{{ s.settingVal }}</span>
+              <input *ngIf="editingId === s.id" type="text" [(ngModel)]="editVal"
+                     class="edit-input" (keyup.enter)="saveEdit(s)" (keyup.escape)="cancelEdit()">
+            </td>
+            <td>{{ s.updatedAt | date:'dd/MM/yy HH:mm' }}</td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-edit" *ngIf="editingId !== s.id" (click)="startEdit(s)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-save" *ngIf="editingId === s.id" (click)="saveEdit(s)" [disabled]="isSaving">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="btn-cancel" *ngIf="editingId === s.id" (click)="cancelEdit()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- ══ AUDIT LOG ══ -->
+  <ng-container *ngIf="activeTab==='audit'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">{{ ls.current === "bn" ? "অডিট লগ" : "Audit Logs" }}</h2>
+          <span class="tl-header__sub">System activity and user action logs</span>
+        </div>
+      </div>
+      <button class="btn-clear" (click)="clearLogs()" *ngIf="logs.length > 0">
+        <i class="fas fa-trash"></i> Clear All
+      </button>
+    </div>
+
+    <div class="tl-card tl-card--list" style="padding:16px">
+      <!-- Filter row -->
+      <div class="audit-filter-row">
+        <div class="tl-input-wrap" style="flex:1">
+          <i class="fas fa-user tl-ico"></i>
+          <input type="text" [(ngModel)]="auditSearch" placeholder="Search by username or module..."
+                 (input)="filterLogs()" class="tl-search-input">
+        </div>
+        <select [(ngModel)]="auditModule" (change)="filterLogs()" class="audit-select">
+          <option value="">All Modules</option>
+          <option *ngFor="let m of auditModules" [value]="m">{{ m }}</option>
+        </select>
+      </div>
+
+      <div class="tl-loading" *ngIf="isLoadingLogs"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+
+      <table class="tl-table" *ngIf="!isLoadingLogs && filteredLogs.length > 0">
+        <thead>
+          <tr><th>#</th><th>User</th><th>{{ ls.current === "bn" ? "ভূমিকা" : "Role" }}</th><th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th><th>{{ ls.current === "bn" ? "মডিউল" : "Module" }}</th><th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th><th>Time</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of filteredLogs; let i=index">
+            <td>{{ i+1 }}</td>
+            <td><strong>{{ log.username }}</strong></td>
+            <td><span class="role-tag">{{ log.userRole || '—' }}</span></td>
+            <td>{{ log.action }}</td>
+            <td><span class="module-tag">{{ log.module }}</span></td>
+            <td>
+              <span class="tl-badge" [class.badge-approved]="log.status==='Success'"
+                    [class.badge-rejected]="log.status==='Failed'"
+                    [class.badge-pending]="!log.status">
+                {{ log.status || 'Unknown' }}
+              </span>
+            </td>
+            <td>{{ log.createdAt | date:'dd/MM/yy HH:mm' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tl-empty" *ngIf="!isLoadingLogs && filteredLogs.length===0">
+        <i class="fas fa-scroll"></i><p>No audit logs found.</p>
+      </div>
+    </div>
+  </ng-container>
+</div>

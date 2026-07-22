@@ -1,0 +1,69 @@
+<div class="status-container">
+  <h2>{{ ls.current === "bn" ? "আবেদনের অবস্থা দেখুন" : "Check Application Status" }}</h2>
+
+  <div class="mobile-box">
+    <input type="text" [(ngModel)]="mobile" [placeholder]="ls.current === 'bn' ? 'মোবাইল নম্বর দিন' : 'Enter Mobile Number'">
+    <button (click)="sendOtp()">{{ ls.current === "bn" ? "OTP পাঠান" : "Send OTP" }}</button>
+  </div>
+
+  <div class="otp-box" *ngIf="otpSent && !otpVerified">
+    <input type="text" maxlength="6" [(ngModel)]="userOtp" [placeholder]="ls.current === 'bn' ? 'OTP দিন' : 'Enter OTP'">
+    <button (click)="verifyOtp()">{{ ls.current === "bn" ? "OTP যাচাই করুন" : "Verify OTP" }}</button>
+  </div>
+
+  <div class="result-box" *ngIf="otpVerified">
+    <h3>{{ ls.current === "bn" ? "আপনার আবেদনসমূহ" : "Your Applications" }}</h3>
+    <table *ngIf="filteredApplications.length > 0">
+      <thead><tr><th>Name</th><th>Type</th><th>Status</th><th>Certificate</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let app of filteredApplications">
+          <td>{{ app.name }}</td><td>{{ app.type }}</td><td><span class="status-pill" [class.final-ok]="isApproved(app)">{{ app.status }}</span></td>
+          <td>
+            <button class="download-btn" *ngIf="isApproved(app) && isDownloadSupported(app)" (click)="openDownloadPopup(app)"><i class="fas fa-file-pdf"></i> Download</button>
+            <span class="waiting-text" *ngIf="isApproved(app) && !isDownloadSupported(app)"><i class="fas fa-clock"></i> Certificate not available</span>
+            <span class="waiting-text" *ngIf="!isApproved(app)"><i class="fas fa-clock"></i> Waiting for final approval</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="empty-msg" *ngIf="filteredApplications.length === 0">No application found ❗</p>
+  </div>
+</div>
+
+<!-- Demo OTP popup -->
+<div class="modal-backdrop" *ngIf="otpModalVisible">
+  <div class="otp-modal">
+    <button class="modal-close" (click)="closeOtpPopup()">×</button>
+    <div class="otp-icon"><i class="fas fa-shield-alt"></i></div>
+    <span class="modal-kicker">SECURE VERIFICATION</span>
+    <h3>{{ ls.current === 'bn' ? 'আপনার OTP কোড' : 'Your OTP Code' }}</h3>
+    <p>{{ ls.current === 'bn' ? 'ডেমো মোডে নিচের কোডটি ব্যবহার করুন।' : 'Use the code below for this demo verification.' }}</p>
+    <div class="otp-code">{{ generatedOtp || '••••••' }}</div>
+    <div class="otp-note"><i class="fas fa-clock"></i> Code expires in 5 minutes</div>
+    <button class="modal-primary" (click)="closeOtpPopup()">Enter OTP</button>
+  </div>
+</div>
+
+<!-- Certificate download popup -->
+<div class="modal-backdrop" *ngIf="downloadModalApp">
+  <div class="download-modal">
+    <button class="modal-close" (click)="closeDownloadPopup()">×</button>
+    <div class="success-ring"><i class="fas fa-check"></i></div>
+    <span class="modal-kicker">CERTIFICATE READY</span>
+    <h3>{{ downloadModalApp.type }} Certificate</h3>
+    <p class="ready-copy">Two-step officer approval is complete. Your official certificate is ready to download.</p>
+    <div class="cert-summary">
+      <div><span>Applicant</span><strong>{{ downloadModalApp.name }}</strong></div>
+      <div><span>Status</span><strong class="approved-text">Approved</strong></div>
+      <div *ngIf="downloadModalApp.details?.certificateNo"><span>Certificate No</span><strong>{{ downloadModalApp.details.certificateNo }}</strong></div>
+      <div *ngIf="downloadModalApp.type === 'Family'"><span>Total Members</span><strong>{{ downloadModalApp.details?.memberCount || getFamilyMembers(downloadModalApp).length }}</strong></div>
+    </div>
+    <div class="family-preview" *ngIf="downloadModalApp.type === 'Family' && getFamilyMembers(downloadModalApp).length">
+      <h4><i class="fas fa-users"></i> Family Members</h4>
+      <div class="member-row" *ngFor="let m of getFamilyMembers(downloadModalApp); let i=index">
+        <span class="member-no">{{ i+1 }}</span><span>{{ m.name || m.memberName || 'Member' }}</span><small>{{ m.relation || m.relationship || '' }}</small>
+      </div>
+    </div>
+    <button class="download-confirm" (click)="download(downloadModalApp)"><i class="fas fa-download"></i> Download Official PDF</button>
+  </div>
+</div>

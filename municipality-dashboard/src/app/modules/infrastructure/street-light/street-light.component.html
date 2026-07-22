@@ -1,0 +1,186 @@
+<div class="if-toast-area" *ngIf="toasts.length > 0">
+  <div *ngFor="let t of toasts" class="if-toast" [class.if-toast--ok]="t.type==='success'" [class.if-toast--fail]="t.type==='error'" [class.if-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="if-page">
+  <div class="if-header">
+    <div class="if-header__top">
+      <div class="if-header__logo-box">
+        <img src="assets/photo/bangladesh-govt.png" class="if-header__logo-img" onerror="this.style.display='none'">
+      </div>
+      <div class="if-header__text">
+        <span class="if-header__gov-bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="if-header__gov-en">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="if-header__title">সড়ক বাতি আবেদন ফরম</span>
+        <span class="if-header__title-en">Street Light Maintenance / Installation Request</span>
+      </div>
+      <img src="assets/photo/bangladesh-govt.png" class="if-header__logo-img-right" onerror="this.style.display='none'">
+    </div>
+    <div class="if-header__note">Fields marked <span>*</span> are mandatory</div>
+  </div>
+
+  <div class="if-steps">
+    <ng-container *ngFor="let s of steps; let i = index">
+      <div class="if-step" [class.if-step--active]="currentStep===i+1" [class.if-step--done]="currentStep>i+1">
+        <div class="if-step__circle">
+          <i class="fas fa-check" *ngIf="currentStep>i+1"></i>
+          <span *ngIf="currentStep<=i+1">{{i+1}}</span>
+        </div>
+        <span class="if-step__label">{{s}}</span>
+      </div>
+      <div class="if-step__line" [class.if-step__line--done]="currentStep>i+1" *ngIf="i<steps.length-1"></div>
+    </ng-container>
+  </div>
+
+  <div class="if-card">
+    <form novalidate>
+
+      <!-- Step 1 -->
+      <div class="if-panel" [class.if-panel--active]="currentStep===1">
+        <div class="if-panel__head">
+          <div class="if-panel__icon"><i class="fas fa-user"></i></div>
+          <div><h3>{{ ls.current === "bn" ? "আবেদনকারীর তথ্য" : "Applicant Information" }}</h3><p>Enter your personal and contact details</p></div>
+          <span class="if-step-tag">Step 1 of 3</span>
+        </div>
+        <div class="if-grid-2">
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-user if-ico"></i>
+              <input type="text" [(ngModel)]="lightForm.name" name="name" [class.invalid]="submitted&&!lightForm.name" placeholder="Enter full name">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>National ID (NID)</label>
+            <div class="if-input-wrap"><i class="fas fa-id-card if-ico"></i>
+              <input type="text" [(ngModel)]="lightForm.nid" name="nid" placeholder="10/13/17 digit NID">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "যোগাযোগ নম্বর" : "Contact Number" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-mobile-screen if-ico"></i>
+              <input type="text" [(ngModel)]="lightForm.contact" name="contact" [class.invalid]="submitted&&!lightForm.contact" placeholder="01XXXXXXXXX" (input)="onContactInput($event)">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>District <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-map if-ico"></i>
+              <input type="text" [(ngModel)]="lightForm.district" name="district" [class.invalid]="submitted&&!lightForm.district" placeholder="e.g. Dhaka">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Upazila <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-map-pin if-ico"></i>
+              <input type="text" [(ngModel)]="lightForm.upazila" name="upazila" [class.invalid]="submitted&&!lightForm.upazila" placeholder="Enter upazila">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-hashtag if-ico"></i>
+              <input type="text" [(ngModel)]="lightForm.ward" name="ward" [class.invalid]="submitted&&!lightForm.ward" placeholder="Ward number">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Area / Road Name <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-location-dot if-ico"></i>
+              <input type="text" [(ngModel)]="lightForm.location" name="location" [class.invalid]="submitted&&!lightForm.location" placeholder="Street or area name">
+            </div>
+          </div>
+        </div>
+        <div class="if-nav"><span></span>
+          <button type="button" class="if-btn if-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="if-panel" [class.if-panel--active]="currentStep===2">
+        <div class="if-panel__head">
+          <div class="if-panel__icon"><i class="fas fa-lightbulb"></i></div>
+          <div><h3>Light Problem Details</h3><p>Describe the street light issue</p></div>
+          <span class="if-step-tag">Step 2 of 3</span>
+        </div>
+        <div class="if-grid-2">
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "সমস্যার ধরন" : "Problem Type" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-circle-exclamation if-ico"></i>
+              <select [(ngModel)]="lightForm.problemType" name="problemType" [class.invalid]="submitted&&!lightForm.problemType">
+                <option value="">Select problem</option>
+                <option>Light Not Working</option><option>New Installation Needed</option>
+                <option>Damaged Pole</option><option>Wiring Issue</option>
+              </select>
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Light Type</label>
+            <div class="if-input-wrap"><i class="fas fa-tag if-ico"></i>
+              <select [(ngModel)]="lightForm.lightType" name="lightType">
+                <option>LED</option><option>Fluorescent</option>
+                <option>Sodium</option><option>{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Number of Lights Affected</label>
+            <div class="if-input-wrap"><i class="fas fa-hashtag if-ico"></i>
+              <input type="number" [(ngModel)]="lightForm.count" name="count" placeholder="e.g. 3">
+            </div>
+          </div>
+        </div>
+        <div class="if-field if-field--full">
+          <label>{{ ls.current === "bn" ? "বিবরণ" : "Description" }} <span class="req">*</span></label>
+          <div class="if-input-wrap"><i class="fas fa-pen-to-square if-ico if-ico--top"></i>
+            <textarea [(ngModel)]="lightForm.description" name="description" rows="4" [class.invalid]="submitted&&!lightForm.description" placeholder="Describe the issue in detail..."></textarea>
+          </div>
+        </div>
+        <div class="if-field" style="margin-top:18px;">
+          <label>Priority Level</label>
+          <div class="if-priority-chips">
+            <label *ngFor="let p of ['Low','Medium','High','Critical']" class="if-priority-chip" [ngClass]="'active--' + (lightForm.priority===p ? p : '')" (click)="setPriority(p)">
+              <i class="fas" [ngClass]="{'fa-arrow-down':p==='Low','fa-minus':p==='Medium','fa-arrow-up':p==='High','fa-triangle-exclamation':p==='Critical'}"></i>
+              {{p}}
+            </label>
+          </div>
+        </div>
+        <div class="if-nav">
+          <button type="button" class="if-btn if-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}</button>
+          <button type="button" class="if-btn if-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="if-panel" [class.if-panel--active]="currentStep===3">
+        <div class="if-panel__head">
+          <div class="if-panel__icon"><i class="fas fa-file-signature"></i></div>
+          <div><h3>Declaration &amp; Submit</h3><p>Review and submit your application</p></div>
+          <span class="if-step-tag">Step 3 of 3</span>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px;font-size:13px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><span style="color:#64748b">Name:</span> <strong>{{lightForm.name}}</strong></div>
+            <div><span style="color:#64748b">Contact:</span> <strong>{{lightForm.contact}}</strong></div>
+            <div><span style="color:#64748b">Location:</span> <strong>{{lightForm.district}}, {{lightForm.upazila}}</strong></div>
+            <div><span style="color:#64748b">Problem:</span> <strong>{{lightForm.problemType}}</strong></div>
+            <div><span style="color:#64748b">Light Type:</span> <strong>{{lightForm.lightType}}</strong></div>
+            <div><span style="color:#64748b">Priority:</span> <strong>{{lightForm.priority}}</strong></div>
+          </div>
+        </div>
+        <div class="if-declaration">
+          <label class="if-check-label">
+            <input type="checkbox" [(ngModel)]="agree" name="agree">
+            <span>I hereby declare that all information provided is true and correct.</span>
+          </label>
+        </div>
+        <div class="if-nav">
+          <button type="button" class="if-btn if-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}</button>
+          <button type="button" class="if-btn if-btn--submit" (click)="submitForm()" [disabled]="isSubmitting">
+            <i class="fas fa-paper-plane" *ngIf="!isSubmitting"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+            {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

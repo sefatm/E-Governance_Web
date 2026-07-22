@@ -1,0 +1,55 @@
+<div class="container">
+
+  <h2><i class="fas fa-exclamation-triangle"></i> Holding Tax Due List</h2>
+
+  <div class="filter-box">
+    <input type="text" placeholder="Search by Holding No or Owner Name"
+           [(ngModel)]="searchText" class="search-box">
+    <button (click)="loadData()" class="btn-reload">
+      <i class="fas fa-sync-alt"></i> {{ ls.current === "bn" ? "রিফ্রেশ" : "Refresh" }}
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+  </div>
+
+  <!-- Table -->
+  <table *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Holding No</th>
+        <th>Owner</th>
+        <th>{{ ls.current === "bn" ? "সম্পত্তির ধরন" : "Property Type" }}</th>
+        <th>Total Tax</th>
+        <th>{{ ls.current === "bn" ? "পরিশোধিত" : "Paid" }}</th>
+        <th>Due</th>
+        <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of filtered; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td><strong>{{ item.holdingNo }}</strong></td>
+        <td>{{ item.ownerName }}</td>
+        <td>{{ item.propertyType || '—' }}</td>
+        <td>{{ item.totalPayable || item.taxAmount || 0 | number }} BDT</td>
+        <td>{{ item.paid | number }} BDT</td>
+        <td>{{ item.due | number }} BDT</td>
+        <td>
+          <span [class]="item.due === 0 ? 'badge-paid' : 'badge-due'">
+            {{ item.due === 0 ? 'Paid' : 'Due' }}
+          </span>
+        </td>
+      </tr>
+      <tr *ngIf="filtered.length === 0">
+        <td colspan="8" class="empty-row">
+          <i class="fas fa-inbox"></i> {{ ls.current === "bn" ? "কোনো রেকর্ড নেই" : "No records found" }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>

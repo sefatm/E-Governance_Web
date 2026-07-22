@@ -1,0 +1,41 @@
+/* ════════════════════════════════════════════════════════════
+   VGD / VGF Card Status — Component-specific styles
+   (shared base styles are in shared-status.css)
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Card type pill (VGD / VGF) ────────────────────────────── */
+.type-pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 5px;
+  font-size: .75rem;
+  font-weight: 700;
+  margin-right: .4rem;
+}
+.type-pill.vgd { background: #ede9fe; color: #5b21b6; }
+.type-pill.vgf { background: #fce7f3; color: #9d174d; }
+
+/* ── Specialised sc-info-value modifiers ───────────────────── */
+.sc-info-value.code      { font-family: monospace; color: #059669; }
+.sc-info-value.highlight { color: #1e3a8a; font-weight: 700; font-size: 1.05rem; }
+
+/* ── Expiry warning ────────────────────────────────────────── */
+.expiring   { color: #b45309 !important; }
+.expiry-tag { font-size: .75rem; margin-left: .3rem; }
+
+/* ── Renew button ──────────────────────────────────────────── */
+.btn-renew {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .86rem;
+  font-family: inherit;
+  transition: background .2s;
+}
+.btn-renew:hover { background: #ddd6fe; }

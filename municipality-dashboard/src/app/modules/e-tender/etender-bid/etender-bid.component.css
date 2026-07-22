@@ -1,0 +1,242 @@
+/* ============================================================
+   E-Tender Bid Form — License-style header, single page
+   ============================================================ */
+
+/* ── Page wrapper ─────────────────────────────────────────── */
+.tl-page {
+  max-width: 900px;
+  margin: 32px auto;
+  padding: 0 20px 80px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #1e293b;
+}
+
+/* ── Toast ────────────────────────────────────────────────── */
+.tl-toast-area { position:fixed; top:20px; right:20px; z-index:9999; max-width:340px; }
+.tl-toast {
+  display:flex; align-items:center; gap:10px;
+  padding:13px 18px; border-radius:10px;
+  font-size:13.5px; font-weight:600; color:#fff;
+  box-shadow:0 4px 18px rgba(0,0,0,.18);
+  animation:toastIn .3s ease;
+}
+.tl-toast--ok   { background:linear-gradient(135deg,#059669,#047857); }
+.tl-toast--fail { background:linear-gradient(135deg,#dc2626,#b91c1c); }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+
+/* ── Success screen ───────────────────────────────────────── */
+.success-screen {
+  background:#fff; border-radius:16px; padding:60px 40px;
+  text-align:center; box-shadow:0 4px 20px rgba(0,0,0,.08);
+  border-top:5px solid #059669;
+}
+.success-icon { font-size:64px; color:#059669; margin-bottom:16px; }
+.success-screen h2 { color:#064e3b; font-size:22px; font-weight:800; margin:0 0 12px; }
+.success-screen p  { color:#475569; font-size:15px; line-height:1.7; }
+
+/* ── Header (License style) ───────────────────────────────── */
+.tl-header {
+  display:flex; align-items:center; justify-content:space-between;
+  background:linear-gradient(135deg,#006633 0%,#008844 50%,#006633 100%);
+  border-top:4px solid #cc0000;
+  border-radius:16px 16px 0 0;
+  padding:28px 32px;
+  border-bottom:5px solid #f59e0b;
+  gap:16px;
+}
+.tl-header__left  { display:flex; align-items:center; gap:18px; }
+.tl-header__logo  { width:56px; height:56px; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
+.tl-header__bn    { display:block; font-size:16px; font-weight:700; color:#fff; font-family:'Noto Serif Bengali',serif; text-shadow:0 1px 2px rgba(0,0,0,.3); }
+.tl-header__country { display:block; font-size:11px; font-weight:500; color:rgba(255,255,255,.75); letter-spacing:.5px; text-transform:uppercase; margin-bottom:4px; }
+.tl-header__divider { width:100%; height:1px; background:rgba(255,255,255,.3); margin:6px 0; }
+.tl-header__title   { margin:0 0 4px; font-size:20px; font-weight:700; color:#fff; letter-spacing:-.2px; }
+.tl-header__title-en { display:block; font-size:13px; color:rgba(255,255,255,.85); margin-bottom:4px; }
+.tl-header__sub   { font-size:12px; color:rgba(255,255,255,.65); }
+.tl-header__right { display:flex; align-items:center; }
+.tl-header__logo--right { width:70px; height:70px; object-fit:contain; filter:drop-shadow(0 2px 4px rgba(0,0,0,.3)); }
+
+/* ── Body ─────────────────────────────────────────────────── */
+.tl-body {
+  background:#fff;
+  border:1px solid #d1d5db;
+  border-top:none;
+  border-radius:0 0 16px 16px;
+  box-shadow:0 4px 6px -1px rgba(0,0,0,.04),0 10px 25px -5px rgba(0,0,0,.06);
+  overflow:hidden;
+}
+
+/* ── Form ─────────────────────────────────────────────────── */
+.gov-form { padding:36px 36px 44px; }
+
+/* ── Section Labels ───────────────────────────────────────── */
+.section-label {
+  display:flex; align-items:center; gap:8px;
+  font-size:11px; font-weight:700; color:#059669;
+  text-transform:uppercase; letter-spacing:1px;
+  margin:28px 0 16px;
+  padding:8px 12px;
+  border-left:4px solid #059669;
+  background:#f0fdf4;
+  border-radius:0 6px 6px 0;
+}
+.section-label:first-child { margin-top:0; }
+.section-label i { font-size:12px; }
+
+/* ── Row ──────────────────────────────────────────────────── */
+.row-2 { display:grid; grid-template-columns:1fr 1fr; gap:0 24px; }
+
+/* ── Field ────────────────────────────────────────────────── */
+.field { margin-bottom:20px; }
+.field label { display:block; font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; }
+.field-hint  { font-size:11px; font-weight:400; color:#9ca3af; margin-left:4px; }
+.req { color:#ef4444; font-weight:700; }
+
+/* ── Inputs ───────────────────────────────────────────────── */
+.gov-form input:not([type="checkbox"]):not([type="file"]),
+.gov-form select,
+.gov-form textarea {
+  width:100%; padding:11px 16px; font-size:14px;
+  font-family:inherit; color:#111827;
+  background:#f9fafb; border:1.5px solid #d1d5db;
+  border-radius:8px; transition:all .2s; box-sizing:border-box;
+}
+.gov-form input::placeholder { color:#9ca3af; }
+.gov-form input:not([type="checkbox"]):focus,
+.gov-form select:focus,
+.gov-form textarea:focus {
+  outline:none; background:#fff;
+  border-color:#059669;
+  box-shadow:0 0 0 3px rgba(5,150,105,.08);
+}
+.gov-form select {
+  appearance:none; cursor:pointer; padding-right:42px;
+  background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 4.5L6 7.5L9 4.5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 14px center;
+}
+.gov-form textarea { min-height:90px; resize:vertical; line-height:1.6; }
+
+/* ── Tender Preview ───────────────────────────────────────── */
+.preview-box {
+  margin-bottom:20px; padding:16px;
+  background:#ecfdf5; border:1.5px solid #6ee7b7;
+  border-radius:10px; animation:fadeIn .25s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:translateY(-4px)} to{opacity:1;transform:translateY(0)} }
+.preview-title { font-size:14px; font-weight:700; color:#064e3b; margin-bottom:12px; display:flex; align-items:center; gap:7px; }
+.preview-meta  { display:flex; gap:24px; flex-wrap:wrap; }
+.preview-meta > div { display:flex; flex-direction:column; gap:3px; }
+.pm-label { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:#6b7280; }
+.pm-val   { font-size:14px; font-weight:700; color:#064e3b; font-family:'Courier New',monospace; }
+
+/* Deadline warning */
+.deadline-warn {
+  font-size:13px; font-weight:600; color:#92400e;
+  background:#fef3c7; border:1px solid #fde68a;
+  border-radius:8px; padding:8px 12px;
+  margin-bottom:12px; display:flex; align-items:center; gap:6px;
+}
+.deadline-warn.urgent { color:#b91c1c; background:#fee2e2; border-color:#fecaca; }
+
+/* ── Blacklist ────────────────────────────────────────────── */
+.blacklist-check {
+  display:flex; align-items:center; gap:8px;
+  font-size:13px; color:#6b7280;
+  padding:10px 14px; background:#f9fafb;
+  border-radius:8px; margin-bottom:16px;
+}
+.checking-spinner {
+  width:14px; height:14px;
+  border:2px solid #d1d5db; border-top-color:#059669;
+  border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.blacklist-alert {
+  display:flex; align-items:flex-start; gap:12px;
+  padding:14px 16px; background:#fff1f2;
+  border:1.5px solid #fda4af; border-radius:10px;
+  margin-bottom:16px; animation:fadeIn .25s ease;
+}
+.blacklist-alert i      { color:#e11d48; font-size:18px; margin-top:2px; flex-shrink:0; }
+.blacklist-alert strong { display:block; color:#be123c; font-size:14px; margin-bottom:4px; }
+.blacklist-alert p      { color:#9f1239; font-size:13px; margin:0; }
+
+/* ── Upload Zone ──────────────────────────────────────────── */
+.upload-zone {
+  border:2px dashed #d1d5db; border-radius:10px;
+  padding:32px 20px; text-align:center;
+  cursor:pointer; transition:all .2s; background:#f9fafb;
+}
+.upload-zone:hover { border-color:#059669; background:#f0fdf4; }
+.upload-icon-fa { font-size:36px; color:#9ca3af; margin-bottom:10px; display:block; }
+.upload-zone:hover .upload-icon-fa { color:#059669; }
+.upload-text { font-size:14px; font-weight:600; color:#374151; margin-bottom:4px; }
+.upload-sub  { font-size:12px; color:#9ca3af; }
+
+.file-preview {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:12px 16px; background:#f0fdf4;
+  border:1.5px solid #6ee7b7; border-radius:10px; animation:fadeIn .2s ease;
+}
+.fp-left     { display:flex; align-items:center; gap:12px; }
+.fp-icon-fa  { font-size:26px; color:#059669; }
+.fp-name     { font-size:14px; font-weight:600; color:#064e3b; }
+.fp-size     { font-size:12px; color:#6b7280; }
+.fp-remove   {
+  width:28px; height:28px; border-radius:50%;
+  border:1px solid #fecaca; background:#fee2e2;
+  color:#b91c1c; cursor:pointer; font-size:13px;
+  display:grid; place-items:center; flex-shrink:0; transition:background .2s;
+}
+.fp-remove:hover { background:#fca5a5; }
+.file-error  { margin-top:6px; font-size:13px; color:#b91c1c; display:flex; align-items:center; gap:5px; }
+
+/* ── Declaration ──────────────────────────────────────────── */
+.declaration-box {
+  margin-top:28px; padding:16px 20px;
+  background:#f9fafb; border:1.5px solid #e5e7eb; border-radius:10px;
+}
+.declaration-box label { display:flex; align-items:flex-start; gap:12px; cursor:pointer; }
+.declaration-box input[type="checkbox"] { margin-top:3px; width:18px; height:18px; flex-shrink:0; accent-color:#059669; }
+.declaration-box span { font-size:13.5px; color:#4b5563; line-height:1.5; }
+
+/* ── Actions ──────────────────────────────────────────────── */
+.form-actions {
+  display:flex; justify-content:flex-end; gap:12px;
+  margin-top:28px; padding-top:20px;
+  border-top:1px solid #f1f5f9;
+}
+.btn-reset {
+  display:flex; align-items:center; gap:7px;
+  padding:12px 24px; border-radius:10px;
+  border:1.5px solid #d1d5db; background:#fff;
+  font-family:inherit; font-size:14px; font-weight:600;
+  cursor:pointer; color:#6b7280; transition:all .2s;
+}
+.btn-reset:hover { background:#f9fafb; border-color:#9ca3af; }
+.btn-submit {
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  padding:12px 32px; font-size:15px; font-weight:700;
+  font-family:inherit; color:#fff;
+  background:linear-gradient(135deg,#059669,#047857);
+  border:none; border-radius:10px; cursor:pointer;
+  box-shadow:0 2px 8px rgba(5,150,105,.25); transition:all .2s;
+}
+.btn-submit:hover:not(:disabled) { opacity:.92; transform:translateY(-1px); box-shadow:0 4px 14px rgba(5,150,105,.3); }
+.btn-submit:disabled { background:#9ca3af; cursor:not-allowed; box-shadow:none; transform:none; }
+.btn-spinner {
+  width:14px; height:14px;
+  border:2px solid rgba(255,255,255,.4); border-top-color:#fff;
+  border-radius:50%; animation:spin .7s linear infinite; display:inline-block;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width:640px) {
+  .tl-page        { margin:16px auto; padding:0 12px 60px; }
+  .tl-header      { flex-direction:column; align-items:flex-start; border-radius:12px 12px 0 0; padding:20px; }
+  .tl-header__right { display:none; }
+  .gov-form       { padding:24px 20px 32px; }
+  .row-2          { grid-template-columns:1fr; gap:0; }
+  .preview-meta   { gap:14px; }
+  .form-actions   { flex-direction:column-reverse; }
+  .btn-submit, .btn-reset { width:100%; justify-content:center; }
+}

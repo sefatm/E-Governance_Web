@@ -1,0 +1,136 @@
+<div class="map-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="ph-icon"><i class="fas fa-map-location-dot"></i></div>
+      <div>
+        <h2>{{ ls.current === "bn" ? "হোল্ডিং অবস্থান মানচিত্র" : "Holding Location Map" }}</h2>
+        <p>Set GPS coordinates for each registered holding</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="hs-item">
+        <span class="hs-val">{{ pinnedCount }}</span>
+        <span class="hs-label">Pinned</span>
+      </div>
+      <div class="hs-div"></div>
+      <div class="hs-item">
+        <span class="hs-val">{{ unpinnedCount }}</span>
+        <span class="hs-label">Not set</span>
+      </div>
+      <div class="hs-div"></div>
+      <div class="hs-item">
+        <span class="hs-val">{{ holdings.length }}</span>
+        <span class="hs-label">{{ ls.current === "bn" ? "মোট" : "Total" }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS / ERROR -->
+  <div class="hlm-msg hlm-msg--ok"   *ngIf="successMsg"><i class="fas fa-circle-check"></i> {{ successMsg }}</div>
+  <div class="hlm-msg hlm-msg--fail" *ngIf="errorMsg"><i class="fas fa-triangle-exclamation"></i> {{ errorMsg }}</div>
+
+  <!-- BODY -->
+  <div class="map-body">
+
+    <!-- MAP WRAP -->
+    <div class="map-wrap">
+
+      <div class="pin-mode-banner" *ngIf="pinModeActive">
+        <i class="fas fa-crosshairs fa-pulse"></i>
+        <span>Click on the map to place pin for
+          <strong>{{ selectedHolding?.holdingNo || 'holding' }}</strong>
+        </span>
+        <div class="pin-mode-actions">
+          <button class="btn-save-pin" [disabled]="!pendingLocation || isSavingPin" (click)="savePin()">
+            <i class="fas" [ngClass]="isSavingPin ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i>
+            {{ isSavingPin ? 'Saving...' : 'Save Pin' }}
+          </button>
+          <button class="btn-cancel-pin" (click)="cancelPinMode()">
+            <i class="fas fa-times"></i> {{ ls.current === "bn" ? "বাতিল" : "Cancel" }}
+          </button>
+        </div>
+      </div>
+
+      <!-- LEAFLET MAP -->
+      <div id="holding-map-container" [class.pin-cursor]="pinModeActive"></div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <div class="side-panel">
+      <div class="sp-title">
+        <i class="fas fa-list"></i> Holdings ({{ filteredHoldings.length }})
+      </div>
+
+      <!-- FILTER -->
+      <div class="filter-section">
+        <div class="filter-body">
+          <input class="search-input" type="text"
+                 [(ngModel)]="searchText" (ngModelChange)="applyFilter()"
+                 placeholder="Search holding no or owner...">
+          <div class="filter-row">
+            <select [(ngModel)]="filterWard" (ngModelChange)="applyFilter()">
+              <option value="">{{ ls.current === "bn" ? "সকল ওয়ার্ড" : "All Wards" }}</option>
+              <option *ngFor="let w of [1,2,3,4,5,6,7,8,9]" [value]="w">Ward {{ w }}</option>
+            </select>
+            <select [(ngModel)]="filterStatus" (ngModelChange)="applyFilter()">
+              <option value="">{{ ls.current === "bn" ? "সকল অবস্থা" : "All Status" }}</option>
+              <option value="Approved">{{ ls.current === "bn" ? "অনুমোদিত" : "Approved" }}</option>
+              <option value="Pending">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</option>
+              <option value="Rejected">{{ ls.current === "bn" ? "প্রত্যাখ্যাত" : "Rejected" }}</option>
+            </select>
+            <button class="reset-btn" (click)="resetFilter()" [title]="ls.current === 'bn' ? 'রিসেট' : 'Reset'">
+              <i class="fas fa-rotate-left"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOLDING LIST -->
+      <div class="holding-list-section">
+        <div class="holding-list">
+          <div *ngFor="let h of filteredHoldings"
+               class="holding-card"
+               [class.active]="selectedHolding?.id === h.id"
+               (click)="selectHolding(h)">
+            <div class="hc-top">
+              <span class="hc-no">{{ h.holdingNo || '—' }}</span>
+              <span class="hc-ward" [style.background]="getWardColor(h.ward)">
+                W{{ h.ward }}
+              </span>
+            </div>
+            <div class="hc-owner">{{ h.applicantName || '—' }}</div>
+            <div class="hc-bottom">
+              <!-- FIX: cleanStatus() strips quotes from DB -->
+              <span [ngClass]="{
+                'status-approved': cleanStatus(h.status) === 'Approved',
+                'status-pending' : cleanStatus(h.status) === 'Pending',
+                'status-rejected': cleanStatus(h.status) === 'Rejected'
+              }">{{ cleanStatus(h.status) }}</span>
+              <span class="pin-badge" [ngClass]="h.latitude ? 'pinned' : 'unpinned'">
+                <i class="fas" [ngClass]="h.latitude ? 'fa-location-dot' : 'fa-location-crosshairs'"></i>
+                {{ h.latitude ? 'Pinned' : 'Not set' }}
+              </span>
+            </div>
+          </div>
+          <div *ngIf="filteredHoldings.length === 0" style="text-align:center;padding:32px;color:#94a3b8;font-size:13px">
+            No holdings found
+          </div>
+        </div>
+      </div>
+
+      <!-- PIN CTA -->
+      <div class="pin-cta" *ngIf="selectedHolding">
+        <div class="pin-cta-info">
+          <i class="fas fa-circle-info"></i>
+          Selected: <strong>{{ selectedHolding.holdingNo }}</strong>
+        </div>
+        <button class="btn-enable-pin" (click)="enablePinMode()" [disabled]="pinModeActive">
+          <i class="fas fa-map-pin"></i>
+          {{ selectedHolding.latitude ? 'Update Pin Location' : 'Set Pin Location' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,190 @@
+<!-- farmer-g2p.component.html — G2P Bank Transfer Admin Panel -->
+<div class="g2p-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-money-bill-transfer me-2" style="color:#5b21b6"></i> G2P নগদ ভর্তুকি ব্যবস্থাপনা</h2>
+      <p>কৃষকদের ব্যাংক / MFS অ্যাকাউন্টে সরাসরি ভর্তুকি পাঠান</p>
+    </div>
+    <div class="hstat-row">
+      <div class="hstat-chip purple"><span>{{ batches.length }}</span><label>মোট Batch</label></div>
+      <div class="hstat-chip green"><span>{{ countBatch('COMPLETED') }}</span><label>{{ ls.current === "bn" ? "সম্পন্ন" : "Completed" }}</label></div>
+      <div class="hstat-chip amber"><span>{{ countBatch('PROCESSING') }}</span><label>{{ ls.current === "bn" ? "প্রক্রিয়াধীন" : "Processing" }}</label></div>
+      <div class="hstat-chip red"><span>{{ countBatch('FAILED') + countBatch('PARTIAL') }}</span><label>Failed/Partial</label></div>
+    </div>
+  </div>
+
+  <!-- Create batch form -->
+  <div class="form-card">
+    <div class="form-card-head" (click)="formOpen=!formOpen" style="cursor:pointer">
+      <h3><i class="fas fa-plus-circle me-2"></i>নতুন G2P Batch তৈরি করুন</h3>
+      <i class="fas" [class.fa-chevron-up]="formOpen" [class.fa-chevron-down]="!formOpen"></i>
+    </div>
+    <div class="form-body" *ngIf="formOpen">
+      <div class="form-grid">
+        <div class="field-group">
+          <label>চক্র (মাস) <span class="req">*</span></label>
+          <input type="month" [(ngModel)]="form.cycleMonth">
+        </div>
+        <div class="field-group">
+          <label>প্রতি কৃষক পরিমাণ (৳) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="form.amountPerFarmer" min="0" placeholder="যেমন: 1500">
+        </div>
+        <div class="field-group">
+          <label>{{ ls.current === "bn" ? "পেমেন্ট গেটওয়ে" : "Payment Gateway" }} <span class="req">*</span></label>
+          <select [(ngModel)]="form.gateway">
+            <option value="BEFTN">BEFTN (Bank Transfer)</option>
+            <option value="BKASH">{{ ls.current === "bn" ? "বিকাশ" : "bKash" }}</option>
+            <option value="NAGAD">{{ ls.current === "bn" ? "নগদ" : "Nagad" }}</option>
+            <option value="IBAS">iBAS++ (সরকারি)</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label>ওয়ার্ড ফিল্টার (ঐচ্ছিক)</label>
+          <input [(ngModel)]="form.ward" placeholder="সব ward = খালি রাখুন">
+        </div>
+        <div class="field-group">
+          <label>জেলা ফিল্টার (ঐচ্ছিক)</label>
+          <input [(ngModel)]="form.district" placeholder="সব district = খালি রাখুন">
+        </div>
+      </div>
+
+      <!-- Gateway info -->
+      <div class="gateway-info" [ngSwitch]="form.gateway">
+        <div *ngSwitchCase="'BEFTN'" class="gw-note beftn">
+          <i class="fas fa-university"></i>
+          <span>Bank-to-bank transfer · ১-৩ কার্যদিবস · Farmer-এর bank account-এ যাবে</span>
+        </div>
+        <div *ngSwitchCase="'BKASH'" class="gw-note bkash">
+          <i class="fas fa-mobile-alt"></i>
+          <span>তাৎক্ষণিক MFS transfer · Farmer-এর 01XXXXXXXXX bKash wallet-এ যাবে</span>
+        </div>
+        <div *ngSwitchCase="'NAGAD'" class="gw-note nagad">
+          <i class="fas fa-mobile-alt"></i>
+          <span>তাৎক্ষণিক MFS transfer · Farmer-এর Nagad wallet-এ যাবে</span>
+        </div>
+        <div *ngSwitchCase="'IBAS'" class="gw-note ibas">
+          <i class="fas fa-landmark"></i>
+          <span>অর্থ মন্ত্রণালয়ের iBAS++ সিস্টেম · সরকারি G2P payment channel</span>
+        </div>
+      </div>
+
+      <div class="form-footer">
+        <button class="btn-create" (click)="createBatch()" [disabled]="creating">
+          <i class="fas" [class.fa-layer-group]="!creating" [class.fa-spinner]="creating" [class.fa-spin]="creating"></i>
+          {{ creating ? 'তৈরি হচ্ছে...' : 'Batch তৈরি করুন' }}
+        </button>
+        <div class="form-msg" *ngIf="formMsg" [class.error]="formError">
+          <i class="fas" [class.fa-check-circle]="!formError" [class.fa-exclamation-triangle]="formError"></i>
+          {{ formMsg }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch list -->
+  <div class="section-card">
+    <div class="section-head">
+      <h3><i class="fas fa-list me-2"></i>সকল G2P Batch</h3>
+      <button class="btn-refresh" (click)="loadBatches()"><i class="fas fa-rotate-right"></i></button>
+    </div>
+
+    <div *ngIf="isLoading" class="state-loading"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+
+    <div *ngIf="!isLoading" class="table-wrap">
+      <table class="batch-table" *ngIf="batches.length > 0">
+        <thead><tr>
+          <th>#</th><th>Batch Ref</th><th>চক্র</th><th>Gateway</th>
+          <th>কৃষক</th><th>মোট (৳)</th><th>স্ট্যাটাস</th><th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let b of batches; let i=index">
+            <td class="td-num">{{ i+1 }}</td>
+            <td><code class="batch-ref">{{ b.batchRef }}</code></td>
+            <td>{{ b.cycleMonth }}</td>
+            <td><span class="gw-badge" [class]="b.gateway.toLowerCase()">{{ b.gateway }}</span></td>
+            <td class="td-center">{{ b.totalFarmers }}</td>
+            <td class="td-amount">৳{{ b.totalAmount | number }}</td>
+            <td>
+              <span class="status-badge"
+                [class.s-draft]="b.status==='DRAFT'"
+                [class.s-submitted]="b.status==='SUBMITTED'"
+                [class.s-processing]="b.status==='PROCESSING'"
+                [class.s-completed]="b.status==='COMPLETED'"
+                [class.s-partial]="b.status==='PARTIAL'"
+                [class.s-failed]="b.status==='FAILED'">
+                <span class="s-dot"></span>{{ b.status }}
+              </span>
+            </td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-view" (click)="viewBatch(b.id)" [title]="ls.current === 'bn' ? 'বিস্তারিত' : 'View Details'">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button class="btn-submit-batch" *ngIf="b.status==='DRAFT'"
+                        (click)="submitBatch(b)" [title]="ls.current === 'bn' ? 'জমা দিন' : 'Submit'">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+                <button class="btn-retry" *ngIf="b.status==='PARTIAL' || b.status==='FAILED'"
+                        (click)="retryBatch(b.id)" title="Retry Failed">
+                  <i class="fas fa-rotate-right"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="batches.length === 0" class="state-empty">
+        <i class="fas fa-inbox"></i><p>কোনো batch পাওয়া যায়নি।</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Batch detail (inline when viewBatchId is set) -->
+  <div class="section-card detail-section" *ngIf="batchDetail">
+    <div class="section-head">
+      <h3><i class="fas fa-receipt me-2"></i>Batch Detail — <code>{{ batchDetail.batch?.batchRef }}</code></h3>
+      <div class="detail-stats">
+        <span class="ds-chip completed">✓ {{ batchDetail.completed }}</span>
+        <span class="ds-chip failed" *ngIf="batchDetail.failed > 0">✗ {{ batchDetail.failed }}</span>
+        <span class="ds-chip pending" *ngIf="batchDetail.pending > 0">⏳ {{ batchDetail.pending }}</span>
+        <span class="ds-chip total">৳{{ batchDetail.totalPaid | number }} paid</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="dist-table">
+        <thead><tr>
+          <th>#</th><th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th><th>কার্ড নং</th><th>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</th>
+          <th>Bank / MFS</th><th>Account</th><th>{{ ls.current === "bn" ? "পরিমাণ" : "Quantity" }}</th>
+          <th>Txn Ref</th><th>স্ট্যাটাস</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let t of batchDetail.transfers; let i=index"
+              [class.row-fail]="t.status==='FAILED'"
+              [class.row-ok]="t.status==='COMPLETED'">
+            <td class="td-num">{{ i+1 }}</td>
+            <td class="td-name">{{ t.farmerName }}</td>
+            <td><code>{{ t.cardNo }}</code></td>
+            <td>{{ t.mobile }}</td>
+            <td>{{ t.bankName || '—' }}</td>
+            <td class="td-acct">{{ t.bankAccount || '—' }}</td>
+            <td class="td-amount">৳{{ t.amount | number }}</td>
+            <td class="td-txn"><code>{{ t.txnRef || '—' }}</code></td>
+            <td>
+              <span class="status-badge"
+                [class.s-processing]="t.status==='PROCESSING'"
+                [class.s-completed]="t.status==='COMPLETED'"
+                [class.s-failed]="t.status==='FAILED'"
+                [class.s-draft]="t.status==='PENDING'">
+                <span class="s-dot"></span>{{ t.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

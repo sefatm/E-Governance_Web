@@ -1,0 +1,93 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="successMsg || errorMsg">
+  <div *ngIf="successMsg" class="tl-toast tl-toast--ok"><i class="fas fa-circle-check"></i><span>{{ successMsg }}</span></div>
+  <div *ngIf="errorMsg"   class="tl-toast tl-toast--fail"><i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span></div>
+</div>
+
+<div class="tl-page">
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">নোটিফিকেশন লগ</h2>
+        <span class="tl-header__title-en">Notification Log — Communication Division</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="tl-summary-row" *ngIf="summary">
+    <div class="sum-chip sum-sms"><div class="sum-icon"><i class="fas fa-sms"></i></div><div><div class="sum-label">SMS পাঠানো</div><div class="sum-val">{{ summary.totalSms }}</div></div></div>
+    <div class="sum-chip sum-email"><div class="sum-icon"><i class="fas fa-envelope"></i></div><div><div class="sum-label">Email পাঠানো</div><div class="sum-val">{{ summary.totalEmail }}</div></div></div>
+    <div class="sum-chip sum-push"><div class="sum-icon"><i class="fas fa-bell"></i></div><div><div class="sum-label">Push পাঠানো</div><div class="sum-val">{{ summary.totalPush }}</div></div></div>
+    <div class="sum-chip sum-total"><div class="sum-icon"><i class="fas fa-paper-plane"></i></div><div><div class="sum-label">{{ ls.current === "bn" ? "মোট" : "Total" }}</div><div class="sum-val">{{ summary.total }}</div></div></div>
+  </div>
+
+  <div class="tl-filter-bar">
+    <div class="tl-filter-input" style="flex:2">
+      <i class="fas fa-magnifying-glass"></i>
+      <input type="text" [(ngModel)]="searchText" (input)="filterData()" placeholder="বার্তা বা প্রাপক দিয়ে খুঁজুন...">
+    </div>
+    <div class="tl-filter-select">
+      <i class="fas fa-filter"></i>
+      <select [(ngModel)]="filterType" (change)="filterData()">
+        <option value="">{{ ls.current === "bn" ? "সকল ধরন" : "All Types" }}</option>
+        <option *ngFor="let t of types" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+    <div class="tl-filter-select">
+      <i class="fas fa-tag"></i>
+      <select [(ngModel)]="filterTag" (change)="filterData()">
+        <option value="">সকল ক্যাটাগরি</option>
+        <option *ngFor="let t of tags" [value]="t">{{ t }}</option>
+      </select>
+    </div>
+    <button class="tl-btn-clear" (click)="clearFilter()"><i class="fas fa-rotate-left"></i> {{ ls.current === "bn" ? "মুছুন" : "Delete" }}</button>
+  </div>
+
+  <div class="tl-loading" *ngIf="isLoading"><div class="tl-spinner"></div><span>{{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</span></div>
+
+  <div class="tl-records-section" *ngIf="!isLoading">
+    <div class="tl-records-head">
+      <h3><i class="fas fa-bell"></i> নোটিফিকেশন লগ</h3>
+      <span class="tl-count-badge">{{ filtered.length }} টি রেকর্ড</span>
+    </div>
+    <div class="tl-table-wrap">
+      <table class="tl-table">
+        <thead><tr><th>#</th><th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th><th>বিষয় / বার্তা</th><th>প্রাপক</th><th>ক্যাটাগরি</th><th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th><th>অ্যাকশন</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let n of filtered; let i=index">
+            <td class="td-num">{{ i+1 }}</td>
+            <td>
+              <span class="notif-type-badge" [class.nt-sms]="n.type==='SMS'" [class.nt-email]="n.type==='Email'" [class.nt-push]="n.type==='Push'">
+                <i class="fas" [ngClass]="{'fa-sms':n.type==='SMS','fa-envelope':n.type==='Email','fa-bell':n.type==='Push'}"></i>
+                {{ n.type }}
+              </span>
+            </td>
+            <td>
+              <div style="font-weight:600;color:#111827;font-size:12px" *ngIf="n.title">{{ n.title }}</div>
+              <div class="td-desc">{{ n.message | slice:0:80 }}{{ n.message.length>80?'...':'' }}</div>
+            </td>
+            <td>
+              <div style="font-weight:600;font-size:12px">{{ n.recipientType }}</div>
+              <div class="td-sub" *ngIf="n.recipientVal">{{ n.recipientVal }}</div>
+            </td>
+            <td><span class="cat-badge">{{ n.serviceTag }}</span></td>
+            <td class="td-date">{{ n.createdAt | date:'dd/MM/yy, hh:mm a' }}</td>
+            <td>
+              <button class="act-btn act-delete" (click)="deleteNotif(n.id!)" [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'">
+                <i class="fas fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length===0"><td colspan="7" class="no-data"><i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#d1d5db"></i>কোনো নোটিফিকেশন পাওয়া যায়নি</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

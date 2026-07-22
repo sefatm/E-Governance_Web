@@ -1,0 +1,204 @@
+/* ============================================================
+   data-show.component.css  —  Holding Tax Admin Table
+   ============================================================ */
+
+.container {
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 0 20px 80px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #1e293b;
+  background: #f0fdf4;
+}
+
+/* ── HEADER ── */
+.container > h2 {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+  color: #fff; padding: 24px 32px;
+  font-size: 18px; font-weight: 800;
+  margin: 0 0 20px;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 5px solid #f59e0b;
+  display: flex; align-items: center; gap: 10px;
+}
+
+/* ── FILTER BOX ── */
+.filter-box {
+  display: flex; gap: 12px; align-items: center;
+  margin-bottom: 18px; flex-wrap: wrap;
+}
+.filter-box input,
+.filter-box select {
+  padding: 10px 14px; font-size: 14px; font-family: inherit;
+  background: #fff; border: 1.5px solid #d1d5db; border-radius: 8px;
+  outline: none; transition: border-color 0.2s;
+}
+.filter-box input { flex: 1; min-width: 180px; }
+.filter-box input:focus,
+.filter-box select:focus { border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.08); }
+
+/* ── LOADING / EMPTY ── */
+.loading-row, .empty-row {
+  text-align: center; padding: 40px; color: #64748b; font-size: 14px;
+}
+.empty-row i { display: block; font-size: 36px; margin-bottom: 10px; color: #cbd5e1; }
+
+/* ── TABLE ── */
+.app-table {
+  width: 100%; border-collapse: collapse;
+  background: #fff; border-radius: 12px; overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+.app-table thead { background: linear-gradient(135deg, #064e3b, #065f46); }
+.app-table thead th {
+  color: #fff; padding: 14px 16px;
+  font-size: 13px; font-weight: 600; text-align: left;
+}
+.app-table tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.15s; }
+.app-table tbody tr:last-child { border-bottom: none; }
+.app-table tbody tr:hover { background: #f0fdf4; }
+.app-table tbody td { padding: 13px 16px; font-size: 13.5px; color: #374151; vertical-align: middle; }
+
+/* ── TYPE BADGE ── */
+.type-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 12px; font-weight: 600;
+}
+.type-new      { background: #dcfce7; color: #15803d; }
+.type-transfer { background: #fef3c7; color: #b45309; }
+
+/* ── STATUS BADGE ── */
+.status-badge {
+  display: inline-block; padding: 3px 10px; border-radius: 12px;
+  font-size: 12px; font-weight: 600;
+}
+.pending  { background: #fef3c7; color: #b45309; }
+.approved { background: #dcfce7; color: #15803d; }
+.rejected { background: #fee2e2; color: #dc2626; }
+
+/* ── ACTION BUTTONS ── */
+.action-col { white-space: nowrap; }
+.icon-btn {
+  width: 32px; height: 32px; border-radius: 7px;
+  border: none; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px; margin-right: 4px; transition: transform 0.15s;
+}
+.icon-btn:hover { transform: scale(1.12); }
+.icon-btn.view    { background: #dbeafe; color: #1d4ed8; }
+.icon-btn.approve { background: #dcfce7; color: #15803d; }
+.icon-btn.reject  { background: #fee2e2; color: #dc2626; }
+
+/* ── DETAILS EXPANDED ROW ── */
+.details-box {
+  background: #f8faff; border: 1px solid #e2e8f0;
+  border-radius: 10px; padding: 16px;
+  display: flex; flex-wrap: wrap; gap: 10px;
+}
+.detail-item {
+  display: flex; gap: 8px; font-size: 13px;
+  min-width: 220px; padding: 8px 12px;
+  background: #fff; border-radius: 8px;
+  border: 1px solid #f1f5f9;
+}
+.detail-key { font-weight: 600; color: #374151; min-width: 100px; }
+.detail-val { color: #64748b; }
+
+@media (max-width: 768px) {
+  .filter-box { flex-direction: column; align-items: stretch; }
+  .app-table thead th:nth-child(3), .app-table tbody td:nth-child(3) { display: none; }
+}
+
+
+/* ===== Premium PDF Download Confirmation Modal ===== */
+.ht-modal-backdrop {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: rgba(2, 20, 12, .62);
+  backdrop-filter: blur(7px); animation: htFadeIn .2s ease-out;
+}
+.ht-download-modal {
+  position: relative; width: min(520px, 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f7fff9 100%);
+  border: 1px solid rgba(22, 163, 74, .18); border-radius: 24px;
+  padding: 30px; box-shadow: 0 28px 80px rgba(0, 0, 0, .25);
+  text-align: center; animation: htPopIn .24s cubic-bezier(.2,.8,.2,1);
+}
+.ht-modal-close {
+  position: absolute; top: 14px; right: 16px; width: 36px; height: 36px;
+  border: 0; border-radius: 50%; background: #f1f5f9; color: #475569;
+  font-size: 24px; line-height: 1; cursor: pointer; transition: .2s;
+}
+.ht-modal-close:hover { background: #e2e8f0; transform: rotate(5deg); }
+.ht-success-ring {
+  width: 72px; height: 72px; margin: 0 auto 14px; border-radius: 50%;
+  display: grid; place-items: center; color: #fff; font-size: 30px;
+  background: linear-gradient(135deg, #16a34a, #047857);
+  box-shadow: 0 14px 30px rgba(22, 163, 74, .28);
+}
+.ht-modal-kicker {
+  display: inline-block; margin-bottom: 6px; color: #15803d; font-size: 11px;
+  font-weight: 800; letter-spacing: 1.4px;
+}
+.ht-download-modal h3 { margin: 0; color: #0f172a; font-size: 25px; font-weight: 800; }
+.ht-ready-copy { margin: 10px auto 18px; max-width: 420px; color: #64748b; font-size: 13.5px; line-height: 1.6; }
+.ht-cert-summary {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  padding: 14px; background: #f8fafc; border: 1px solid #e2e8f0;
+  border-radius: 14px; text-align: left;
+}
+.ht-cert-summary > div { display: flex; flex-direction: column; gap: 3px; padding: 8px; }
+.ht-cert-summary span { color: #94a3b8; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.ht-cert-summary strong { color: #1e293b; font-size: 14px; word-break: break-word; }
+.ht-approved-text { color: #15803d !important; }
+.ht-download-confirm {
+  width: 100%; margin-top: 18px; padding: 14px 18px; border: 0; border-radius: 12px;
+  color: #fff; background: linear-gradient(135deg, #15803d, #047857);
+  font-size: 14px; font-weight: 800; cursor: pointer; transition: .2s;
+  box-shadow: 0 10px 22px rgba(5, 150, 105, .22);
+}
+.ht-download-confirm:hover { transform: translateY(-1px); box-shadow: 0 14px 28px rgba(5, 150, 105, .28); }
+.ht-download-confirm i { margin-right: 7px; }
+@keyframes htFadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes htPopIn { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+@media (max-width: 560px) {
+  .ht-download-modal { padding: 26px 18px 20px; border-radius: 18px; }
+  .ht-cert-summary { grid-template-columns: 1fr; }
+}
+
+/* Citizen-service style details, documents and approval */
+.details-panel { background:#f8fafc; border:1px solid #dbe7df; border-radius:14px; padding:18px; }
+.details-section + .details-section { margin-top:18px; }
+.details-section h4 { margin:0 0 11px; color:#14532d; font-size:14px; display:flex; gap:8px; align-items:center; }
+.document-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
+.document-card { overflow:hidden; border:1px solid #dfe7e3; border-radius:12px; background:#fff; box-shadow:0 3px 12px rgba(15,23,42,.05); }
+.document-preview { height:180px; display:grid; place-items:center; background:#eef6f1; overflow:hidden; }
+.document-preview img,.document-preview iframe { width:100%; height:100%; border:0; object-fit:contain; background:#fff; }
+.generic-file { font-size:52px; color:#64748b; }
+.document-meta { padding:12px; }
+.document-meta strong { display:block; color:#1e293b; margin-bottom:9px; }
+.document-actions { display:flex; gap:8px; }
+.document-actions a { flex:1; text-align:center; text-decoration:none; padding:8px; border-radius:8px; background:#e8f5ee; color:#047857; font-size:12px; font-weight:700; }
+.approval-stage-grid { display:grid; gap:10px; }
+.approval-stage-card { display:grid; grid-template-columns:38px 1fr auto; gap:12px; align-items:center; padding:12px; border:1px dashed #cbd5e1; border-radius:11px; background:#fff; opacity:.72; }
+.approval-stage-card.completed { opacity:1; border-style:solid; border-color:#a7d9bd; background:#f0fdf4; }
+.stage-number { width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#d1fae5;color:#047857;font-weight:800; }
+.approval-stage-card p { margin:4px 0 0; color:#64748b; font-size:12px; }
+.approval-assets { display:flex; gap:8px; }
+.approval-assets img { width:76px; height:54px; object-fit:contain; border:1px solid #dbe4df; border-radius:7px; background:#fff; }
+.approval-modal { position:relative; width:min(650px,100%); background:#fff; border-radius:22px; padding:28px; box-shadow:0 30px 90px rgba(0,0,0,.3); }
+.approval-modal-head { display:flex; gap:15px; align-items:center; text-align:left; margin-bottom:20px; }
+.approval-modal-head span { color:#15803d;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px; }
+.approval-modal-head h3 { margin:3px 0;color:#0f172a;font-size:22px; }
+.approval-modal-head p { margin:0;color:#64748b;font-size:13px; }
+.approval-icon { width:56px;height:56px;border-radius:16px;display:grid;place-items:center;background:#dcfce7;color:#15803d;font-size:24px; }
+.approval-upload-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+.approval-upload-box { min-height:190px;border:2px dashed #b8cfc2;border-radius:14px;background:#f7fcf9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;color:#166534;overflow:hidden;padding:12px; }
+.approval-upload-box:hover { border-color:#16a34a;background:#f0fdf4; }
+.approval-upload-box > i { font-size:34px; }
+.approval-upload-box small,.approval-upload-box span { color:#64748b;font-size:12px; }
+.approval-upload-box img { width:100%;height:125px;object-fit:contain;background:#fff;border-radius:9px; }
+.approval-note { margin:15px 0;padding:10px 12px;border-radius:9px;background:#eff6ff;color:#1e40af;font-size:12px;text-align:left; }
+.approval-submit { width:100%;border:0;border-radius:11px;padding:13px;background:linear-gradient(135deg,#15803d,#047857);color:#fff;font-weight:800;cursor:pointer; }
+.approval-submit:disabled { opacity:.45;cursor:not-allowed; }
+@media(max-width:650px){.approval-upload-grid{grid-template-columns:1fr}.approval-stage-card{grid-template-columns:38px 1fr}.approval-assets{grid-column:2}.document-preview{height:150px}}

@@ -1,0 +1,230 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="toast">
+  <div class="tl-toast"
+       [class.tl-toast--ok]="toast.type==='success'"
+       [class.tl-toast--fail]="toast.type==='error'">
+    <i class="fas" [ngClass]="toast.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ toast.msg }}</span>
+  </div>
+</div>
+
+<!-- Success Screen -->
+<div class="tl-page" *ngIf="submitSuccess">
+  <div class="success-screen">
+    <div class="success-icon"><i class="fas fa-circle-check"></i></div>
+    <h2>Bid Submitted Successfully!</h2>
+    <p>Your bid has been submitted for review.<br>
+       If documents are attached, Admin will verify them and notify you via email.</p>
+    <button class="btn-submit" style="margin-top:24px" (click)="submitSuccess=false">
+      <i class="fas fa-plus"></i> {{ ls.current === "bn" ? "আরেকটি বিড জমা দিন" : "Submit Another Bid" }}
+    </button>
+  </div>
+</div>
+
+<div class="tl-page" *ngIf="!submitSuccess">
+
+  <!-- ══ HEADER (License style) ══ -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">ই-টেন্ডার বিড জমা ফরম</h2>
+        <span class="tl-header__title-en">{{ ls.current === "bn" ? "ই-টেন্ডার বিড জমা ফর্ম" : "E-Tender Bid Submission Form" }}</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- ══ FORM BODY ══ -->
+  <div class="tl-body">
+    <form (ngSubmit)="submitForm(f)" #f="ngForm" class="gov-form">
+
+      <!-- ── Tender Selection ── -->
+      <div class="section-label"><i class="fas fa-file-contract"></i> Tender Selection</div>
+
+      <div class="field">
+        <label>Select Open Tender <span class="req">*</span></label>
+        <select [(ngModel)]="form.tenderId" name="tenderId" (change)="onTenderSelect()" required>
+          <option [value]="0">— Select an Open Tender —</option>
+          <option *ngFor="let n of openNotices" [value]="n.id">
+            {{ n.tenderNo }} — {{ n.title }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Tender Preview -->
+      <div class="preview-box" *ngIf="selectedNotice">
+        <div class="preview-title"><i class="fas fa-info-circle"></i> {{ selectedNotice.title }}</div>
+        <div class="deadline-warn" *ngIf="daysLeft(selectedNotice.endDate) <= 3"
+             [class.urgent]="daysLeft(selectedNotice.endDate) <= 1">
+          <i class="fas fa-clock"></i>
+          Warning: Bid Deadline is in <strong>{{ daysLeft(selectedNotice.endDate) }} days</strong>!
+        </div>
+        <div class="preview-meta">
+          <div>
+            <span class="pm-label">{{ ls.current === "bn" ? "আনুমানিক খরচ" : "Estimated Cost" }}</span>
+            <span class="pm-val">{{ formatCurrency(selectedNotice.estimatedCost) }}</span>
+          </div>
+          <div>
+            <span class="pm-label">EMD Required</span>
+            <span class="pm-val">{{ formatCurrency(selectedNotice.emdAmount) }}</span>
+          </div>
+          <div>
+            <span class="pm-label">{{ ls.current === "bn" ? "জমার শেষ তারিখ" : "Submission Deadline" }}</span>
+            <span class="pm-val" [style.color]="daysLeft(selectedNotice.endDate)<=3 ? '#dc2626' : ''">
+              {{ selectedNotice.endDate | date:'dd MMM yyyy' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Bidder Information ── -->
+      <div class="section-label"><i class="fas fa-user"></i> Bidder Information</div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>Bidder's Name <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.bidderName" name="bidderName"
+                 [placeholder]="ls.current === 'bn' ? 'পূর্ণ নাম' : 'Full Name'" required>
+        </div>
+        <div class="field">
+          <label>Company / Firm Name <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.companyName" name="companyName"
+                 placeholder="Registered company name" required>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }} <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.nid" name="nid"
+                 placeholder="National ID number"
+                 (blur)="checkBlacklist()" required>
+        </div>
+        <div class="field">
+          <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }} <span class="req">*</span></label>
+          <input type="tel" [(ngModel)]="form.mobile" name="mobile"
+                 placeholder="01XXXXXXXXX"
+                 (blur)="checkBlacklist()" required>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>{{ ls.current === "bn" ? "ইমেইল ঠিকানা" : "Email Address" }}</label>
+          <input type="email" [(ngModel)]="form.email" name="email"
+                 placeholder="email@example.com"
+                 (blur)="checkBlacklist()">
+        </div>
+        <div class="field">
+          <label>EMD Receipt Number <span class="req">*</span></label>
+          <input type="text" [(ngModel)]="form.emdReceiptNo" name="emdReceiptNo"
+                 placeholder="Bank receipt number" required>
+        </div>
+      </div>
+
+      <!-- Blacklist feedback -->
+      <div class="blacklist-check" *ngIf="blacklistChecking">
+        <span class="checking-spinner"></span> Blacklist check is going on...
+      </div>
+      <div class="blacklist-alert" *ngIf="!blacklistChecking && blacklistBlocked">
+        <i class="fas fa-ban"></i>
+        <div>
+          <strong>Bid cannot be submitted!</strong>
+          <p>{{ blacklistMessage }}</p>
+        </div>
+      </div>
+
+      <!-- ── Bid Details ── -->
+      <div class="section-label"><i class="fas fa-gavel"></i> Bid Details</div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>Bid Amount (৳) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="form.bidAmount" name="bidAmount"
+                 placeholder="0.00" min="1" required>
+        </div>
+        <div class="field">
+          <label>Completion Time (days) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="form.completionDays" name="completionDays"
+                 placeholder="e.g. 180" min="1" required>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="field">
+          <label>Experience (years)</label>
+          <input type="number" [(ngModel)]="form.experienceYears" name="experienceYears"
+                 placeholder="0" min="0">
+        </div>
+        <div class="field"></div>
+      </div>
+
+      <div class="field">
+        <label>Previous Works / Projects</label>
+        <textarea [(ngModel)]="form.previousWorks" name="previousWorks" rows="3"
+                  placeholder="Previous Work Details..."></textarea>
+      </div>
+
+      <!-- ── Supporting Document ── -->
+      <div class="section-label"><i class="fas fa-paperclip"></i> Supporting Document</div>
+
+      <div class="field">
+        <label>
+          Document Upload
+          <span class="field-hint">(Trade License, Tax Certificate, etc. — PDF/JPG/PNG, max 5MB)</span>
+        </label>
+
+        <div class="upload-zone" *ngIf="!selectedFile" (click)="docFileInput.click()">
+          <input type="file" #docFileInput accept=".pdf,.jpg,.jpeg,.png"
+                 (change)="onFileSelect($event)" style="display:none">
+          <i class="fas fa-cloud-upload-alt upload-icon-fa"></i>
+          <div class="upload-text">Click to upload or drag and drop a file</div>
+          <div class="upload-sub">PDF, JPG, PNG — maximum 5MB</div>
+        </div>
+
+        <div class="file-preview" *ngIf="selectedFile">
+          <div class="fp-left">
+            <i class="fas" [ngClass]="selectedFile.type==='application/pdf' ? 'fa-file-pdf' : 'fa-file-image'" class="fp-icon-fa"></i>
+            <div>
+              <div class="fp-name">{{ filePreviewName }}</div>
+              <div class="fp-size">{{ (selectedFile.size / 1024).toFixed(1) }} KB</div>
+            </div>
+          </div>
+          <button type="button" class="fp-remove" (click)="removeFile()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="file-error" *ngIf="fileError"><i class="fas fa-exclamation-triangle"></i> {{ fileError }}</div>
+      </div>
+
+      <!-- ── Declaration ── -->
+      <div class="declaration-box">
+        <label>
+          <input type="checkbox" [(ngModel)]="agree" name="agree" required>
+          <span>I hereby declare that all the information provided is correct and I have submitted the required EMD.</span>
+        </label>
+      </div>
+
+      <!-- ── Actions ── -->
+      <div class="form-actions">
+        <button type="button" class="btn-reset" (click)="resetForm(f)">
+          <i class="fas fa-redo"></i> {{ ls.current === "bn" ? "রিসেট" : "Reset" }}
+        </button>
+        <button type="submit" class="btn-submit"
+                [disabled]="isSubmitting || !f.valid || !agree || blacklistBlocked || blacklistChecking">
+          <span *ngIf="!isSubmitting"><i class="fas fa-paper-plane"></i> {{ ls.current === "bn" ? "বিড জমা দিন" : "Submit Bid" }}</span>
+          <span *ngIf="isSubmitting"><span class="btn-spinner"></span> {{ ls.current === "bn" ? "জমা হচ্ছে..." : "Submitting..." }}</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

@@ -1,0 +1,165 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="successMsg || errorMsg">
+  <div *ngIf="successMsg" class="tl-toast tl-toast--ok"><i class="fas fa-circle-check"></i><span>{{ successMsg }}</span></div>
+  <div *ngIf="errorMsg"   class="tl-toast tl-toast--fail"><i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span></div>
+</div>
+
+<div class="tl-page">
+
+  <!-- ── Header ── -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">{{ ls.current === "bn" ? "বর্জ্য সংগ্রহের সময়সূচি" : "Garbage Collection Schedule" }}</h2>
+        <span class="tl-header__title-en">Garbage Collection Schedule — Waste Management Division</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- ── Form Card ── -->
+  <div class="tl-card" *ngIf="canManage">
+    <div class="tl-panel tl-panel--active">
+
+      <div class="tl-panel__head">
+        <div class="tl-panel__icon"><i class="fas fa-calendar-plus"></i></div>
+        <div>
+          <h3>{{ editIndex !== null ? 'সময়সূচি আপডেট করুন' : 'নতুন সময়সূচি যোগ করুন' }}</h3>
+          <p>বর্জ্য সংগ্রহের তারিখ ও এলাকার তথ্য পূরণ করুন</p>
+        </div>
+        <span class="tl-mode-tag" [class.edit-mode]="editIndex !== null">
+          {{ editIndex !== null ? '✏️ আপডেট মোড' : '➕ নতুন সময়সূচি' }}
+        </span>
+      </div>
+
+      <div class="tl-section-label"><i class="fas fa-location-dot"></i> সময়সূচির তথ্য</div>
+
+      <div class="tl-grid-2">
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "ওয়ার্ড নং" : "Ward No." }}<span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-map-pin tl-ico"></i>
+            <input type="text" [(ngModel)]="schedule.ward" name="ward"
+                   [class.tl-invalid]="submitted && !schedule.ward"
+                   [placeholder]="ls.current === 'bn' ? 'ওয়ার্ড নম্বর' : 'Ward Number'">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !schedule.ward"><i class="fas fa-circle-exclamation"></i> ওয়ার্ড আবশ্যক</div>
+        </div>
+
+        <div class="tl-field">
+          <label>এলাকার নাম <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-location-dot tl-ico"></i>
+            <input type="text" [(ngModel)]="schedule.area" name="area"
+                   [class.tl-invalid]="submitted && !schedule.area"
+                   placeholder="এলাকার নাম">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !schedule.area"><i class="fas fa-circle-exclamation"></i> এলাকা আবশ্যক</div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "সংগ্রহের দিন" : "Collection Day" }}<span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-calendar-week tl-ico"></i>
+            <select [(ngModel)]="schedule.day" name="day"
+                    [class.tl-invalid]="submitted && !schedule.day">
+              <option value="">-- দিন নির্বাচন করুন --</option>
+              <option>Sunday</option><option>Monday</option><option>Tuesday</option>
+              <option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option>
+            </select>
+          </div>
+          <div class="tl-err" *ngIf="submitted && !schedule.day"><i class="fas fa-circle-exclamation"></i> দিন নির্বাচন আবশ্যক</div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "সংগ্রহের সময়" : "Collection Time" }}</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-clock tl-ico"></i>
+            <input type="time" [(ngModel)]="schedule.time" name="time">
+          </div>
+        </div>
+
+      </div>
+
+      <div class="tl-nav">
+        <button *ngIf="editIndex !== null" class="tl-btn tl-btn--cancel" (click)="resetForm()">
+          <i class="fas fa-times"></i> {{ ls.current === "bn" ? "বাতিল" : "Cancelled" }}</button>
+        <div style="flex:1"></div>
+        <button class="tl-btn tl-btn--submit" (click)="saveSchedule()" [disabled]="isSubmitting">
+          <i class="fas" [ngClass]="editIndex !== null ? 'fa-floppy-disk' : 'fa-plus'"></i>
+          {{ isSubmitting ? 'সংরক্ষণ হচ্ছে...' : (editIndex !== null ? 'আপডেট করুন' : 'সময়সূচি যোগ করুন') }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Filter + Table ── -->
+  <div class="tl-records-section" style="margin-top:24px">
+    <div class="tl-records-head">
+      <h3><i class="fas fa-calendar-days"></i> সময়সূচি তালিকা</h3>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="tl-filter-select" style="min-width:160px">
+          <i class="fas fa-filter"></i>
+          <select [(ngModel)]="selectedDay" (change)="filterData()">
+            <option value="">সকল দিন</option>
+            <option>Sunday</option><option>Monday</option><option>Tuesday</option>
+            <option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option>
+          </select>
+        </div>
+        <span class="tl-count-badge">{{ filteredSchedules.length }} টি সময়সূচি</span>
+      </div>
+    </div>
+    <div class="tl-table-wrap">
+      <table class="tl-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+            <th>এলাকা</th>
+            <th>দিন</th>
+            <th>সময়</th>
+            <th>স্ট্যাটাস</th>
+            <th *ngIf="canManage">অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of filteredSchedules; let i = index">
+            <td class="td-num">{{ i + 1 }}</td>
+            <td><span class="ward-chip">{{ s.ward }}</span></td>
+            <td><strong>{{ s.area }}</strong></td>
+            <td><span class="day-badge"><i class="fas fa-calendar-day"></i> {{ s.day }}</span></td>
+            <td class="td-time"><i class="fas fa-clock" style="color:#9ca3af;margin-right:4px"></i>{{ s.time || '—' }}</td>
+            <td>
+              <span class="status-pill" [class.s-active]="s.status === 'Active'" [class.s-done]="s.status !== 'Active'">
+                <span class="s-dot"></span>{{ s.status === 'Active' ? 'সক্রিয়' : 'সম্পন্ন' }}
+              </span>
+            </td>
+            <td *ngIf="canManage">
+              <div class="action-btns">
+                <button class="act-btn act-edit"   [title]="ls.current === 'bn' ? 'সম্পাদনা' : 'Edit'" (click)="editSchedule(i)"><i class="fas fa-pen"></i></button>
+                <button class="act-btn act-toggle" [title]="ls.current === 'bn' ? 'টগল' : 'Toggle'"      (click)="toggleStatus(s)"><i class="fas fa-arrows-rotate"></i></button>
+                <button class="act-btn act-delete" [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'"    (click)="deleteSchedule(i)"><i class="fas fa-trash"></i></button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="filteredSchedules.length === 0">
+            <td [attr.colspan]="canManage ? 7 : 6" class="no-data">
+              <i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#d1d5db"></i>
+              কোনো সময়সূচি পাওয়া যায়নি
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

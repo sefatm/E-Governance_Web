@@ -1,0 +1,166 @@
+<div class="tl-toast-area" *ngIf="toasts.length">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success'?'fa-circle-check':'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- Tabs -->
+  <div class="tl-tabs">
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='password'" (click)="activeTab='password'">
+      <i class="fas fa-lock"></i> {{ ls.current === "bn" ? "পাসওয়ার্ড পরিবর্তন" : "Change Password" }}
+    </button>
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='preferences'" (click)="activeTab='preferences'">
+      <i class="fas fa-sliders"></i> Preferences
+    </button>
+  </div>
+
+  <!--CHANGE PASSWORD -->
+  <ng-container *ngIf="activeTab==='password'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">{{ ls.current === "bn" ? "পাসওয়ার্ড পরিবর্তন" : "Change Password" }}</h2>
+          <span class="tl-header__sub">Update your account password securely</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-card tl-card--list" style="padding:28px;max-width:500px">
+      <div class="tl-grid-1">
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "বর্তমান পাসওয়ার্ড" : "Current Password" }} <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-lock tl-ico"></i>
+            <input [type]="showCurrent?'text':'password'" [(ngModel)]="currentPassword" name="currentPassword" placeholder="Enter current password">
+            <button type="button" class="eye-btn" (click)="showCurrent=!showCurrent">
+              <i class="fas" [ngClass]="showCurrent?'fa-eye-slash':'fa-eye'"></i>
+            </button>
+          </div>
+        </div>
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "নতুন পাসওয়ার্ড" : "New Password" }} <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-key tl-ico"></i>
+            <input [type]="showNew?'text':'password'" [(ngModel)]="newPassword" name="newPassword" placeholder="At least 6 characters">
+            <button type="button" class="eye-btn" (click)="showNew=!showNew">
+              <i class="fas" [ngClass]="showNew?'fa-eye-slash':'fa-eye'"></i>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div class="strength-wrap" *ngIf="newPassword">
+            <div class="strength-bar">
+              <div class="strength-fill" [ngClass]="strength.cls" [style.width]="strength.width"></div>
+            </div>
+            <span class="strength-label" [ngClass]="strength.cls">{{ strength.label }}</span>
+          </div>
+        </div>
+        <div class="tl-field">
+          <label>Confirm New Password <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-key tl-ico"></i>
+            <input [type]="showConfirm?'text':'password'" [(ngModel)]="confirmPassword" name="confirmPassword" placeholder="Re-enter new password">
+            <button type="button" class="eye-btn" (click)="showConfirm=!showConfirm">
+              <i class="fas" [ngClass]="showConfirm?'fa-eye-slash':'fa-eye'"></i>
+            </button>
+          </div>
+          <span class="match-err" *ngIf="confirmPassword && newPassword !== confirmPassword">
+            <i class="fas fa-circle-xmark"></i> Passwords do not match
+          </span>
+        </div>
+      </div>
+      <div class="tl-nav" style="margin-top:20px">
+        <span></span>
+        <button class="tl-btn tl-btn--submit" (click)="changePassword()" [disabled]="isSaving || !currentPassword || newPassword !== confirmPassword">
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          <i class="fas fa-lock" *ngIf="!isSaving"></i>
+          {{ isSaving ? 'Saving...' : 'Update Password' }}
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- PREFERENCES -->
+  <ng-container *ngIf="activeTab==='preferences'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">User Preferences</h2>
+          <span class="tl-header__sub">Customize your account preferences</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-card tl-card--list" style="padding:28px;max-width:500px">
+      <div class="tl-grid-1">
+        <div class="tl-field">
+          <label>Default Language</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-globe tl-ico"></i>
+            <select [(ngModel)]="language" name="language">
+              <option value="English">English</option>
+              <option value="Bangla">বাংলা</option>
+            </select>
+          </div>
+        </div>
+        <div class="tl-field">
+          <label>Items Per Page</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-list-ol tl-ico"></i>
+            <select [(ngModel)]="itemsPerPage" name="itemsPerPage">
+              <option value="10">10</option>
+              <option value="25">25</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Notification toggles -->
+        <div class="pref-section">Notification Preferences</div>
+        <div class="pref-row">
+          <div>
+            <strong>Email Notifications</strong>
+            <div class="pref-sub">Receive updates via email</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" [(ngModel)]="emailNotif" name="emailNotif">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+        <div class="pref-row">
+          <div>
+            <strong>SMS Notifications</strong>
+            <div class="pref-sub">Receive updates via SMS</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" [(ngModel)]="smsNotif" name="smsNotif">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+        <div class="pref-row">
+          <div>
+            <strong>Push Notifications</strong>
+            <div class="pref-sub">Browser push notifications</div>
+          </div>
+          <label class="toggle">
+            <input type="checkbox" [(ngModel)]="pushNotif" name="pushNotif">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          </label>
+        </div>
+      </div>
+      <div class="tl-nav" style="margin-top:20px">
+        <span></span>
+        <button class="tl-btn tl-btn--submit" (click)="savePreferences()" [disabled]="isSaving">
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          <i class="fas fa-save" *ngIf="!isSaving"></i>
+          {{ isSaving ? 'Saving...' : 'Save Preferences' }}
+        </button>
+      </div>
+    </div>
+  </ng-container>
+</div>

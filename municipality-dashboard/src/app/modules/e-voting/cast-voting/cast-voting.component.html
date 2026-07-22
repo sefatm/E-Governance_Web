@@ -1,0 +1,65 @@
+<div class="verify-wrapper">
+
+  <div class="verify-card">
+    <div class="vc-header">
+      <div class="vc-header__logos">
+        <!-- <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="vc-logo" onerror="this.style.display='none'"> -->
+        <img src="assets/photo/election_commission.png" alt="Election Commission" class="vc-logo vc-logo--ec" onerror="this.style.display='none'">
+      </div>
+      <div class="vc-header__gov">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</div>
+      <div class="vc-header__ec">Bangladesh Election Commissioner</div>
+      <div class="vc-header__divider"></div>
+      <h2>Voter Verification</h2>
+      <p>Provide your NID number and date of birth to verify your identity.</p>
+    </div>
+
+    <div class="vc-body">
+
+      <div class="field-group">
+        <label for="nidInput">{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }}</label>
+        <input
+          id="nidInput"
+          type="text"
+          [(ngModel)]="nid"
+          placeholder="10 or 17 digit NID number"
+          maxlength="17"
+          [disabled]="isLoading"
+        >
+      </div>
+
+      <div class="field-group">
+        <label for="dobInput">{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }}</label>
+        <input
+          id="dobInput"
+          type="date"
+          [(ngModel)]="dob"
+          [disabled]="isLoading"
+        >
+      </div>
+
+      <!-- Error message -->
+      <div class="error-msg" *ngIf="error">
+        <i class="fas fa-exclamation-circle"></i>
+        {{ error }}
+      </div>
+
+      <!-- Submit button with loading state -->
+      <button
+        class="verify-btn"
+        (click)="verifyVoter()"
+        [disabled]="isLoading"
+      >
+        <i class="fas fa-spinner fa-spin" *ngIf="isLoading"></i>
+        <i class="fas fa-check-circle"    *ngIf="!isLoading"></i>
+        {{ isLoading ? 'Verifying...' : 'Verify' }}
+      </button>
+
+    </div>
+
+    <div class="vc-footer">
+      <i class="fas fa-lock"></i>
+      Your information is completely secure. Only authorized voters can proceed.
+    </div>
+  </div>
+
+</div>

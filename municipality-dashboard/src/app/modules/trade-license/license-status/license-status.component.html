@@ -1,0 +1,147 @@
+<!-- ══ TOAST AREA ══ -->
+<div class="tl-toast-area" *ngIf="toasts.length">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--info]="t.type==='info'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas"
+       [ngClass]="t.type==='success' ? 'fa-circle-check' : t.type==='error' ? 'fa-circle-xmark' : 'fa-circle-info'">
+    </i>
+    {{ t.message }}
+  </div>
+</div>
+
+<div class="status-page">
+
+  <div class="page-header">
+    <div class="ph-icon"><i class="fas fa-search"></i></div>
+    <div>
+      <h2 class="ph-title">License Status Check</h2>
+      <p class="ph-sub">Check application status and download certificate using mobile number</p>
+    </div>
+  </div>
+
+  <!-- ══ Step Card ══ -->
+  <div class="step-card" *ngIf="!otpVerified">
+
+    <!-- Step 1: Mobile -->
+    <div class="step-block">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <label class="s-label">{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }}</label>
+        <div class="input-row">
+          <input class="s-input" type="tel" [(ngModel)]="mobile"
+                 placeholder="01XXXXXXXXX" maxlength="11"
+                 [disabled]="otpSent">
+          <button class="otp-btn" (click)="sendOtp()"
+                  [disabled]="otpSent || isLoadingOtp">
+            <i class="fas" [ngClass]="isLoadingOtp ? 'fa-spinner fa-spin' : 'fa-paper-plane'"></i>
+            {{ isLoadingOtp ? 'Sending...' : 'Send OTP' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div class="step-block" *ngIf="otpSent">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <label class="s-label">{{ ls.current === "bn" ? "OTP যাচাই করুন" : "Verify OTP" }}</label>
+        <div class="otp-hint">
+          <i class="fas fa-info-circle"></i>
+          OTP has been sent (Demo mode: Check Toast)
+        </div>
+        <div class="input-row" style="margin-top:10px">
+          <input class="s-input otp-input" type="text" [(ngModel)]="userOtp"
+                 placeholder="• • • • • •" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+          <button class="verify-btn" (click)="verifyOtp()">
+            <i class="fas fa-check-circle"></i> {{ ls.current === "bn" ? "যাচাই করুন" : "Verify" }}
+          </button>
+        </div>
+        <button class="resend-link" (click)="resendOtp()">
+          <i class="fas fa-redo"></i> Send New OTP
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ Result ══ -->
+  <div *ngIf="otpVerified">
+
+    <div class="result-header">
+      <i class="fas fa-check-circle"></i>
+      Verify Successful! <strong>{{mobile}}</strong> number applications are shown below
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-box" *ngIf="isLoadingData">
+      <i class="fas fa-spinner fa-spin"></i> Loading data...
+    </div>
+
+    <!-- Applications table -->
+    <div class="table-wrap" *ngIf="!isLoadingData && filteredApplications.length > 0">
+      <table class="s-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th>
+            <th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+            <th>{{ ls.current === "bn" ? "লাইসেন্স নম্বর" : "License Number" }}</th>
+            <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+            <th>Certificate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of filteredApplications; let i=index">
+            <td>{{i + 1}}</td>
+            <td><strong>{{app.name}}</strong></td>
+            <td><span class="type-badge">{{app.type}}</span></td>
+            <td class="mono">{{app.licenseNumber || '—'}}</td>
+            <td>
+              <span class="badge" [ngClass]="badgeClass(app.status)">{{app.status}}</span>
+            </td>
+            <td>
+              <button class="dl-btn"
+                      *ngIf="app.status === 'Approved' && app.type === 'Trade License'"
+                      (click)="downloadLicense(app.id)">
+                <i class="fas fa-file-pdf"></i> {{ ls.current === "bn" ? "ডাউনলোড" : "Download" }}
+              </button>
+              <button class="dl-btn"
+                      *ngIf="app.status === 'Approved' && app.type === 'Trade Renewal'"
+                      (click)="downloadRenewal(app.id)">
+                <i class="fas fa-file-pdf"></i> {{ ls.current === "bn" ? "ডাউনলোড" : "Download" }}
+              </button>
+              <span class="wait-msg" *ngIf="app.status === 'Pending'">
+                <i class="fas fa-clock"></i> Pending Review
+              </span>
+              <span class="reject-msg" *ngIf="app.status === 'Rejected'">
+                <i class="fas fa-times-circle"></i> {{ ls.current === "bn" ? "প্রত্যাখ্যাত" : "Rejected" }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="no-data" *ngIf="!isLoadingData && filteredApplications.length === 0">
+      <i class="fas fa-inbox"></i>
+      No applications found for this mobile number
+    </div>
+
+  </div>
+</div>
+
+<div class="otp-demo-overlay" *ngIf="showOtpPopup" (click)="closeOtpPopup()">
+  <div class="otp-demo-card" (click)="$event.stopPropagation()">
+    <button class="otp-demo-close" (click)="closeOtpPopup()">&times;</button>
+    <div class="otp-demo-icon"><i class="fas fa-shield-alt"></i></div>
+    <div class="otp-demo-kicker">SECURE VERIFICATION</div>
+    <h3>Demo OTP Code</h3>
+    <p>Use this 6-digit code to continue verification.</p>
+    <div class="otp-demo-code">{{ generatedOtp }}</div>
+    <small>Valid for 5 minutes</small>
+    <button class="otp-demo-action" (click)="closeOtpPopup()">Enter OTP</button>
+  </div>
+</div>

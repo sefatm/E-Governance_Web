@@ -1,0 +1,422 @@
+<div class="epi-page">
+
+  <!-- Header -->
+  <div class="epi-header">
+    <div class="header-icon">🏥</div>
+    <div class="epi-header-copy">
+      <h2>EPI Vaccination — Admin Panel</h2>
+      <p>Child vaccination management — Bangladesh EPI Schedule</p>
+    </div>
+    <button class="btn-qr-scan" (click)="openScanner()">
+      <span class="qr-btn-icon">▦</span> Scan EPI QR & Give Dose
+    </button>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card s-blue">
+      <span class="s-num">{{ stats.totalChildren || 0 }}</span>
+      <span class="s-lbl">Registered Children</span>
+    </div>
+    <div class="stat-card s-orange">
+      <span class="s-num">{{ pendingList.length }}</span>
+      <span class="s-lbl">Pending Approval</span>
+    </div>
+    <div class="stat-card s-green">
+      <span class="s-num">{{ stats.totalGiven || 0 }}</span>
+      <span class="s-lbl">Vaccinations Given</span>
+    </div>
+    <div class="stat-card s-orange">
+      <span class="s-num">{{ stats.dueSoon || 0 }}</span>
+      <span class="s-lbl">Due Soon</span>
+    </div>
+    <div class="stat-card s-red">
+      <span class="s-num">{{ stats.overdueCount || 0 }}</span>
+      <span class="s-lbl">{{ ls.current === "bn" ? "বকেয়া" : "Overdue" }}</span>
+    </div>
+    <div class="stat-card s-gray">
+      <span class="s-num">{{ stats.totalMissed || 0 }}</span>
+      <span class="s-lbl">Missed</span>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button [class.active]="activeTab==='pending'"  (click)="setTab('pending')">
+      ⏳ Pending Approval
+      <span class="tab-badge" *ngIf="pendingList.length > 0">{{ pendingList.length }}</span>
+    </button>
+    <button [class.active]="activeTab==='children'" (click)="setTab('children')">👶 Registered Children</button>
+    <button [class.active]="activeTab==='upcoming'" (click)="setTab('upcoming')">📅 Upcoming Vaccinations</button>
+    <button [class.active]="activeTab==='missed'"   (click)="setTab('missed')">⚠ Missed Vaccinations</button>
+  </div>
+
+  <!-- ── TAB: PENDING APPROVAL ── -->
+  <div *ngIf="activeTab === 'pending'">
+    <div class="table-wrap">
+      <div *ngIf="isLoading" class="loading">⏳ Loading...</div>
+      <div *ngIf="!isLoading && pendingList.length === 0" class="no-data" style="padding:40px;text-align:center">
+        ✅ No pending registrations.
+      </div>
+      <table class="epi-table" *ngIf="!isLoading && pendingList.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Card No.</th>
+            <th>{{ ls.current === "bn" ? "শিশুর নাম" : "Child's Name" }}</th>
+            <th>Age</th>
+            <th>Father / Mother</th>
+            <th>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</th>
+            <th>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}</th>
+            <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+            <th>Status</th>
+            <th>Registered</th>
+            <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of pendingList; let i = index" style="background:#fffbeb">
+            <td>{{ i + 1 }}</td>
+            <td><span class="card-badge">{{ c.cardNo }}</span></td>
+            <td>
+              <strong>{{ c.childName }}</strong><br/>
+              <small>{{ c.gender }}</small>
+            </td>
+            <td>{{ ageLabel(c.dateOfBirth) }}</td>
+            <td>{{ c.fatherName }} / {{ c.motherName }}</td>
+            <td>{{ c.guardianPhone }}</td>
+            <td style="font-size:11px;color:#6b7280">{{ c.guardianEmail || '—' }}</td>
+            <td>{{ c.ward }}</td>
+            <td>
+              <span class="status-badge"
+                    [style.background]="c.status === 'First Approved' ? '#dbeafe' : '#fef3c7'"
+                    [style.color]="c.status === 'First Approved' ? '#1d4ed8' : '#92400e'">
+                {{ c.status }}
+              </span>
+            </td>
+            <td style="font-size:11px;color:#6b7280">{{ c.createdAt | date:'dd MMM yyyy' }}</td>
+            <td>
+              <button class="btn-view" (click)="renderChildDetails(c)">Details</button>
+              <button class="btn-approve" (click)="openApproval(c)">✅ {{ approvalLabel(c) }}</button>
+              <button class="btn-delete"  (click)="deleteChild(c.id)">🗑 Reject</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: Children ── -->
+  <div *ngIf="activeTab === 'children'">
+    <div class="filter-row">
+      <input [(ngModel)]="searchText" (input)="applyFilter()" placeholder="Child's Name / Card No. / NID..." />
+      <select [(ngModel)]="selectedWard" (change)="applyFilter()">
+        <option *ngFor="let w of wards" [value]="w">{{ w || 'All Wards' }}</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <div *ngIf="isLoading" class="loading">⏳ Loading...</div>
+      <div *ngIf="errorMsg"  class="error-state">⚠ {{ errorMsg }}</div>
+
+      <table class="epi-table" *ngIf="!isLoading && !errorMsg">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Card No.</th>
+            <th>{{ ls.current === "bn" ? "শিশুর নাম" : "Child's Name" }}</th>
+            <th>Age</th>
+            <th>Father/Mother</th>
+            <th>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</th>
+            <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+            <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+            <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filtered; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td><span class="card-badge">{{ c.cardNo }}</span></td>
+            <td>
+              <strong>{{ c.childName }}</strong><br/>
+              <small>{{ c.gender }}</small>
+            </td>
+            <td>{{ ageLabel(c.dateOfBirth) }}</td>
+            <td>{{ c.fatherName }} / {{ c.motherName }}</td>
+            <td>{{ c.guardianPhone }}</td>
+            <td>{{ c.ward }}</td>
+            <td>
+              <span class="status-badge"
+                    [style.background]="c.status === 'Approved' ? '#d1fae5' : '#fef3c7'"
+                    [style.color]="c.status === 'Approved' ? '#065f46' : '#92400e'">
+                {{ c.status || 'Pending' }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-view" (click)="renderChildDetails(c)">Details</button>
+              <button class="btn-view"     (click)="viewSchedule(c)">📋 Schedule</button>
+              <button class="btn-download" (click)="downloadCard(c)"
+                      [disabled]="c.status !== 'Approved'"
+                      [title]="c.status !== 'Approved' ? 'Approve first to download card' : 'Download EPI Card PDF'">
+                📄 Card PDF
+              </button>
+              <button class="btn-delete"   (click)="deleteChild(c.id)">🗑</button>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="9" class="no-data">No children found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: Upcoming ── -->
+  <div *ngIf="activeTab === 'upcoming'">
+    <div class="table-wrap">
+      <table class="epi-table">
+        <thead>
+          <tr><th>#</th><th>{{ ls.current === "bn" ? "শিশুর নাম" : "Child's Name" }}</th><th>Card No.</th><th>Vaccine</th><th>Scheduled Date</th><th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th><th>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</th><th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of upcoming; let i = index">
+            <td>{{ i+1 }}</td>
+            <td>{{ v.childName }}</td>
+            <td><span class="card-badge">{{ v.cardNo }}</span></td>
+            <td><strong>{{ v.vaccineName }}</strong> Dose {{ v.doseNo }}</td>
+            <td>{{ v.scheduledDate }}</td>
+            <td>{{ v.ward }}</td>
+            <td>{{ v.guardianPhone }}</td>
+            <td><button class="btn-give" (click)="openGiveModal(v)">✅ Give Vaccine</button></td>
+          </tr>
+          <tr *ngIf="upcoming.length === 0">
+            <td colspan="8" class="no-data">No upcoming vaccinations.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── TAB: Missed ── -->
+  <div *ngIf="activeTab === 'missed'">
+    <div class="table-wrap">
+      <table class="epi-table">
+        <thead>
+          <tr><th>#</th><th>{{ ls.current === "bn" ? "শিশুর নাম" : "Child's Name" }}</th><th>Card No.</th><th>Vaccine</th><th>Scheduled Date</th><th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th><th>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</th><th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of missed; let i = index">
+            <td>{{ i+1 }}</td>
+            <td>{{ v.childName }}</td>
+            <td><span class="card-badge">{{ v.cardNo }}</span></td>
+            <td><strong>{{ v.vaccineName }}</strong> Dose {{ v.doseNo }}</td>
+            <td style="color:#c62828;">{{ v.scheduledDate }}</td>
+            <td>{{ v.ward }}</td>
+            <td>{{ v.guardianPhone }}</td>
+            <td>
+              <button class="btn-give"   (click)="openGiveModal(v)">✅ Give Vaccine</button>
+              <button class="btn-missed" (click)="markMissed(v.vaccinationId)">✗ Mark Missed</button>
+            </td>
+          </tr>
+          <tr *ngIf="missed.length === 0">
+            <td colspan="8" class="no-data">No missed vaccinations.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Child Details Modal -->
+<div *ngIf="selectedDetailChild" class="modal-overlay" (click)="closeDetailModal()">
+  <div class="modal-box epi-child-detail-modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <span>Child Registration Details</span>
+      <button (click)="closeDetailModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="child-summary">
+        <div class="child-avatar" *ngIf="!selectedDetailChild.childPhotoUrl">👶</div>
+        <img *ngIf="selectedDetailChild.childPhotoUrl"
+             class="child-photo-avatar"
+             [src]="fileUrl(selectedDetailChild.childPhotoUrl)"
+             alt="Child photo">
+        <div>
+          <h3>{{ selectedDetailChild.childName }}</h3>
+          <p>{{ selectedDetailChild.cardNo }} · {{ selectedDetailChild.gender }} · {{ ageLabel(selectedDetailChild.dateOfBirth) }}</p>
+          <p>{{ selectedDetailChild.fatherName }} / {{ selectedDetailChild.motherName }}</p>
+        </div>
+      </div>
+
+      <div class="epi-detail-grid">
+        <div class="epi-detail-item" *ngFor="let f of detailFields(selectedDetailChild)">
+          <span>{{ f.key }}</span>
+          <strong>{{ f.value }}</strong>
+        </div>
+      </div>
+
+      <div class="epi-file-section" *ngIf="fileEntries(selectedDetailChild).length > 0">
+        <div class="epi-detail-title"><i class="fas fa-paperclip"></i> Uploaded Files</div>
+        <div class="epi-file-cards">
+          <div class="epi-file-card" *ngFor="let f of fileEntries(selectedDetailChild)">
+            <div class="epi-file-label">{{ f.label }}</div>
+            <div class="epi-file-preview">
+              <img *ngIf="f.isImage" [src]="fileUrl(f.url)" [alt]="f.label">
+              <div *ngIf="!f.isImage" class="epi-pdf-icon">
+                <i class="fas fa-file-pdf"></i>
+                <span>Document</span>
+              </div>
+            </div>
+            <a [href]="fileUrl(f.url)" target="_blank" class="epi-file-link">
+              <i class="fas fa-download"></i> View / Download
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Approval Signature + Seal Modal -->
+<div *ngIf="approvalChild" class="modal-overlay" (click)="closeApproval()">
+  <div class="modal-box approval-modal" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <span>{{ approvalLabel(approvalChild) }} - Signature & Seal Upload</span>
+      <button (click)="closeApproval()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="vacc-info">
+        {{ approvalChild.childName }} | {{ approvalChild.cardNo }} | {{ approvalChild.status || 'Pending' }}
+      </div>
+
+      <div class="approval-upload-grid">
+        <div class="approval-upload-card">
+          <label>Signature Image <span class="req">*</span></label>
+          <input type="file" accept="image/*" (change)="onApprovalUpload($event, 'signature')">
+          <small>{{ approvalSignatureName || 'Upload officer signature image' }}</small>
+        </div>
+        <div class="approval-upload-card">
+          <label>Seal Image <span class="req">*</span></label>
+          <input type="file" accept="image/*" (change)="onApprovalUpload($event, 'seal')">
+          <small>{{ approvalSealName || 'Upload official seal image' }}</small>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-confirm"
+                [disabled]="approvalSubmitting || !approvalSignatureBase64 || !approvalSealBase64"
+                (click)="submitApproval()">
+          {{ approvalSubmitting ? 'Saving...' : approvalLabel(approvalChild) }}
+        </button>
+        <button class="btn-cancel" (click)="closeApproval()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QR Scanner Modal -->
+<div *ngIf="showScannerModal" class="modal-overlay qr-overlay" (click)="closeScanner()">
+  <div class="modal-box qr-modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-head qr-modal-head">
+      <div>
+        <span>▦ EPI QR Scanner & Dose Entry</span>
+        <small>Scan the QR code printed on the approved EPI card</small>
+      </div>
+      <button (click)="closeScanner()">✕</button>
+    </div>
+
+    <div class="modal-body qr-modal-body">
+      <div class="qr-layout">
+        <div class="scanner-card">
+          <div class="scanner-frame" [class.scanner-on]="scannerActive">
+            <video #qrVideo playsinline muted></video>
+            <div class="scan-corners"><span></span><span></span><span></span><span></span></div>
+            <div class="scan-line" *ngIf="scannerActive"></div>
+          </div>
+          <p class="scanner-message">{{ scannerMessage || 'Start the camera or enter the card number manually.' }}</p>
+          <div class="scanner-actions">
+            <button class="btn-start-camera" (click)="startScanner()">📷 Start Camera</button>
+            <button class="btn-stop-camera" (click)="stopScanner()" *ngIf="scannerActive">■ Stop</button>
+          </div>
+
+          <div class="manual-card-lookup">
+            <span>OR</span>
+            <div>
+              <input [(ngModel)]="manualCardNo" placeholder="EPI-2026-00001" (keyup.enter)="lookupManualCard()" />
+              <button (click)="lookupManualCard()">Verify Card</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="scan-result-card" *ngIf="scannedChild; else noScanResult">
+          <div class="verified-strip">✓ VERIFIED EPI CARD</div>
+          <div class="child-summary">
+            <div class="child-avatar">👶</div>
+            <div>
+              <h3>{{ scannedChild.childName }}</h3>
+              <p>{{ scannedChild.cardNo }} · {{ scannedChild.gender }} · {{ ageLabel(scannedChild.dateOfBirth) }}</p>
+              <p>{{ scannedChild.fatherName }} / {{ scannedChild.motherName }}</p>
+            </div>
+          </div>
+
+          <h4>Vaccination Schedule</h4>
+          <div class="dose-list">
+            <div class="dose-row" *ngFor="let v of scannedSchedule" [class.dose-done]="v.status === 'Given'">
+              <div>
+                <strong>{{ v.vaccineName }} — Dose {{ v.doseNo }}</strong>
+                <span>Scheduled: {{ v.scheduledDate }}</span>
+              </div>
+              <span class="dose-status" [ngClass]="statusClass(v.status)">{{ v.status }}</span>
+              <button *ngIf="v.status !== 'Given'" class="btn-give scanned-give" (click)="openScannedDose(v)">💉 Enter Dose</button>
+              <span *ngIf="v.status === 'Given'" class="dose-complete">✓ {{ v.givenDate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <ng-template #noScanResult>
+          <div class="scan-empty-state">
+            <div>▦</div>
+            <h3>Scan an EPI card</h3>
+            <p>The child profile and pending vaccine doses will appear here. A health assistant can then enter the dose information immediately.</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Give Vaccine Modal -->
+<div *ngIf="showGiveModal" class="modal-overlay" (click)="showGiveModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-head">
+      <span>💉 Give Vaccine Record</span>
+      <button (click)="showGiveModal=false">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="vacc-info">{{ selectedVacc?.vaccineName }} — Dose {{ selectedVacc?.doseNo }} | {{ selectedVacc?.childName }}</p>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Vaccinator</label>
+          <input [(ngModel)]="givenBy" placeholder="Enter name" />
+        </div>
+        <div class="form-group">
+          <label>Health Center</label>
+          <input [(ngModel)]="healthCenter" placeholder="Center name" />
+        </div>
+        <div class="form-group">
+          <label>Batch No.</label>
+          <input [(ngModel)]="batchNo" placeholder="Vaccine batch number" />
+        </div>
+        <div class="form-group full">
+          <label>{{ ls.current === "bn" ? "মন্তব্য" : "Remarks" }}</label>
+          <textarea [(ngModel)]="remarks" rows="2" placeholder="Any additional remarks"></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-confirm" (click)="confirmGive()">✅ Confirm</button>
+        <button class="btn-cancel"  (click)="showGiveModal=false">{{ ls.current === "bn" ? "বাতিল" : "Cancel" }}</button>
+      </div>
+    </div>
+  </div>
+</div>

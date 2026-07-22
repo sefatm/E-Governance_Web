@@ -1,0 +1,141 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="successMsg || errorMsg">
+  <div *ngIf="successMsg" class="tl-toast tl-toast--ok"><i class="fas fa-circle-check"></i><span>{{ successMsg }}</span></div>
+  <div *ngIf="errorMsg"   class="tl-toast tl-toast--fail"><i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span></div>
+</div>
+
+<div class="tl-page">
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">নোটিফিকেশন পাঠান</h2>
+        <span class="tl-header__title-en">Send Notification — Communication Division</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="tl-card">
+    <div class="tl-panel tl-panel--active">
+
+      <!-- Type Tabs -->
+      <div class="notif-tabs">
+        <button class="notif-tab" [class.active-sms]="activeType==='SMS'"     (click)="selectType('SMS')">
+          <i class="fas fa-sms"></i> SMS
+        </button>
+        <button class="notif-tab" [class.active-email]="activeType==='Email'" (click)="selectType('Email')">
+          <i class="fas fa-envelope"></i> {{ ls.current === "bn" ? "ইমেইল" : "Email" }}
+        </button>
+        <button class="notif-tab" [class.active-push]="activeType==='Push'"   (click)="selectType('Push')">
+          <i class="fas fa-bell"></i> Push
+        </button>
+      </div>
+
+      <!-- Push info banner -->
+      <div class="push-info-box" *ngIf="isPushType">
+        <i class="fas fa-circle-info"></i>
+        Push notification FCM দিয়ে পাঠানো হবে। <strong>All Citizens</strong> পাঠাতে citizen app-এ <code>all_citizens</code> topic subscribe থাকতে হবে।
+      </div>
+
+      <!-- Subject / Title (Email & Push) -->
+      <div class="tl-section-label" *ngIf="isEmailType||isPushType"><i class="fas fa-heading"></i> বিষয় / শিরোনাম</div>
+      <div class="tl-field" *ngIf="isEmailType||isPushType" style="margin-bottom:20px">
+        <label>Subject / Title <span class="req">*</span></label>
+        <div class="tl-input-wrap">
+          <i class="fas fa-heading tl-ico"></i>
+          <input type="text" [(ngModel)]="form.title" placeholder="বিষয় বা শিরোনাম লিখুন">
+        </div>
+      </div>
+
+      <!-- Recipient -->
+      <div class="tl-section-label"><i class="fas fa-users"></i> প্রাপক নির্বাচন</div>
+      <div class="recipient-options">
+        <label class="recip-opt">
+          <input type="radio" [(ngModel)]="form.recipientType" value="All" name="recipientType">
+          <span class="recip-label"><i class="fas fa-globe"></i> সকল নাগরিক</span>
+        </label>
+        <label class="recip-opt">
+          <input type="radio" [(ngModel)]="form.recipientType" value="Individual" name="recipientType">
+          <span class="recip-label"><i class="fas fa-user"></i> ব্যক্তিগত</span>
+        </label>
+        <label class="recip-opt" *ngIf="!isPushType">
+          <input type="radio" [(ngModel)]="form.recipientType" value="Ward" name="recipientType">
+          <span class="recip-label"><i class="fas fa-map-pin"></i> ওয়ার্ড ভিত্তিক</span>
+        </label>
+      </div>
+
+      <!-- Individual fields -->
+      <div class="tl-grid-2" *ngIf="form.recipientType==='Individual'" style="margin-top:14px">
+        <div class="tl-field">
+          <label>{{ isPushType?'FCM Token':isEmailType?'Email Address':'Mobile Number' }} <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas" [ngClass]="isPushType?'fa-key':isEmailType?'fa-envelope':'fa-phone'" class="tl-ico"></i>
+            <input type="text" [(ngModel)]="form.recipientVal" [placeholder]="isPushType?'FCM device token':isEmailType?'email@example.com':'01XXXXXXXXX'">
+          </div>
+        </div>
+        <div class="tl-field" *ngIf="!isPushType">
+          <label>প্রাপকের নাম (ঐচ্ছিক)</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-user tl-ico"></i>
+            <input type="text" [(ngModel)]="form.recipientName" placeholder="প্রাপকের নাম">
+          </div>
+        </div>
+      </div>
+
+      <!-- Ward select -->
+      <div class="tl-field" *ngIf="form.recipientType==='Ward'&&!isPushType" style="margin-top:14px;max-width:260px">
+        <label>{{ ls.current === "bn" ? "ওয়ার্ড নম্বর" : "Ward Number" }}<span class="req">*</span></label>
+        <div class="tl-input-wrap">
+          <i class="fas fa-map-pin tl-ico"></i>
+          <select [(ngModel)]="form.recipientVal">
+            <option value="">-- ওয়ার্ড নির্বাচন করুন --</option>
+            <option *ngFor="let w of wardOptions" [value]="w">ওয়ার্ড {{ w }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Service Tag + Message -->
+      <div class="tl-section-label" style="margin-top:24px"><i class="fas fa-tag"></i> ক্যাটাগরি ও বার্তা</div>
+      <div class="tl-grid-2">
+        <div class="tl-field">
+          <label>ক্যাটাগরি</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-tag tl-ico"></i>
+            <select [(ngModel)]="form.serviceTag" name="serviceTag">
+              <option *ngFor="let tag of serviceTags" [value]="tag">{{ tag }}</option>
+            </select>
+          </div>
+        </div>
+        <div class="tl-field" style="grid-column:1/-1">
+          <label>{{ ls.current === "bn" ? "বার্তা" : "Message" }}<span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-pen tl-ico tl-ico--top"></i>
+            <textarea [(ngModel)]="form.message" name="message"
+                      [placeholder]="isSmsType?'SMS বার্তা (সর্বোচ্চ ১৬০ অক্ষর)':'নোটিফিকেশনের বার্তা লিখুন...'"
+                      [maxlength]="isSmsType?160:5000" rows="5"></textarea>
+          </div>
+          <div class="char-count" *ngIf="isSmsType">{{ charCount }} / 160</div>
+        </div>
+      </div>
+
+      <div class="tl-nav" style="justify-content:flex-end;gap:10px">
+        <button type="button" class="tl-btn tl-btn--cancel" (click)="resetForm()">
+          <i class="fas fa-rotate-left"></i> {{ ls.current === "bn" ? "রিসেট" : "Reset" }}</button>
+        <button class="tl-btn" [class.tl-btn--sms]="isSmsType" [class.tl-btn--email]="isEmailType" [class.tl-btn--push]="isPushType"
+                (click)="sendNotification()" [disabled]="isSubmitting">
+          <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+          <i class="fas fa-paper-plane"     *ngIf="!isSubmitting"></i>
+          {{ isSubmitting ? 'পাঠানো হচ্ছে...' : activeType + ' পাঠান' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

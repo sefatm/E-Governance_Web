@@ -1,0 +1,284 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="toast">
+  <div class="tl-toast" [class.tl-toast--ok]="toast.type==='success'" [class.tl-toast--fail]="toast.type==='error'">
+    <i class="fas" [ngClass]="toast.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ toast.msg }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- Header -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">ভোটার নিবন্ধন ফরম</h2>
+        <span class="tl-header__title-en">Voter Registration Form — E-Voting System</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/election_commission.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="tl-steps">
+    <ng-container *ngFor="let s of steps; let i = index">
+      <div class="tl-step" [class.tl-step--done]="currentStep > i+1" [class.tl-step--active]="currentStep === i+1">
+        <div class="tl-step__circle">
+          <i class="fas fa-check" *ngIf="currentStep > i+1"></i>
+          <span *ngIf="currentStep <= i+1">{{ i+1 }}</span>
+        </div>
+        <span class="tl-step__label">{{ s }}</span>
+      </div>
+      <div class="tl-step__line" *ngIf="i < steps.length - 1" [class.tl-step__line--done]="currentStep > i+1"></div>
+    </ng-container>
+  </div>
+
+  <div class="tl-card">
+
+    <!-- STEP 1: Personal Info -->
+    <div class="tl-panel" [class.tl-panel--active]="currentStep === 1">
+      <div class="tl-panel__head">
+        <div class="tl-panel__icon"><i class="fas fa-user"></i></div>
+        <div>
+          <h3>Personal information</h3>
+          <p>Provide complete personal information of the voter.</p>
+        </div>
+        <span class="tl-step-tag">Step 1 of 3</span>
+      </div>
+
+      <div class="tl-grid-2">
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }} <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-user tl-ico"></i>
+            <input type="text" [(ngModel)]="voter.name" name="name" [class.tl-invalid]="submitted && !voter.name" [placeholder]="ls.current === 'bn' ? 'পূর্ণ নাম' : 'Full Name'">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !voter.name"><i class="fas fa-circle-exclamation"></i> Name is required</div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }} <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-calendar tl-ico"></i>
+            <input type="date" [(ngModel)]="voter.dob" name="dob" [class.tl-invalid]="submitted && !voter.dob">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !voter.dob"><i class="fas fa-circle-exclamation"></i> Date of Birth is required</div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }}</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-venus-mars tl-ico"></i>
+            <select [(ngModel)]="voter.gender" name="gender">
+              <option value="">Select Gender</option>
+              <option>{{ ls.current === "bn" ? "পুরুষ" : "Male" }}</option>
+              <option>{{ ls.current === "bn" ? "মহিলা" : "Female" }}</option>
+              <option>{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>Father's Name</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-user tl-ico"></i>
+            <input type="text" [(ngModel)]="voter.fatherName" name="fatherName" placeholder="Father's Name">
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>Mother's Name</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-user tl-ico"></i>
+            <input type="text" [(ngModel)]="voter.motherName" name="motherName" placeholder="Mother's Name">
+          </div>
+        </div>
+      </div>
+
+      <!-- Photo upload -->
+      <div class="tl-field--full">
+        <label>Photo <span style="color:#6b7280;font-weight:400;font-size:12px">(JPG/PNG/WEBP, max 2MB)</span></label>
+        <div class="tl-uploads" style="grid-template-columns:1fr">
+          <div class="tl-upload-card">
+            <div class="tl-upload-label"><i class="fas fa-portrait"></i> Photo of the voter <span class="tl-upload-hint">JPG · PNG · WEBP · Max 2MB</span></div>
+            <div *ngIf="!photoPreview" class="tl-upload-zone" (click)="photoInput.click()">
+              <input #photoInput type="file" accept="image/jpeg,image/jpg,image/png,image/webp" (change)="onPhotoSelected($event)" hidden>
+              <i class="fas fa-cloud-upload-alt tl-upload-icon"></i>
+              <span>Click to upload photo</span>
+            </div>
+            <div *ngIf="photoPreview" class="tl-photo-preview">
+              <img [src]="photoPreview" alt="Photo preview">
+              <button class="tl-remove-btn" (click)="removePhoto()"><i class="fas fa-times"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-nav">
+        <span></span>
+        <button class="tl-btn tl-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Identity + Address -->
+    <div class="tl-panel" [class.tl-panel--active]="currentStep === 2">
+      <div class="tl-panel__head">
+        <div class="tl-panel__icon"><i class="fas fa-id-card"></i></div>
+        <div>
+          <h3>Identity and Address</h3>
+          <p>Provide identity and current address information</p>
+        </div>
+        <span class="tl-step-tag">Step 2 of 3</span>
+      </div>
+
+      <div class="tl-grid-2">
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }} <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-id-card tl-ico"></i>
+            <input type="text" [(ngModel)]="voter.nid" name="nid" [class.tl-invalid]="submitted && !voter.nid" placeholder="10 or 17 digit NID" maxlength="17">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !voter.nid"><i class="fas fa-circle-exclamation"></i> NID is required</div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }} <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-phone tl-ico"></i>
+            <input type="text" [(ngModel)]="voter.mobile" name="mobile" [class.tl-invalid]="submitted && !voter.mobile" placeholder="01XXXXXXXXX" maxlength="11">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !voter.mobile"><i class="fas fa-circle-exclamation"></i> Mobile is required</div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "ইমেইল" : "Email" }} <span style="color:#6b7280;font-weight:400;font-size:12px">(for notifications)</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-envelope tl-ico"></i>
+            <input type="email" [(ngModel)]="voter.email" name="email" placeholder="example@email.com (optional)">
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>District</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-map-marker-alt tl-ico"></i>
+            <input type="text" [(ngModel)]="voter.district" name="district" placeholder="District name">
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>Upazila</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-map tl-ico"></i>
+            <input type="text" [(ngModel)]="voter.upazila" name="upazila" placeholder="Upazila name">
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>Area</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-home tl-ico"></i>
+            <input type="text" [(ngModel)]="voter.area" name="area" placeholder="Gram / Mohalla">
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-field--full" style="margin-top:16px">
+        <label>Full Address</label>
+        <div class="tl-input-wrap">
+          <i class="fas fa-map-pin tl-ico tl-ico--top"></i>
+          <textarea [(ngModel)]="voter.address" name="address" placeholder="Enter full address"></textarea>
+        </div>
+      </div>
+
+      <div class="tl-nav">
+        <button class="tl-btn tl-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পূর্ববর্তী" : "Previous" }}</button>
+        <button class="tl-btn tl-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Voting Info -->
+    <div class="tl-panel" [class.tl-panel--active]="currentStep === 3">
+      <div class="tl-panel__head">
+        <div class="tl-panel__icon"><i class="fas fa-vote-yea"></i></div>
+        <div>
+          <h3>Voting information</h3>
+          <p>Provide election area and center information</p>
+        </div>
+        <span class="tl-step-tag">Step 3 of 3</span>
+      </div>
+
+      <div class="tl-grid-2">
+        <div class="tl-field">
+          <label>Type of election</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-landmark tl-ico"></i>
+            <select [(ngModel)]="voter.electionType" name="electionType">
+              <option value="">Select Type</option>
+              <option value="National">National</option>
+              <option value="City Corporation">City Corporation</option>
+              <option value="Municipality">Municipality</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>Registration Date</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-calendar-check tl-ico"></i>
+            <input type="date" [(ngModel)]="voter.registrationDate" name="registrationDate">
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>Zone / Ward <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-layer-group tl-ico"></i>
+            <select [(ngModel)]="voter.zoneId" name="zoneId" [class.tl-invalid]="submitted && !voter.zoneId">
+              <option value="">Select Zone</option>
+              <option *ngFor="let z of zones" [value]="z.id">{{z.name}}</option>
+            </select>
+          </div>
+          <div class="tl-err" *ngIf="submitted && !voter.zoneId"><i class="fas fa-circle-exclamation"></i> Zone is required</div>
+        </div>
+
+        <div class="tl-field">
+          <label>Voting Center <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-building tl-ico"></i>
+            <select [(ngModel)]="voter.centerId" name="centerId" [class.tl-invalid]="submitted && !voter.centerId">
+              <option value="">Select Center</option>
+              <option *ngFor="let c of centers" [value]="c.id">{{c.name}}</option>
+            </select>
+          </div>
+          <div class="tl-err" *ngIf="submitted && !voter.centerId"><i class="fas fa-circle-exclamation"></i> Voting Center is required</div>
+        </div>
+      </div>
+
+      <!-- Declaration -->
+      <div class="tl-declaration">
+        <label class="tl-check-label">
+          <input type="checkbox" [(ngModel)]="agreed" name="agreed">
+          I hereby declare that the information provided above is true and correct. Any false information provided may lead to legal consequences.
+        </label>
+      </div>
+
+      <div class="tl-nav">
+        <button class="tl-btn tl-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পূর্ববর্তী" : "Previous" }}</button>
+        <button class="tl-btn tl-btn--submit" (click)="register()" [disabled]="isSubmitting || !agreed">
+          <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+          <i class="fas fa-user-plus" *ngIf="!isSubmitting"></i>
+          {{ isSubmitting ? 'Registering...' : 'Complete Registration' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,60 @@
+<div class="container">
+  <h2>{{ ls.current === "bn" ? "অডিট লগ" : "Audit Logs" }}</h2>
+
+  <!-- Filter -->
+  <div class="filter-box">
+    <input type="text" placeholder="Search by username / action..." [(ngModel)]="searchText" (input)="filterData()">
+    <select [(ngModel)]="filterModule" (change)="filterData()">
+      <option value="">All Modules</option>
+      <option *ngFor="let m of modules" [value]="m">{{ m }}</option>
+    </select>
+    <button (click)="clearFilter()">Clear</button>
+    <button class="btn-danger" (click)="clearAllLogs()">
+      <i class="fas fa-trash"></i> Clear All
+    </button>
+  </div>
+
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+  </div>
+
+  <table class="app-table" *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>#</th><th>{{ ls.current === "bn" ? "ব্যবহারকারীর নাম" : "Username" }}</th><th>{{ ls.current === "bn" ? "ভূমিকা" : "Role" }}</th>
+        <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th><th>{{ ls.current === "bn" ? "মডিউল" : "Module" }}</th>
+        <th>Date & Time</th><th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let l of filteredLogs; let i=index">
+        <tr>
+          <td>{{ i+1 }}</td>
+          <td>{{ l.username }}</td>
+          <td><span class="role-chip">{{ l.userRole || '—' }}</span></td>
+          <td>{{ l.action }}</td>
+          <td><span class="mod-chip">{{ l.module }}</span></td>
+          <td>{{ l.createdAt | date:'dd/MM/yy, hh:mm a' }}</td>
+          <td><span [ngClass]="statusClass(l.status!)">{{ l.status }}</span></td>
+          <td>
+            <button class="icon-btn" (click)="toggleDetails(i)"
+                    *ngIf="l.details" [title]="ls.current === 'bn' ? 'বিবরণ' : 'Details'">
+              <i class="fa fa-eye"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="expandedIndex === i && l.details">
+          <td colspan="8">
+            <div class="details-box">
+              <p><b>Details:</b> {{ l.details }}</p>
+              <p *ngIf="l.ipAddress"><b>IP Address:</b> {{ l.ipAddress }}</p>
+            </div>
+          </td>
+        </tr>
+      </ng-container>
+      <tr *ngIf="filteredLogs.length === 0">
+        <td colspan="8">No audit logs found.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

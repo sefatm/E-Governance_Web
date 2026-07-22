@@ -1,0 +1,52 @@
+<div class="settings-container">
+  <h2>Settings</h2>
+
+  <form *ngIf="settingsForm" [formGroup]="settingsForm" (ngSubmit)="onSubmit()">
+
+    <!-- Change Password -->
+    <div class="card">
+      <h3>{{ ls.current === "bn" ? "পাসওয়ার্ড পরিবর্তন" : "Change Password" }}</h3>
+
+      <div class="form-group">
+        <label>{{ ls.current === "bn" ? "বর্তমান পাসওয়ার্ড" : "Current Password" }}</label>
+        <input type="password" formControlName="currentPassword">
+      </div>
+
+      <div class="form-group">
+        <label>{{ ls.current === "bn" ? "নতুন পাসওয়ার্ড" : "New Password" }}</label>
+        <input type="password" formControlName="newPassword">
+      </div>
+
+      <div class="form-group">
+        <label>{{ ls.current === "bn" ? "পাসওয়ার্ড নিশ্চিত" : "Confirm Password" }}</label>
+        <input type="password" formControlName="confirmPassword">
+      </div>
+    </div>
+
+    <!-- Theme -->
+    <div class="card">
+      <h3>Theme Settings</h3>
+
+      <div class="form-group">
+        <label>Select Theme</label>
+        <select formControlName="theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card">
+      <h3>Notifications</h3>
+
+      <div class="form-group toggle">
+        <label>Enable Notifications</label>
+        <input type="checkbox" formControlName="notifications">
+      </div>
+    </div>
+
+    <button type="submit">Save Settings</button>
+
+  </form>
+</div>

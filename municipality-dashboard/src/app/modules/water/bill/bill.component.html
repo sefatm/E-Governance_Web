@@ -1,0 +1,392 @@
+<div class="tl-toast-area" *ngIf="toasts.length">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success'?'fa-circle-check':'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- Tabs -->
+  <div class="tl-tabs">
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='generate'" (click)="activeTab='generate'">
+      <i class="fas fa-file-invoice"></i> Generate Water Bill
+    </button>
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='connections'" (click)="switchTab('connections')">
+      <i class="fas fa-faucet"></i> Connection Applications
+      <span class="tl-tab-count" *ngIf="connections.length">{{ connections.length }}</span>
+    </button>
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='bills'" (click)="switchTab('bills')">
+      <i class="fas fa-list"></i> All Bills
+      <span class="tl-tab-count" *ngIf="bills.length">{{ bills.length }}</span>
+    </button>
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='rates'" (click)="activeTab='rates'">
+      <i class="fas fa-bangladeshi-taka-sign"></i> Rate Chart
+    </button>
+  </div>
+
+  <!-- GENERATE BILL-->
+  <ng-container *ngIf="activeTab==='generate'">
+
+    <div class="tl-header">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+          <span class="tl-header__country">GOVERNMENT OF THE PEOPLE'S REPUBLIC OF BANGLADESH</span>
+          <div class="tl-header__divider"></div>
+          <h2 class="tl-header__title">পানি বিল তৈরি ফরম</h2>
+          <span class="tl-header__title-en">Water Bill Generation System — Municipality Water Supply</span>
+          <span class="tl-header__sub">Auto-calculates units and amount from meter readings</span>
+        </div>
+      </div>
+      <div class="tl-header__right">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <div class="tl-card">
+      <div class="tl-panel tl-panel--active">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-file-invoice"></i></div>
+          <div><h3>Bill Generation</h3><p>Enter meter readings to auto-calculate bill amount</p></div>
+        </div>
+
+        <form (ngSubmit)="generateBill()" novalidate>
+          <div class="tl-grid-2">
+            <div class="tl-field">
+              <label>Customer Name <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-user tl-ico"></i>
+                <input type="text" [(ngModel)]="bill.name" name="name" placeholder="Customer full name" required>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Registered Mobile <span class="req">*</span></label>
+              <div class="tl-input-wrap"><i class="fas fa-mobile-screen tl-ico"></i><input type="text" [(ngModel)]="bill.mobile" name="mobile" placeholder="01XXXXXXXXX" maxlength="11" required></div>
+            </div>
+            <div class="tl-field">
+              <label>Email for Bill Notification</label>
+              <div class="tl-input-wrap"><i class="fas fa-envelope tl-ico"></i><input type="email" [(ngModel)]="bill.email" name="email" placeholder="customer@example.com"></div>
+            </div>
+            <div class="tl-field">
+              <label>Citizen NID</label>
+              <div class="tl-input-wrap"><i class="fas fa-id-card tl-ico"></i><input type="text" [(ngModel)]="bill.nid" name="nid" placeholder="NID number"></div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "মিটার নম্বর" : "Meter Number" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-gauge tl-ico"></i>
+                <input type="text" [(ngModel)]="bill.meterNo" name="meterNo" placeholder="e.g. WM-001234" required>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Billing Month <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-calendar tl-ico"></i>
+                <select [(ngModel)]="bill.month" name="month" required>
+                  <option value="">Select month</option>
+                  <option *ngFor="let m of months" [value]="m">{{ m }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "সংযোগের ধরন" : "Connection Type" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-pipe-section tl-ico"></i>
+                <select [(ngModel)]="bill.connectionType" name="connectionType" (change)="calcBill()" required>
+                  <option value="Residential">Residential — আবাসিক</option>
+                  <option value="Commercial">Commercial — বাণিজ্যিক</option>
+                  <option value="Industrial">Industrial — শিল্প</option>
+                  <option value="Government">Government — সরকারি</option>
+                </select>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Previous Reading (L) <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-arrow-left tl-ico"></i>
+                <input type="number" [(ngModel)]="bill.previousReading" name="previousReading"
+                       (input)="calcBill()" placeholder="0" min="0" required>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Current Reading (L) <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-arrow-right tl-ico"></i>
+                <input type="number" [(ngModel)]="bill.currentReading" name="currentReading"
+                       (input)="calcBill()" placeholder="0" min="0" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Auto-calculated Bill Preview -->
+          <div class="bill-preview" *ngIf="calculatedUnits > 0">
+            <div class="bill-preview-title"><i class="fas fa-receipt"></i> Bill Preview</div>
+            <div class="bill-preview-grid">
+              <div class="bill-prow">
+                <span>{{ ls.current === "bn" ? "ব্যবহৃত ইউনিট" : "Units Consumed" }}</span>
+                <strong>{{ calculatedUnits | number }} L</strong>
+              </div>
+              <div class="bill-prow">
+                <span>Rate per Unit</span>
+                <strong>৳ {{ ratePerUnit }}</strong>
+              </div>
+              <div class="bill-prow">
+                <span>Base Charge</span>
+                <strong>৳ {{ baseCharge | number:'1.2-2' }}</strong>
+              </div>
+              <div class="bill-prow">
+                <span>Service Charge</span>
+                <strong>৳ {{ serviceCharge | number:'1.2-2' }}</strong>
+              </div>
+              <div class="bill-prow bill-prow--total">
+                <span>Total Amount</span>
+                <strong class="bill-total">৳ {{ totalAmount | number:'1.2-2' }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-nav" style="margin-top:20px">
+            <span></span>
+            <button type="submit" class="tl-btn tl-btn--submit" [disabled]="isSubmitting">
+              <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+              <i class="fas fa-file-invoice" *ngIf="!isSubmitting"></i>
+              {{ isSubmitting ? 'Generating...' : 'Generate Water Bill' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- CONNECTION APPLICATIONS -->
+  <ng-container *ngIf="activeTab==='connections'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">Water Connection Applications</h2>
+          <span class="tl-header__sub">Review and approve/reject citizen water connection requests</span>
+        </div>
+      </div>
+      <div class="bill-chips">
+        <div class="bill-chip bill-chip--amber"><span>Pending</span><strong>{{ connectionCount('Pending') }}</strong></div>
+        <div class="bill-chip bill-chip--green"><span>Approved</span><strong>{{ connectionCount('Approved') }}</strong></div>
+        <div class="bill-chip bill-chip--blue"><span>Total</span><strong>{{ connections.length }}</strong></div>
+      </div>
+    </div>
+    <div class="tl-card tl-card--list">
+      <table class="tl-table" *ngIf="connections.length">
+        <thead>
+          <tr>
+            <th>#</th><th>Applicant</th><th>Phone</th><th>NID</th><th>Type</th>
+            <th>Location</th><th>Status</th><th>Date</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of connections; let i=index">
+            <td>{{ i + 1 }}</td>
+            <td>
+              <strong>{{ app.name }}</strong><br>
+              <small>{{ app.email || 'No email' }}</small>
+            </td>
+            <td>{{ app.phone }}</td>
+            <td class="mono">{{ app.nid || '—' }}</td>
+            <td><span class="type-tag">{{ app.connectionType }}</span></td>
+            <td>{{ app.ward }}, {{ app.upazila }}, {{ app.district }}</td>
+            <td><span class="tl-badge" [ngClass]="app.status === 'Approved' ? 'badge-approved' : app.status === 'Rejected' ? 'badge-rejected' : 'badge-pending'">{{ app.status || 'Pending' }}</span></td>
+            <td>{{ app.createdAt | date:'dd MMM y' }}</td>
+            <td>
+              <button class="tl-mini-btn" (click)="openConnectionDetails(app)">
+                <i class="fas fa-eye"></i> Details
+              </button>
+              <button class="tl-mini-btn approve" *ngIf="app.status !== 'Approved'" (click)="updateConnectionStatus(app, 'Approved')">
+                <i class="fas fa-check"></i> Approve
+              </button>
+              <button class="tl-mini-btn reject" *ngIf="app.status !== 'Rejected'" (click)="updateConnectionStatus(app, 'Rejected')">
+                <i class="fas fa-xmark"></i> Reject
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tl-empty" *ngIf="!connections.length">
+        <i class="fas fa-inbox"></i><p>No water connection applications found.</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══ ALL BILLS ══ -->
+  <ng-container *ngIf="activeTab==='bills'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">Water Bill Admin Data</h2>
+          <span class="tl-header__sub">Generate, manage, verify payments, upload signature/seal and download receipts</span>
+        </div>
+      </div>
+      <!-- Summary chips -->
+      <div class="bill-chips">
+        <div class="bill-chip bill-chip--blue">
+          <span>{{ ls.current === "bn" ? "মোট" : "Total" }}</span><strong>{{ bills.length }}</strong>
+        </div>
+        <div class="bill-chip bill-chip--green">
+          <span>{{ ls.current === "bn" ? "পরিশোধিত" : "Paid" }}</span><strong>{{ paidCount }}</strong>
+        </div>
+        <div class="bill-chip bill-chip--amber">
+          <span>{{ ls.current === "bn" ? "অপরিশোধিত" : "Unpaid" }}</span><strong>{{ bills.length - paidCount }}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="tl-card tl-card--list">
+      <div class="tl-loading" *ngIf="isLoading"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+      <table class="tl-table" *ngIf="!isLoading && bills.length">
+        <thead>
+          <tr>
+            <th>#</th><th>Customer</th><th>Meter No</th><th>Month</th>
+            <th>Units (L)</th><th>Amount (৳)</th><th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th><th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th><th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of bills; let i=index">
+            <td>{{ i+1 }}</td>
+            <td><strong>{{ b.name }}</strong></td>
+            <td class="mono">{{ b.meterNo }}</td>
+            <td>{{ b.month }}</td>
+            <td>{{ b.units | number }}</td>
+            <td><strong>৳{{ b.amount | number:'1.2-2' }}</strong></td>
+            <td><span class="type-tag">{{ b.connectionType }}</span></td>
+            <td>
+              <span class="tl-badge" [ngClass]="b.status?.toLowerCase()==='paid'?'badge-approved':'badge-pending'">
+                {{ b.status || 'Unpaid' }}
+              </span>
+            </td>
+            <td>
+              <span class="tl-badge badge-pending" *ngIf="b.status?.toLowerCase()!=='paid'">
+                <i class="fas fa-clock"></i> Awaiting Citizen Payment
+              </span>
+              <span class="paid-check" *ngIf="b.status?.toLowerCase()==='paid'">
+                <i class="fas fa-circle-check"></i> {{ ls.current === "bn" ? "পরিশোধিত" : "Paid" }}
+              </span>
+              <button class="tl-mini-btn" (click)="uploadWaterAssets(b)">
+                <i class="fas fa-stamp"></i>
+                {{ b.authoritySignature && b.authoritySeal ? 'Update Signature + Seal' : 'Upload Signature + Seal' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tl-empty" *ngIf="!isLoading && !bills.length">
+        <i class="fas fa-inbox"></i><p>No bills generated yet.</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══ RATE CHART ══ -->
+  <ng-container *ngIf="activeTab==='rates'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">পানি সরবরাহ শুল্ক তালিকা</h2>
+          <span class="tl-header__sub">Water Supply Rate Chart — পৌরসভা পানি সরবরাহ দপ্তর</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-card tl-card--list" style="padding:24px">
+      <div class="rate-chart-note">
+        <i class="fas fa-circle-info"></i>
+        Bill = (Units × Rate per Unit) + Base Charge + Service Charge (10%)
+      </div>
+      <table class="rate-table">
+        <thead>
+          <tr>
+            <th>{{ ls.current === "bn" ? "সংযোগের ধরন" : "Connection Type" }}</th>
+            <th>Rate per Unit (L)</th>
+            <th>Base Charge</th>
+            <th>Service Charge</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of rateChart">
+            <td><span class="type-tag">{{ r.type }}</span></td>
+            <td><strong>৳ {{ r.rate }}</strong></td>
+            <td>৳ {{ r.base }}</td>
+            <td>10% of subtotal</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+</div>
+
+<!-- Connection Application Details Modal -->
+<div class="water-modal-backdrop" *ngIf="selectedConnection" (click)="closeConnectionDetails()">
+  <div class="water-modal-card water-modal-card--wide" (click)="$event.stopPropagation()">
+    <button type="button" class="water-modal-close" (click)="closeConnectionDetails()">×</button>
+    <h3>Water Connection Application Details</h3>
+    <p class="water-modal-sub">
+      {{ selectedConnection.name }} | {{ selectedConnection.phone }} | {{ selectedConnection.status || 'Pending' }}
+    </p>
+
+    <div class="connection-detail-grid">
+      <div class="connection-detail-item" *ngFor="let f of connectionDetailFields(selectedConnection)">
+        <span>{{ f.key }}</span>
+        <strong>{{ f.value }}</strong>
+      </div>
+    </div>
+
+    <div class="water-modal-actions">
+      <button type="button" class="tl-mini-btn approve"
+              *ngIf="selectedConnection.status !== 'Approved'"
+              (click)="updateConnectionStatus(selectedConnection, 'Approved'); closeConnectionDetails()">
+        <i class="fas fa-check"></i> Approve
+      </button>
+      <button type="button" class="tl-mini-btn reject"
+              *ngIf="selectedConnection.status !== 'Rejected'"
+              (click)="updateConnectionStatus(selectedConnection, 'Rejected'); closeConnectionDetails()">
+        <i class="fas fa-xmark"></i> Reject
+      </button>
+      <button type="button" class="tl-btn tl-btn--back" (click)="closeConnectionDetails()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Bill Signature + Seal Upload Modal -->
+<div class="water-modal-backdrop" *ngIf="assetBill" (click)="closeAssetModal()">
+  <div class="water-modal-card" (click)="$event.stopPropagation()">
+    <button type="button" class="water-modal-close" (click)="closeAssetModal()">×</button>
+    <h3>Bill Signature & Seal Upload</h3>
+    <p class="water-modal-sub">{{ assetBill.name }} | {{ assetBill.meterNo }} | {{ assetBill.month }}</p>
+
+    <div class="asset-grid">
+      <label class="asset-upload">
+        <span><i class="fas fa-signature"></i> Signature Image <b>*</b></span>
+        <input type="file" accept="image/*" (change)="onAssetFile($event, 'signature')">
+        <small>{{ assetSignatureName || 'Upload PNG/JPG signature' }}</small>
+      </label>
+      <label class="asset-upload">
+        <span><i class="fas fa-stamp"></i> Seal Image <b>*</b></span>
+        <input type="file" accept="image/*" (change)="onAssetFile($event, 'seal')">
+        <small>{{ assetSealName || 'Upload PNG/JPG official seal' }}</small>
+      </label>
+    </div>
+
+    <div class="water-modal-actions">
+      <button type="button" class="tl-btn tl-btn--back" (click)="closeAssetModal()">Cancel</button>
+      <button type="button"
+              class="tl-btn tl-btn--submit"
+              [disabled]="assetSubmitting || !assetSignatureBase64 || !assetSealBase64"
+              (click)="submitAssetUpload()">
+        <i class="fas fa-spinner fa-spin" *ngIf="assetSubmitting"></i>
+        {{ assetSubmitting ? 'Saving...' : 'Save Signature + Seal' }}
+      </button>
+    </div>
+  </div>
+</div>

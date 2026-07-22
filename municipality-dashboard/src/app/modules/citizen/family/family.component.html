@@ -1,0 +1,480 @@
+<!-- ══ Toast ════════════════════════════════════════════════ -->
+<div class="toast-area" *ngIf="toasts.length > 0">
+  <div *ngFor="let t of toasts" class="toast-item"
+       [class.ok]="t.type==='success'" [class.fail]="t.type==='error'" [class.bye]="t.removing">
+    <i class="fas t-icon" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<!-- PAGE -->
+<div class="cit-page">
+
+  <!-- Form Header -->
+
+<!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-btn" [class.active]="activeTab === 'form'" (click)="switchTab('form')">
+      <i class="fas fa-file-alt"></i> {{ ls.current === "bn" ? "আবেদন করুন" : "Apply" }}
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'list'" (click)="switchTab('list')">
+      <i class="fas fa-list"></i> My Applications
+      <span class="tab-count" *ngIf="applications.length > 0">{{ applications.length }}</span>
+    </button>
+  </div>
+
+  <!-- APPLY FORM -->
+  <ng-container *ngIf="activeTab === 'form'">
+
+  <!-- Header -->
+      <div class="tl-header">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+          <span class="tl-header__country">GOVERNMENT OF THE PEOPLE'S REPUBLIC OF BANGLADESH</span>
+          <div class="tl-header__divider"></div>
+          <h2 class="tl-header__title">পারিবারিক সনদপত্র আবেদন ফরম</h2>
+          <span class="tl-header__title-en">Municipal Authority · Family Certificate Application Form</span>
+          <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+        </div>
+      </div>
+      <div class="tl-header__right">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+
+    <!-- Step Bar -->
+    <div class="step-bar">
+      <ng-container *ngFor="let s of steps; let i = index">
+        <div class="sb-item"
+             [class.sb-done]="currentStep > i+1"
+             [class.sb-active]="currentStep === i+1">
+          <div class="sb-circle">
+            <i class="fas fa-check" *ngIf="currentStep > i+1"></i>
+            <span *ngIf="currentStep <= i+1">{{ i+1 }}</span>
+          </div>
+          <span class="sb-label">{{ s }}</span>
+        </div>
+        <div class="sb-line" *ngIf="i < steps.length - 1"
+             [class.sb-line-done]="currentStep > i+1"></div>
+      </ng-container>
+    </div>
+
+    <div class="form-card">
+      <form [formGroup]="form" (ngSubmit)="submitForm()" novalidate enctype="multipart/form-data">
+
+        <!-- STEP 1 — Family Head -->
+        <div class="step-panel" [class.active]="currentStep === 1">
+          <div class="panel-head">
+            <div class="ph-icon"><i class="fas fa-user-tie"></i></div>
+            <div><h3>Family Head Information</h3><p>Details of the head of family as per NID</p></div>
+            <span class="ph-step-tag">Step 1 of 3</span>
+          </div>
+
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }} <span class="req">*</span></label>
+            <div class="input-wrap">
+              <i class="fas fa-user input-ico"></i>
+              <input type="text" formControlName="headName"
+                     [class.invalid]="submitted && f['headName'].invalid"
+                     placeholder="Full name as per NID">
+            </div>
+            <div class="ferr" *ngIf="submitted && f['headName'].errors?.['required']">
+              <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }} <span class="req">*</span></label>
+              <div class="input-wrap">
+                <i class="fas fa-id-card input-ico"></i>
+                <input type="text" formControlName="headNid" maxlength="17"
+                       [class.invalid]="submitted && f['headNid'].invalid"
+                       placeholder="10, 13 or 17 digits">
+              </div>
+              <div class="ferr" *ngIf="submitted && f['headNid'].errors?.['required']">
+                <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+              </div>
+              <div class="ferr" *ngIf="submitted && f['headNid'].errors?.['pattern']">
+                <i class="fas fa-circle-exclamation"></i> Invalid NID format
+              </div>
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }} <span class="req">*</span></label>
+              <div class="input-wrap">
+                <i class="fas fa-calendar input-ico"></i>
+                <input type="date" formControlName="headDob"
+                       [class.invalid]="submitted && f['headDob'].invalid">
+              </div>
+              <div class="ferr" *ngIf="submitted && f['headDob'].errors?.['required']">
+                <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }} <span class="req">*</span></label>
+              <select formControlName="headGender" [class.invalid]="submitted && f['headGender'].invalid">
+                <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+                <option value="male">{{ ls.current === "bn" ? "পুরুষ" : "Male" }}</option>
+                <option value="female">{{ ls.current === "bn" ? "মহিলা" : "Female" }}</option>
+                <option value="other">{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+              </select>
+              <div class="ferr" *ngIf="submitted && f['headGender'].errors?.['required']">
+                <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+              </div>
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }} <span class="req">*</span></label>
+              <div class="input-wrap">
+                <span class="input-prefix">+880</span>
+                <input type="tel" formControlName="headContact" maxlength="11"
+                       [class.invalid]="submitted && f['headContact'].invalid"
+                       placeholder="01XXXXXXXXX" style="padding-left:52px">
+              </div>
+              <div class="ferr" *ngIf="submitted && f['headContact'].errors?.['required']">
+                <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+              </div>
+              <div class="ferr" *ngIf="submitted && f['headContact'].errors?.['pattern']">
+                <i class="fas fa-circle-exclamation"></i> Invalid mobile
+              </div>
+            </div>
+          </div>
+
+          <!-- Head Photo & NID Upload -->
+          <div class="upload-section-title">
+            <i class="fas fa-cloud-arrow-up"></i> Head Documents
+          </div>
+          <div class="grid-2">
+            <div class="upload-card" [class.uc-done]="headPhotoFile">
+              <input type="file" accept="image/png,image/jpeg" (change)="onHeadPhotoChange($event)">
+              <ng-container *ngIf="!headPhotoFile">
+                <div class="uc-icon-wrap photo-bg"><i class="fas fa-camera"></i></div>
+                <p class="uc-name">Head's Photo</p>
+                <p class="uc-hint">PNG / JPG · max 300 KB</p>
+                <span class="uc-btn"><i class="fas fa-upload"></i> Choose</span>
+              </ng-container>
+              <ng-container *ngIf="headPhotoFile">
+                <div class="uc-preview" *ngIf="headPhotoPreview">
+                  <img [src]="headPhotoPreview" alt="Photo">
+                </div>
+                <div class="uc-ok"><i class="fas fa-circle-check"></i> {{ headPhotoFile.name }}</div>
+                <span class="uc-change">Change</span>
+              </ng-container>
+            </div>
+
+            <div class="upload-card" [class.uc-done]="headNidFile">
+              <input type="file" accept="image/png,image/jpeg,application/pdf" (change)="onHeadNidChange($event)">
+              <ng-container *ngIf="!headNidFile">
+                <div class="uc-icon-wrap nid-bg"><i class="fas fa-id-card"></i></div>
+                <p class="uc-name">Head's NID Copy</p>
+                <p class="uc-hint">PNG / JPG / PDF · max 1 MB</p>
+                <span class="uc-btn"><i class="fas fa-upload"></i> Choose</span>
+              </ng-container>
+              <ng-container *ngIf="headNidFile">
+                <div class="uc-icon-wrap nid-bg" style="margin-bottom:8px"><i class="fas fa-file-check"></i></div>
+                <div class="uc-ok"><i class="fas fa-circle-check"></i> {{ headNidFile.name }}</div>
+                <span class="uc-change">Change</span>
+              </ng-container>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <div></div>
+            <button type="button" class="btn-next" (click)="nextStep()">
+              Next Step <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2 — Address & Purpose -->
+        <div class="step-panel" [class.active]="currentStep === 2">
+          <div class="panel-head">
+            <div class="ph-icon ph-teal"><i class="fas fa-location-dot"></i></div>
+            <div><h3>Address & Purpose</h3><p>Where does the family reside?</p></div>
+            <span class="ph-step-tag">Step 2 of 3</span>
+          </div>
+
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "বর্তমান ঠিকানা" : "Present Address" }} <span class="req">*</span></label>
+            <textarea formControlName="address" rows="3"
+                      [class.invalid]="submitted && f['address'].invalid"
+                      placeholder="House No, Road, Area, Upazila, Post Office"></textarea>
+            <div class="ferr" *ngIf="submitted && f['address'].errors?.['required']">
+              <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+            </div>
+          </div>
+
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "স্থায়ী ঠিকানা" : "Permanent Address" }}</label>
+            <textarea formControlName="permanentAddress" rows="2"
+                      placeholder="Leave blank if same as present address"></textarea>
+          </div>
+
+          <div class="grid-2">
+            <div class="field">
+              <label>Division <span class="req">*</span></label>
+              <select formControlName="division" [class.invalid]="submitted && f['division'].invalid">
+                <option value="">Select Division</option>
+                <option>Dhaka</option><option>Chattogram</option><option>Rajshahi</option>
+                <option>Khulna</option><option>Barishal</option><option>Sylhet</option>
+                <option>Rangpur</option><option>Mymensingh</option>
+              </select>
+              <div class="ferr" *ngIf="submitted && f['division'].errors?.['required']">
+                <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+              </div>
+            </div>
+            <div class="field">
+              <label>District <span class="req">*</span></label>
+              <input type="text" formControlName="district"
+                     [class.invalid]="submitted && f['district'].invalid"
+                     placeholder="District name">
+              <div class="ferr" *ngIf="submitted && f['district'].errors?.['required']">
+                <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Purpose of Certificate <span class="req">*</span></label>
+            <input type="text" formControlName="purpose"
+                   [class.invalid]="submitted && f['purpose'].invalid"
+                   placeholder="e.g. Loan Application, Visa, Government Service">
+            <div class="ferr" *ngIf="submitted && f['purpose'].errors?.['required']">
+              <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-back" (click)="prevStep()">
+              <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+            </button>
+            <button type="button" class="btn-next" (click)="nextStep()">
+              Next Step <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3 — Members & Documents -->
+        <div class="step-panel" [class.active]="currentStep === 3">
+          <div class="panel-head">
+            <div class="ph-icon ph-blue"><i class="fas fa-users"></i></div>
+            <div>
+              <h3>Family Members & Documents</h3>
+              <p>Add each member — upload NID or Birth Certificate</p>
+            </div>
+            <span class="ph-step-tag">Step 3 of 3</span>
+          </div>
+
+          <div formArrayName="members">
+            <div *ngFor="let member of membersArray.controls; let i = index"
+                 [formGroupName]="i" class="member-card">
+
+              <!-- Member card header -->
+              <div class="mc-header">
+                <div class="mc-num">
+                  <i class="fas fa-user"></i> Member {{ i + 1 }}
+                </div>
+                <button type="button" class="mc-remove"
+                        *ngIf="membersArray.length > 1"
+                        (click)="removeMember(i)"
+                        title="Remove">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+
+              <!-- Member fields -->
+              <div class="mc-body">
+                <div class="grid-2">
+                  <div class="field">
+                    <label>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }} <span class="req">*</span></label>
+                    <input type="text" formControlName="name"
+                           [class.invalid]="submitted && memberCtrl(i,'name')?.invalid"
+                           placeholder="Member's full name">
+                    <div class="ferr" *ngIf="submitted && memberCtrl(i,'name')?.errors?.['required']">
+                      <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Relation with Head <span class="req">*</span></label>
+                    <select formControlName="relation"
+                            [class.invalid]="submitted && memberCtrl(i,'relation')?.invalid">
+                      <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+                      <option *ngFor="let r of relationOptions" [value]="r">{{ r }}</option>
+                    </select>
+                    <div class="ferr" *ngIf="submitted && memberCtrl(i,'relation')?.errors?.['required']">
+                      <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="grid-3">
+                  <div class="field">
+                    <label>Age <span class="req">*</span></label>
+                    <input type="number" formControlName="age" min="0" max="120"
+                           [class.invalid]="submitted && memberCtrl(i,'age')?.invalid"
+                           placeholder="Years">
+                    <div class="ferr" *ngIf="submitted && memberCtrl(i,'age')?.errors?.['required']">
+                      <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }} <span class="req">*</span></label>
+                    <select formControlName="gender"
+                            [class.invalid]="submitted && memberCtrl(i,'gender')?.invalid">
+                      <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+                      <option value="male">{{ ls.current === "bn" ? "পুরুষ" : "Male" }}</option>
+                      <option value="female">{{ ls.current === "bn" ? "মহিলা" : "Female" }}</option>
+                      <option value="other">{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+                    </select>
+                    <div class="ferr" *ngIf="submitted && memberCtrl(i,'gender')?.errors?.['required']">
+                      <i class="fas fa-circle-exclamation"></i> {{ ls.current === "bn" ? "আবশ্যক" : "Required" }}
+                    </div>
+                  </div>
+                  <div class="field">
+                    <label>Document Type</label>
+                    <select formControlName="docType">
+                      <option value="nid">{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</option>
+                      <option value="birth">Birth Cert.</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="grid-2">
+                  <div class="field">
+                    <label>
+                      {{ memberCtrl(i,'docType')?.value === 'birth' ? 'Birth Reg. No' : 'NID Number' }}
+                    </label>
+                    <input type="text" formControlName="nidOrBirth"
+                           [placeholder]="memberCtrl(i,'docType')?.value === 'birth' ? 'Birth registration number' : '10 / 13 / 17 digit NID'">
+                  </div>
+
+                  <!-- Upload card for member doc -->
+                  <div class="field">
+                    <label>
+                      Upload
+                      {{ memberCtrl(i,'docType')?.value === 'birth' ? 'Birth Certificate' : 'NID Copy' }}
+                    </label>
+                    <div class="member-upload" [class.mu-done]="memberFiles[i]?.doc">
+                      <input type="file" accept="image/png,image/jpeg,application/pdf"
+                             (change)="onMemberDocChange($event, i)">
+                      <ng-container *ngIf="!memberFiles[i]?.doc">
+                        <i class="fas fa-cloud-arrow-up mu-icon"></i>
+                        <span class="mu-label">Click to upload</span>
+                        <span class="mu-hint">PNG / JPG / PDF</span>
+                      </ng-container>
+                      <ng-container *ngIf="memberFiles[i]?.doc">
+                        <img *ngIf="memberFiles[i]?.preview" [src]="memberFiles[i]?.preview" class="mu-img-preview">
+                        <i class="fas fa-file-check mu-done-icon" *ngIf="!memberFiles[i]?.preview"></i>
+                        <span class="mu-done-label">
+                          <i class="fas fa-circle-check"></i> {{ memberFiles[i]?.doc?.name }}
+                        </span>
+                        <span class="mu-change">Change</span>
+                      </ng-container>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Add member button -->
+          <button type="button" class="btn-add-member" (click)="addMember()">
+            <i class="fas fa-user-plus"></i> Add Another Member
+          </button>
+
+          <!-- Summary strip -->
+          <div class="summary-strip" *ngIf="f['headName'].value">
+            <div class="ss-title"><i class="fas fa-clipboard-check"></i> Application Summary</div>
+            <div class="ss-grid">
+              <div class="ss-item"><span>Head</span><strong>{{ f['headName'].value }}</strong></div>
+              <div class="ss-item"><span>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</span><strong>{{ f['headNid'].value }}</strong></div>
+              <div class="ss-item"><span>Members</span><strong>{{ membersArray.length + 1 }} (incl. head)</strong></div>
+              <div class="ss-item"><span>Purpose</span><strong>{{ f['purpose'].value }}</strong></div>
+            </div>
+          </div>
+
+          <div class="step-nav">
+            <button type="button" class="btn-back" (click)="prevStep()">
+              <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+            </button>
+            <button type="submit" class="btn-submit" [disabled]="isSubmitting">
+              <ng-container *ngIf="!isSubmitting">
+                <i class="fas fa-paper-plane"></i> {{ ls.current === "bn" ? "আবেদন জমা দিন" : "Submit Application" }}
+              </ng-container>
+              <div class="spinner" *ngIf="isSubmitting"></div>
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+  </ng-container>
+
+  <!-- MY APPLICATIONS LIST -->
+  <ng-container *ngIf="activeTab === 'list'">
+    <div class="form-card list-card">
+
+      <div class="panel-head">
+        <div class="ph-icon"><i class="fas fa-list"></i></div>
+        <div><h3>My Applications</h3><p>Track your submitted family certificate applications</p></div>
+      </div>
+
+      <div class="loading-box" *ngIf="isLoading">
+        <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+      </div>
+
+      <div class="table-wrap" *ngIf="!isLoading && applications.length > 0">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Head of Family</th>
+              <th>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</th>
+              <th>Members</th>
+              <th>Applied Date</th>
+              <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+              <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let app of applications; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td><strong>{{ app.headName }}</strong></td>
+              <td class="mono">{{ app.nid }}</td>
+              <td>{{ app.memberCount }} members</td>
+              <td>{{ app.createdAt | javaDate }}</td>
+              <td>
+                <span class="status-badge" [ngClass]="getStatusClass(app.status)">
+                  {{ getStatusText(app.status) }}
+                </span>
+              </td>
+              <td>
+                <button class="btn-download"
+                        *ngIf="isApproved(app.status)"
+                        (click)="download(app.id)">
+                  <i class="fas fa-file-pdf"></i> Certificate
+                </button>
+                <span class="pending-note" *ngIf="!isApproved(app.status)">
+                  Awaiting approval
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="empty-state" *ngIf="!isLoading && applications.length === 0">
+        <i class="fas fa-inbox"></i>
+        <p>No applications yet. Use the Apply tab to submit one.</p>
+      </div>
+
+    </div>
+  </ng-container>
+
+</div>

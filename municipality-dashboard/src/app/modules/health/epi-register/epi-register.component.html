@@ -1,0 +1,273 @@
+<div class="tl-toast-area" *ngIf="success || error">
+  <div *ngIf="success" class="tl-toast tl-toast--ok">
+    <i class="fas fa-circle-check"></i><span>{{ success }}</span>
+  </div>
+  <div *ngIf="error" class="tl-toast tl-toast--fail">
+    <i class="fas fa-circle-xmark"></i><span>{{ error }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">শিশু ইপিআই নিবন্ধন ফরম</h2>
+        <span class="tl-header__title-en">Child EPI Registration - Expanded Programme on Immunization</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="tl-card">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <div class="tl-panel tl-panel--active">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon"><i class="fas fa-baby"></i></div>
+          <div>
+            <h3>শিশু ইপিআই নিবন্ধন</h3>
+            <p>শিশু, অভিভাবক, ঠিকানা এবং প্রয়োজনীয় ডকুমেন্ট তথ্য পূরণ করুন</p>
+          </div>
+        </div>
+
+        <div class="tl-section-label">
+          <i class="fas fa-child"></i> Child Information
+        </div>
+        <div class="tl-grid-3">
+          <div class="tl-field">
+            <label>Child Name <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-user tl-ico"></i>
+              <input formControlName="childName" placeholder="Full name" [class.tl-invalid]="f('childName').touched && f('childName').invalid">
+            </div>
+            <div class="tl-err" *ngIf="f('childName').touched && f('childName').invalid">
+              <i class="fas fa-circle-exclamation"></i> Child name is required
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Date of Birth <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-calendar tl-ico"></i>
+              <input type="date" formControlName="dateOfBirth" [max]="today" [class.tl-invalid]="f('dateOfBirth').touched && f('dateOfBirth').invalid">
+            </div>
+            <div class="tl-err" *ngIf="f('dateOfBirth').touched && f('dateOfBirth').invalid">
+              <i class="fas fa-circle-exclamation"></i> Date of birth is required
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Gender <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-venus-mars tl-ico"></i>
+              <select formControlName="gender" [class.tl-invalid]="f('gender').touched && f('gender').invalid">
+                <option value="">-- Select --</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div class="tl-err" *ngIf="f('gender').touched && f('gender').invalid">
+              <i class="fas fa-circle-exclamation"></i> Gender is required
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Birth Place</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-location-dot tl-ico"></i>
+              <input formControlName="birthPlace" placeholder="Birth place">
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-section-label" style="margin-top:28px">
+          <i class="fas fa-users"></i> Guardian Information
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>Father Name <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-user tl-ico"></i>
+              <input formControlName="fatherName" placeholder="Father name" [class.tl-invalid]="f('fatherName').touched && f('fatherName').invalid">
+            </div>
+            <div class="tl-err" *ngIf="f('fatherName').touched && f('fatherName').invalid">
+              <i class="fas fa-circle-exclamation"></i> Father name is required
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Mother Name <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-user tl-ico"></i>
+              <input formControlName="motherName" placeholder="Mother name" [class.tl-invalid]="f('motherName').touched && f('motherName').invalid">
+            </div>
+            <div class="tl-err" *ngIf="f('motherName').touched && f('motherName').invalid">
+              <i class="fas fa-circle-exclamation"></i> Mother name is required
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Guardian NID</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-id-card tl-ico"></i>
+              <input formControlName="guardianNid" placeholder="Guardian NID">
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Father NID</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-id-card tl-ico"></i>
+              <input formControlName="fatherNid" placeholder="Father NID">
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Mother NID</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-id-card tl-ico"></i>
+              <input formControlName="motherNid" placeholder="Mother NID">
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Mobile Number <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-phone tl-ico"></i>
+              <input formControlName="guardianPhone" placeholder="01XXXXXXXXX" [class.tl-invalid]="f('guardianPhone').touched && f('guardianPhone').invalid">
+            </div>
+            <div class="tl-err" *ngIf="f('guardianPhone').touched && f('guardianPhone').invalid">
+              <i class="fas fa-circle-exclamation"></i> Valid mobile number is required
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Email Address</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-envelope tl-ico"></i>
+              <input formControlName="guardianEmail" type="email" placeholder="example@email.com" [class.tl-invalid]="f('guardianEmail').touched && f('guardianEmail').invalid">
+            </div>
+            <div class="tl-err" *ngIf="f('guardianEmail').touched && f('guardianEmail').invalid">
+              <i class="fas fa-circle-exclamation"></i> Enter a valid email
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-section-label" style="margin-top:28px">
+          <i class="fas fa-paperclip"></i> Documents
+        </div>
+        <div class="tl-grid-3">
+          <div class="tl-field">
+            <label>Child Photo</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-camera tl-ico"></i>
+              <input type="file" accept="image/*" (change)="onFileSelected($event, 'childPhoto')">
+            </div>
+            <small class="file-note">{{ fileName(childPhoto) }}</small>
+          </div>
+
+          <div class="tl-field">
+            <label>Father NID File</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-file-image tl-ico"></i>
+              <input type="file" accept="image/*,application/pdf" (change)="onFileSelected($event, 'fatherNidFile')">
+            </div>
+            <small class="file-note">{{ fileName(fatherNidFile) }}</small>
+          </div>
+
+          <div class="tl-field">
+            <label>Mother NID File</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-file-image tl-ico"></i>
+              <input type="file" accept="image/*,application/pdf" (change)="onFileSelected($event, 'motherNidFile')">
+            </div>
+            <small class="file-note">{{ fileName(motherNidFile) }}</small>
+          </div>
+        </div>
+
+        <div class="tl-section-label" style="margin-top:28px">
+          <i class="fas fa-location-dot"></i> Address
+        </div>
+        <div class="tl-grid-2">
+          <div class="tl-field">
+            <label>Ward No. <span class="req">*</span></label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-map-pin tl-ico"></i>
+              <select formControlName="ward" [class.tl-invalid]="f('ward').touched && f('ward').invalid">
+                <option value="">-- Select Ward --</option>
+                <option *ngFor="let w of wards" [value]="w">{{ w }}</option>
+              </select>
+            </div>
+            <div class="tl-err" *ngIf="f('ward').touched && f('ward').invalid">
+              <i class="fas fa-circle-exclamation"></i> Ward is required
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Union / Municipality</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-building tl-ico"></i>
+              <input formControlName="unionName" placeholder="Union or municipality">
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>Upazila</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-map tl-ico"></i>
+              <input formControlName="upazila" placeholder="Upazila">
+            </div>
+          </div>
+
+          <div class="tl-field">
+            <label>District</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-map-location tl-ico"></i>
+              <input formControlName="district" placeholder="District">
+            </div>
+          </div>
+
+          <div class="tl-field" style="grid-column:1/-1">
+            <label>Present Address</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-house tl-ico tl-ico--top"></i>
+              <textarea formControlName="presentAddress" rows="2" placeholder="Present address"></textarea>
+            </div>
+          </div>
+
+          <div class="tl-field" style="grid-column:1/-1">
+            <label>Permanent Address</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-house tl-ico tl-ico--top"></i>
+              <textarea formControlName="permanentAddress" rows="2" placeholder="Permanent address"></textarea>
+            </div>
+          </div>
+
+          <div class="tl-field" style="grid-column:1/-1">
+            <label>Additional Address Notes</label>
+            <div class="tl-input-wrap">
+              <i class="fas fa-house tl-ico tl-ico--top"></i>
+              <textarea formControlName="address" rows="2" placeholder="Optional address note"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="tl-nav" style="justify-content:flex-end">
+          <button type="button" class="tl-btn tl-btn--reset" (click)="form.reset()">
+            <i class="fas fa-rotate-left"></i> Reset
+          </button>
+          <button type="submit" class="tl-btn tl-btn--submit" [disabled]="submitting">
+            <i class="fas fa-syringe"></i>
+            {{ submitting ? 'Submitting...' : 'Submit Registration' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

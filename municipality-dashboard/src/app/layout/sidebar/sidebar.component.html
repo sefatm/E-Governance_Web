@@ -1,0 +1,371 @@
+<div class="sidebar" [class.collapsed]="isCollapsed" [class.mobile-open]="isMobileOpen">
+
+  <!-- ══ LOGO ══ -->
+  <div class="sb-logo">
+    <div class="logo-img-wrap">
+      <img src="assets/photo/bangladesh-govt.png" alt="Govt Logo" class="logo-img">
+    </div>
+    <div class="logo-text" *ngIf="!isCollapsed">
+      <span class="logo-title">{{ ls.t('nav.eGovernance') }}</span>
+      <span class="logo-sub">Municipal Portal</span>
+    </div>
+  </div>
+
+  <div class="sb-divider"></div>
+
+  <!-- ══ MENU ══ -->
+  <ul class="sb-menu">
+
+    <!-- Dashboard -->
+    <li class="sb-item" routerLink="/dashboard" routerLinkActive="sb-active" [attr.data-tip]="ls.t('sb.dashboard')">
+      <div class="sb-icon"><i class="fas fa-tachometer-alt"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.dashboard') }}</span>
+    </li>
+
+    <li class="sb-section-label" *ngIf="!isCollapsed">{{ ls.t('sb.services') }}</li>
+
+    <!-- ══ Citizen Service ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openCitizenMenu" (click)="toggleCitizenMenu()" [attr.data-tip]="ls.t('sb.citizenService')">
+      <div class="sb-icon"><i class="fas fa-user"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.citizenService') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openCitizenMenu && !isCollapsed">
+      <li routerLink="/birth-death"  routerLinkActive="sb-sub-active"><i class="fas fa-certificate"></i> {{ ls.t('cs.birthDeath') }}</li>
+      <li routerLink="/citizen"      routerLinkActive="sb-sub-active"><i class="fas fa-id-card"></i> {{ ls.t('cs.citizenCert') }}</li>
+      <li routerLink="/family"       routerLinkActive="sb-sub-active"><i class="fas fa-users"></i> {{ ls.t('cs.familyCert') }}</li>
+      <li routerLink="/passport"     routerLinkActive="sb-sub-active"><i class="fas fa-passport"></i> {{ ls.t('cs.passport') }}</li>
+      <li routerLink="/status"       routerLinkActive="sb-sub-active"><i class="fas fa-search"></i> {{ ls.t('cs.appStatus') }}</li>
+      <li routerLink="/passport-admin" routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isDeptOfficer"><i class="fas fa-clipboard-check"></i> {{ ls.t('cs.passportAdmin') }}</li>
+      <li routerLink="/applications"   routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isDeptOfficer"><i class="fas fa-list"></i> {{ ls.t('cs.allApplyData') }}</li>
+    </ul>
+
+    <!-- ══ Trade License ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openTradeLicenseMenu" (click)="toggleTradeLicenseMenu()" [attr.data-tip]="ls.t('sb.tradeLicense')">
+      <div class="sb-icon"><i class="fas fa-id-card"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.tradeLicense') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openTradeLicenseMenu && !isCollapsed">
+      <li routerLink="/trade-license"        routerLinkActive="sb-sub-active"><i class="fas fa-file-alt"></i> {{ ls.t('tl.applyLicense') }}</li>
+      <li routerLink="/license-renewal"      routerLinkActive="sb-sub-active"><i class="fas fa-sync-alt"></i> {{ ls.t('tl.renewal') }}</li>
+      <li routerLink="/license-verification" routerLinkActive="sb-sub-active"><i class="fas fa-check-circle"></i> {{ ls.t('tl.statusCheck') }}</li>
+      <li routerLink="/licenseDataShow"      routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isDeptOfficer"><i class="fas fa-list"></i> {{ ls.t('tl.allApplyData') }}</li>
+    </ul>
+
+    <!-- ══ Holding Tax ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openHoldingMenu" (click)="toggleHoldingMenu()" [attr.data-tip]="ls.t('sb.holdingTax')">
+      <div class="sb-icon"><i class="fas fa-money-bill"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.holdingTax') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openHoldingMenu && !isCollapsed">
+      <li routerLink="/new-registration"   routerLinkActive="sb-sub-active"><i class="fas fa-plus-circle"></i> {{ ls.t('ht.newRegistration') }}</li>
+      <li routerLink="/tax-assessment"     routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isAccountant"><i class="fas fa-calculator"></i> {{ ls.t('ht.taxAssessment') }}</li>
+      <li routerLink="/tax-payment"        routerLinkActive="sb-sub-active"><i class="fas fa-credit-card"></i> {{ ls.t('ht.taxPayment') }}</li>
+      <li routerLink="/tax-due"            routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isAccountant"><i class="fas fa-exclamation-triangle"></i> {{ ls.t('ht.taxDueList') }}</li>
+      <li routerLink="/ownership-transfer" routerLinkActive="sb-sub-active"><i class="fas fa-exchange-alt"></i> {{ ls.t('ht.ownershipTransfer') }}</li>
+      <li routerLink="/tax-collection-report" routerLinkActive="sb-sub-active" *ngIf="isFinanceRole"><i class="fas fa-chart-bar"></i> {{ ls.t('ht.collectionReport') }}</li>
+      <li routerLink="/tax-applications"   routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isDeptOfficer"><i class="fas fa-list"></i> {{ ls.t('ht.taxApplications') }}</li>
+    </ul>
+
+    <!-- ══ Infrastructure ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openInfrastructureMenu" (click)="toggleInfrastructureMenu()" [attr.data-tip]="ls.t('sb.infrastructure')">
+      <div class="sb-icon"><i class="fas fa-building"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.infrastructure') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openInfrastructureMenu && !isCollapsed">
+      <li routerLink="/road"                    routerLinkActive="sb-sub-active"><i class="fas fa-road"></i> {{ ls.t('inf.road') }}</li>
+      <li routerLink="/drainage"                routerLinkActive="sb-sub-active"><i class="fas fa-water"></i> {{ ls.t('inf.drainage') }}</li>
+      <li routerLink="/street-light"            routerLinkActive="sb-sub-active"><i class="fas fa-lightbulb"></i> {{ ls.t('inf.streetLight') }}</li>
+      <li routerLink="/construction-permission" routerLinkActive="sb-sub-active"><i class="fas fa-hard-hat"></i> {{ ls.t('inf.construction') }}</li>
+      <li routerLink="/infrastructure-status"   routerLinkActive="sb-sub-active" *ngIf="isInfraRole"><i class="fas fa-list"></i> {{ ls.t('inf.status') }}</li>
+      <li routerLink="/check-status"            routerLinkActive="sb-sub-active" *ngIf="isCitizen"><i class="fas fa-magnifying-glass"></i> {{ ls.current === 'bn' ? 'আবেদনের অবস্থা' : 'Check My Status' }}</li>
+    </ul>
+
+    <!-- ══ Health & Sanitation ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openHealthMenu" (click)="toggleHealthMenu()" [attr.data-tip]="ls.t('sb.healthSanitation')">
+      <div class="sb-icon"><i class="fas fa-heartbeat"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.healthSanitation') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openHealthMenu && !isCollapsed">
+      <li routerLink="/health-notices"       routerLinkActive="sb-sub-active"><i class="fas fa-bullhorn"></i> {{ ls.t('hl.notices') }}</li>
+      <li routerLink="/epi-register"         routerLinkActive="sb-sub-active"><i class="fas fa-syringe"></i> {{ ls.t('hl.epiRegister') }}</li>
+      <li routerLink="/epi-admin"            routerLinkActive="sb-sub-active" *ngIf="isHealthRole"><i class="fas fa-notes-medical"></i> {{ ls.t('hl.epiAdmin') }}</li>
+      <li routerLink="/sanitation-monitoring" routerLinkActive="sb-sub-active" *ngIf="isHealthRole"><i class="fas fa-broom"></i> {{ ls.t('hl.sanitation') }}</li>
+      <li routerLink="/health-center-info"   routerLinkActive="sb-sub-active"><i class="fas fa-hospital"></i> {{ ls.t('hl.centerInfo') }}</li>
+    </ul>
+
+    <!-- ══ E-Tender ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openTenderMenu" (click)="toggleTenderMenu()" [attr.data-tip]="ls.t('sb.etender')">
+      <div class="sb-icon"><i class="fas fa-gavel"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.etender') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openTenderMenu && !isCollapsed">
+      <li routerLink="/etender-notices"   routerLinkActive="sb-sub-active"><i class="fas fa-list-alt"></i> {{ ls.t('et.notices') }}</li>
+      <li routerLink="/etender-bid"       routerLinkActive="sb-sub-active"><i class="fas fa-file-signature"></i> {{ ls.t('et.bid') }}</li>
+      <li routerLink="/etender-admin"     routerLinkActive="sb-sub-active" *ngIf="isAdminLevel"><i class="fas fa-cogs"></i> {{ ls.t('et.admin') }}</li>
+      <li routerLink="/etender-blacklist" routerLinkActive="sb-sub-active" *ngIf="isAdminLevel"><i class="fas fa-ban"></i> {{ ls.t('et.blacklist') }}</li>
+    </ul>
+
+    <!-- ══ Project ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openProjectMenu" (click)="toggleProjectMenu()" [attr.data-tip]="ls.t('sb.project')">
+      <div class="sb-icon"><i class="fas fa-project-diagram"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.project') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openProjectMenu && !isCollapsed">
+      <li routerLink="/list" routerLinkActive="sb-sub-active">
+        <i class="fas fa-list-alt"></i> {{ ls.t('pj.list') }}
+      </li>
+      <li routerLink="/budget" routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isProjectOfficer || isAccountant">
+        <i class="fas fa-wallet"></i> {{ ls.t('pj.budget') }}
+      </li>
+    </ul>
+
+    <!-- ══ Water Supply ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openWaterMenu" (click)="toggleWaterMenu()" [attr.data-tip]="ls.t('sb.waterSupply')">
+      <div class="sb-icon"><i class="fas fa-tint"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.waterSupply') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openWaterMenu && !isCollapsed">
+      <li routerLink="/connection" routerLinkActive="sb-sub-active"><i class="fas fa-plug"></i> {{ ls.t('wt.connection') }}</li>
+      <li routerLink="/water-bill-status" routerLinkActive="sb-sub-active"><i class="fas fa-magnifying-glass-dollar"></i> Bill Status & Pay</li>
+      <li routerLink="/water-admin" routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isAccountant || isDeptOfficer"><i class="fas fa-user-tie"></i> Water Admin Panel</li>
+      <li routerLink="/report"     routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isAccountant"><i class="fas fa-chart-line"></i> {{ ls.t('wt.usageReport') }}</li>
+    </ul>
+
+    <!-- ══ Waste Management ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openWasteMenu" (click)="toggleWasteMenu()" [attr.data-tip]="ls.t('sb.wasteManagement')">
+      <div class="sb-icon"><i class="fas fa-trash"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.wasteManagement') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openWasteMenu && !isCollapsed">
+      <li routerLink="/schedule"          routerLinkActive="sb-sub-active"><i class="fas fa-calendar"></i> {{ ls.t('ws.schedule') }}</li>
+      <li routerLink="/request"           routerLinkActive="sb-sub-active"><i class="fas fa-truck"></i> {{ ls.t('ws.pickupRequest') }}</li>
+      <li routerLink="/smart-bin"         routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isDeptOfficer"><i class="fas fa-recycle"></i> {{ ls.t('ws.smartBin') }}</li>
+      <li routerLink="/collection-report" routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isDeptOfficer"><i class="fas fa-chart-bar"></i> {{ ls.t('ws.collectionReport') }}</li>
+    </ul>
+
+    <!-- ══ Social Cards ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openSocialCardMenu" (click)="toggleSocialCardMenu()" [attr.data-tip]="ls.t('sb.socialCards')">
+      <div class="sb-icon"><i class="fas fa-id-card"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.socialCards') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openSocialCardMenu && !isCollapsed">
+
+      <!-- Family Card (TCB) -->
+      <li class="sb-sub-parent" [class.sb-sub2-open]="openFamilyCardSub" (click)="openFamilyCardSub = !openFamilyCardSub; $event.stopPropagation()">
+        <span><i class="fas fa-users me-2"></i> {{ ls.t('sc.familyApply') | slice:0:-7 }}</span>
+        <i class="fas fa-chevron-right sb-sub2-arrow"></i>
+      </li>
+      <ul class="sb-sub2" *ngIf="openFamilyCardSub">
+        <li routerLink="/family-card/apply"  routerLinkActive="sb-sub-active"><i class="fas fa-file-alt"></i> {{ ls.current === 'bn' ? 'আবেদন' : 'Apply' }}</li>
+        <li routerLink="/family-card/status" routerLinkActive="sb-sub-active"><i class="fas fa-search"></i> {{ ls.current === 'bn' ? 'অবস্থা দেখুন' : 'Check Status' }}</li>
+        <li routerLink="/family-card/admin"  routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-tasks"></i> {{ ls.current === 'bn' ? 'ব্যবস্থাপনা' : 'Manage' }}</li>
+        <li routerLink="/tcb/scan"           routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-camera"></i> {{ ls.t('fd.tcbDistribution') }}</li>
+        <li routerLink="/tcb/stock"          routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-boxes"></i> {{ ls.current === 'bn' ? 'টিসিবি স্টক' : 'TCB Stock' }}</li>
+        <li routerLink="/tcb/distribution"   routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-clipboard-list"></i> {{ ls.current === 'bn' ? 'বিতরণ ইতিহাস' : 'Distribution History' }}</li>
+      </ul>
+
+      <!-- Farmer Card -->
+      <li class="sb-sub-parent" [class.sb-sub2-open]="openFarmerCardSub" (click)="openFarmerCardSub = !openFarmerCardSub; $event.stopPropagation()">
+        <span><i class="fas fa-seedling me-2"></i> {{ ls.current === 'bn' ? 'কৃষক কার্ড' : 'Farmer Card' }}</span>
+        <i class="fas fa-chevron-right sb-sub2-arrow"></i>
+      </li>
+      <ul class="sb-sub2" *ngIf="openFarmerCardSub">
+        <li routerLink="/farmer-card/apply"  routerLinkActive="sb-sub-active"><i class="fas fa-file-alt"></i> {{ ls.current === 'bn' ? 'আবেদন' : 'Apply' }}</li>
+        <li routerLink="/farmer-card/status" routerLinkActive="sb-sub-active"><i class="fas fa-search"></i> {{ ls.current === 'bn' ? 'অবস্থা দেখুন' : 'Check Status' }}</li>
+        <li routerLink="/farmer-card/admin"  routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-tasks"></i> {{ ls.current === 'bn' ? 'ব্যবস্থাপনা' : 'Manage' }}</li>
+        <li routerLink="/farmer-distribution/scan" routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-qrcode"></i> {{ ls.current === 'bn' ? 'সার/বীজ স্ক্যান' : 'Fertilizer/Seed Scan' }}</li>
+        <li routerLink="/farmer-distribution/stock-distribution" routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-boxes-stacked"></i> {{ ls.current === 'bn' ? 'স্টক ও বিতরণ' : 'Stock & Distribution' }}</li>
+        <li routerLink="/farmer-distribution/g2p" routerLinkActive="sb-sub-active" *ngIf="isAdminLevel"><i class="fas fa-building-columns"></i> {{ ls.current === 'bn' ? 'জি২পি ট্রান্সফার' : 'G2P Transfer' }}</li>
+      </ul>
+
+      <!-- LPG Card -->
+      <li class="sb-sub-parent" [class.sb-sub2-open]="openLpgCardSub" (click)="openLpgCardSub = !openLpgCardSub; $event.stopPropagation()">
+        <span><i class="fas fa-fire me-2"></i> {{ ls.current === 'bn' ? 'এলপিজি কার্ড' : 'LPG Card' }}</span>
+        <i class="fas fa-chevron-right sb-sub2-arrow"></i>
+      </li>
+      <ul class="sb-sub2" *ngIf="openLpgCardSub">
+        <li routerLink="/lpg-card/apply"  routerLinkActive="sb-sub-active"><i class="fas fa-file-alt"></i> {{ ls.current === 'bn' ? 'আবেদন' : 'Apply' }}</li>
+        <li routerLink="/lpg-card/status" routerLinkActive="sb-sub-active"><i class="fas fa-search"></i> {{ ls.current === 'bn' ? 'অবস্থা দেখুন' : 'Check Status' }}</li>
+        <li routerLink="/lpg-card/admin"  routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-tasks"></i> {{ ls.current === 'bn' ? 'ব্যবস্থাপনা' : 'Manage' }}</li>
+        <li routerLink="/lpg-distribution/scan"    routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-qrcode"></i> {{ ls.current === 'bn' ? 'এলপিজি স্ক্যান' : 'LPG Scan' }}</li>
+        <li routerLink="/lpg-distribution/stock-distribution" routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-boxes-stacked"></i> {{ ls.current === 'bn' ? 'স্টক ও বিতরণ' : 'Stock & Distribution' }}</li>
+      </ul>
+
+      <!-- VGD/VGF Card -->
+      <li class="sb-sub-parent" [class.sb-sub2-open]="openVgdCardSub" (click)="openVgdCardSub = !openVgdCardSub; $event.stopPropagation()">
+        <span><i class="fas fa-hands-helping me-2"></i> {{ ls.current === 'bn' ? 'ভিজিডি / ভিজিএফ কার্ড' : 'VGD / VGF Card' }}</span>
+        <i class="fas fa-chevron-right sb-sub2-arrow"></i>
+      </li>
+      <ul class="sb-sub2" *ngIf="openVgdCardSub">
+        <li routerLink="/vgd-card/apply"  routerLinkActive="sb-sub-active"><i class="fas fa-file-alt"></i> {{ ls.current === 'bn' ? 'আবেদন' : 'Apply' }}</li>
+        <li routerLink="/vgd-card/status" routerLinkActive="sb-sub-active"><i class="fas fa-search"></i> {{ ls.current === 'bn' ? 'অবস্থা দেখুন' : 'Check Status' }}</li>
+        <li routerLink="/vgd-card/admin"  routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-tasks"></i> {{ ls.current === 'bn' ? 'ব্যবস্থাপনা' : 'Manage' }}</li>
+        <li routerLink="/vgd-distribution/stock"   routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-boxes"></i> {{ ls.current === 'bn' ? 'ভিজিডি স্টক' : 'VGD Stock' }}</li>
+        <li routerLink="/vgd-distribution/scan"    routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-qrcode"></i> {{ ls.current === 'bn' ? 'ভিজিডি বিতরণ' : 'VGD Distribution' }}</li>
+        <li routerLink="/vgd-distribution/history" routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin"><i class="fas fa-history"></i> {{ ls.current === 'bn' ? 'ভিজিডি ইতিহাস' : 'VGD History' }}</li>
+      </ul>
+
+      <li routerLink="/social-cards/analytics" routerLinkActive="sb-sub-active" *ngIf="isSocialAdmin">
+        <i class="fas fa-chart-bar"></i> {{ ls.t('sc.analytics') }}
+      </li>
+    </ul>
+
+    <!-- ══ Complaint ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openComplaintMenu" (click)="toggleComplaintMenu()" [attr.data-tip]="ls.t('sb.complaint')">
+      <div class="sb-icon"><i class="fas fa-exclamation-circle"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.complaint') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openComplaintMenu && !isCollapsed">
+      <li routerLink="/complaint-submit"     routerLinkActive="sb-sub-active"><i class="fas fa-pen"></i> {{ ls.t('cp.submit') }}</li>
+      <li routerLink="/tracking"             routerLinkActive="sb-sub-active"><i class="fas fa-search"></i> {{ ls.t('cp.tracking') }}</li>
+      <li routerLink="/complaint-resolution" routerLinkActive="sb-sub-active" *ngIf="isAdminLevel || isDeptOfficer"><i class="fas fa-check"></i> {{ ls.t('cp.resolution') }}</li>
+    </ul>
+
+    <!-- ══ Ward ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openWardMenu" (click)="toggleWardMenu()" [attr.data-tip]="ls.t('wt.wardList')" *ngIf="isAdminLevel || isDeptOfficer">
+      <div class="sb-icon"><i class="fas fa-map"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('wt.wardList') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openWardMenu && !isCollapsed && (isAdminLevel || isDeptOfficer)">
+      <li routerLink="/ward-list"  routerLinkActive="sb-sub-active"><i class="fas fa-list"></i> {{ ls.t('wt.wardList') }}</li>
+      <li routerLink="/population" routerLinkActive="sb-sub-active"><i class="fas fa-users"></i> {{ ls.t('wt.population') }}</li>
+    </ul>
+
+    <!-- ══ Notice & Announcement ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openNoticeMenu" (click)="toggleNoticeMenu()" [attr.data-tip]="ls.t('sb.notices')">
+      <div class="sb-icon"><i class="fas fa-bullhorn"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.notices') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openNoticeMenu && !isCollapsed">
+      <li routerLink="/notice/public" routerLinkActive="sb-sub-active"><i class="fas fa-globe"></i> {{ ls.t('nt.public') }}</li>
+      <li routerLink="/notice/admin"  routerLinkActive="sb-sub-active"  *ngIf="isAdminLevel"><i class="fas fa-cog"></i> {{ ls.t('nt.admin') }}</li>
+    </ul>
+
+    <!-- ══ GIS / Map ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openGisMenu" (click)="toggleGisMenu()" [attr.data-tip]="ls.t('sb.maps')">
+      <div class="sb-icon"><i class="fas fa-map-marked-alt"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.maps') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openGisMenu && !isCollapsed">
+      <li routerLink="/map/wards"          routerLinkActive="sb-sub-active"><i class="fas fa-map"></i> {{ ls.t('mp.ward') }}</li>
+      <li routerLink="/map/holdings"       routerLinkActive="sb-sub-active"><i class="fas fa-home"></i> {{ ls.t('mp.holdings') }}</li>
+      <li routerLink="/map/infrastructure" routerLinkActive="sb-sub-active"><i class="fas fa-building"></i> {{ ls.t('mp.infrastructure') }}</li>
+    </ul>
+
+    <li class="sb-section-label" *ngIf="!isCollapsed">{{ ls.current === 'bn' ? 'সিস্টেম' : 'System' }}</li>
+
+    <!-- ══ E-Voting ══ -->
+    <li class="sb-item sb-parent sb-voting" [class.sb-open]="openVotingMenu" (click)="toggleVotingMenu()" [attr.data-tip]="ls.t('sb.election')">
+      <div class="sb-icon"><i class="fas fa-vote-yea"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.election') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openVotingMenu && !isCollapsed">
+      <li routerLink="/election"           routerLinkActive="sb-sub-active" *ngIf="isElectionAdmin"><i class="fas fa-landmark"></i> {{ ls.current === 'bn' ? 'নির্বাচন ঘোষণা' : 'Election Declaration' }}</li>
+      <li routerLink="/voter-registration" routerLinkActive="sb-sub-active"><i class="fas fa-user-plus"></i> {{ ls.t('ev.voterReg') }}</li>
+      <li routerLink="/voter-approval"     routerLinkActive="sb-sub-active" *ngIf="isElectionAdmin"><i class="fas fa-user-check"></i> {{ ls.current === 'bn' ? 'ভোটার অনুমোদন' : 'Voter Approval' }}</li>
+      <li routerLink="/candidate"          routerLinkActive="sb-sub-active"><i class="fas fa-users"></i> {{ ls.t('ev.candidate') }}</li>
+      <li routerLink="/candidate-approval" routerLinkActive="sb-sub-active" *ngIf="isElectionAdmin"><i class="fas fa-user-shield"></i> {{ ls.current === 'bn' ? 'প্রার্থী অনুমোদন' : 'Candidate Approval' }}</li>
+      <li routerLink="/vote-cast"          routerLinkActive="sb-sub-active"><i class="fas fa-vote-yea"></i> {{ ls.current === 'bn' ? 'ভোট প্রদান' : 'Cast Vote' }}</li>
+      <li routerLink="/vote-result"        routerLinkActive="sb-sub-active"><i class="fas fa-chart-bar"></i> {{ ls.current === 'bn' ? 'নির্বাচন ফলাফল' : 'Election Result' }}</li>
+      <li routerLink="/voting-analytics"   routerLinkActive="sb-sub-active" *ngIf="isElectionAdmin"><i class="fas fa-chart-line"></i> {{ ls.t('rp.analytics') }}</li>
+      <li routerLink="/audit"              routerLinkActive="sb-sub-active" *ngIf="isElectionAdmin"><i class="fas fa-shield-alt"></i> {{ ls.t('ad.auditLogs') }}</li>
+    </ul>
+
+    <!-- ══ Online Payment ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openPaymentMenu" (click)="togglePaymentMenu()" [attr.data-tip]="ls.t('sb.payment')">
+      <div class="sb-icon"><i class="fas fa-money-bill-wave"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.payment') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openPaymentMenu && !isCollapsed">
+      <li routerLink="/payment"         routerLinkActive="sb-sub-active"><i class="fas fa-credit-card"></i> {{ ls.t('pay.online') }}</li>
+      <li routerLink="/payment-history" routerLinkActive="sb-sub-active"><i class="fas fa-history"></i> {{ ls.t('pay.history') }}</li>
+      <li routerLink="/payment-admin"   routerLinkActive="sb-sub-active" *ngIf="isFinanceRole"><i class="fas fa-chart-bar"></i> {{ ls.t('pay.admin') }}</li>
+    </ul>
+
+    <!-- ══ Communication ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openCommMenu" (click)="toggleCommMenu()" [attr.data-tip]="ls.t('sb.communication')">
+      <div class="sb-icon"><i class="fas fa-bell"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.communication') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openCommMenu && !isCollapsed">
+      <li routerLink="/notification-send" routerLinkActive="sb-sub-active" *ngIf="isAdminLevel"><i class="fas fa-paper-plane"></i> {{ ls.t('cm.sendNotif') }}</li>
+      <li routerLink="/notification-log"  routerLinkActive="sb-sub-active" *ngIf="isAdminLevel"><i class="fas fa-history"></i> {{ ls.t('cm.notifLog') }}</li>
+      <li routerLink="/feedback"          routerLinkActive="sb-sub-active"><i class="fas fa-comment-dots"></i> {{ ls.t('cm.feedback') }}</li>
+      <li routerLink="/feedback-admin"    routerLinkActive="sb-sub-active" *ngIf="isAdminLevel"><i class="fas fa-comments"></i> {{ ls.t('cm.feedbackAdmin') }}</li>
+    </ul>
+
+    <!-- ══ User Roles ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openRolesMenu" (click)="toggleRolesMenu()" [attr.data-tip]="ls.t('ad.roles')" *ngIf="isAdminLevel">
+      <div class="sb-icon"><i class="fas fa-user-shield"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('ad.roles') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openRolesMenu && !isCollapsed && isAdminLevel">
+      <li routerLink="/super-admin"        routerLinkActive="sb-sub-active" *ngIf="isSuperAdmin"><i class="fas fa-crown"></i> {{ ls.current === "bn" ? "সুপার অ্যাডমিন" : "Super Admin" }}</li>
+      <li routerLink="/admin-officer"      routerLinkActive="sb-sub-active"><i class="fas fa-user-cog"></i> {{ ls.current === "bn" ? "অ্যাডমিন কর্মকর্তা" : "Admin Officer" }}</li>
+      <li routerLink="/department-officer" routerLinkActive="sb-sub-active"><i class="fas fa-sitemap"></i> {{ ls.current === "bn" ? "বিভাগীয় কর্মকর্তা" : "Department Officer" }}</li>
+      <li routerLink="/citizen-user"       routerLinkActive="sb-sub-active"><i class="fas fa-user"></i> {{ ls.current === 'bn' ? 'নাগরিক' : 'Citizen / User' }}</li>
+      <li routerLink="/accountant"         routerLinkActive="sb-sub-active"><i class="fas fa-calculator"></i> {{ ls.current === 'bn' ? 'হিসাবরক্ষক' : 'Auditor / Accountant' }}</li>
+      <li routerLink="/health"             routerLinkActive="sb-sub-active"><i class="fas fa-heartbeat"></i> {{ ls.current === 'bn' ? 'স্বাস্থ্য কর্মকর্তা' : 'Health Officer' }}</li>
+      <li routerLink="/project"            routerLinkActive="sb-sub-active"><i class="fas fa-project-diagram"></i> {{ ls.current === 'bn' ? 'প্রকল্প কর্মকর্তা' : 'Project Officer' }}</li>
+    </ul>
+
+    <!-- ══ Report & Analytics ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openReportMenu" (click)="toggleReportMenu()" [attr.data-tip]="ls.t('sb.reports')" *ngIf="isAdminLevel || isAccountant || isProjectOfficer">
+      <div class="sb-icon"><i class="fas fa-chart-bar"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('sb.reports') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openReportMenu && !isCollapsed && (isAdminLevel || isAccountant || isProjectOfficer)">
+      <li routerLink="/report/citizen"   routerLinkActive="sb-sub-active" *ngIf="isAdminLevel"><i class="fas fa-users"></i> {{ ls.t('rp.citizen') }}</li>
+      <li routerLink="/report/service"   routerLinkActive="sb-sub-active"><i class="fas fa-concierge-bell"></i> {{ ls.t('rp.service') }}</li>
+      <li routerLink="/report/analytics" routerLinkActive="sb-sub-active"><i class="fas fa-chart-line"></i> {{ ls.t('rp.analytics') }}</li>
+    </ul>
+
+    <!-- ══ System Settings ══ -->
+    <li class="sb-item sb-parent" [class.sb-open]="openSystemMenu" (click)="toggleSystemMenu()" [attr.data-tip]="ls.t('ad.systemSettings')" *ngIf="isSystemAdmin">
+      <div class="sb-icon"><i class="fas fa-cogs"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('ad.systemSettings') }}</span>
+      <i class="fas fa-chevron-right sb-arrow" *ngIf="!isCollapsed"></i>
+    </li>
+    <ul class="sb-sub" *ngIf="openSystemMenu && !isCollapsed && isSystemAdmin">
+      <li routerLink="/settings"        routerLinkActive="sb-sub-active"><i class="fas fa-cogs"></i> {{ ls.t('ad.settings') }}</li>
+      <li routerLink="/system-settings" routerLinkActive="sb-sub-active"><i class="fas fa-sliders-h"></i> {{ ls.current === 'bn' ? 'সাধারণ সেটিংস' : 'General Settings' }}</li>
+      <li routerLink="/roles"           routerLinkActive="sb-sub-active"><i class="fas fa-lock"></i> {{ ls.current === 'bn' ? 'ভূমিকা ও অনুমতি' : 'Roles & Permissions' }}</li>
+      <li routerLink="/user-approval"   routerLinkActive="sb-sub-active"><i class="fas fa-user-check"></i> {{ ls.t('ad.userApproval') }}</li>
+      <li routerLink="/audit-logs"      routerLinkActive="sb-sub-active" *ngIf="isSuperAdmin"><i class="fas fa-clipboard-list"></i> {{ ls.t('ad.auditLogs') }}</li>
+    </ul>
+
+  </ul>
+
+  <!-- ══ BOTTOM — LOGOUT ══ -->
+  <div class="sb-bottom">
+    <div class="sb-divider"></div>
+    <div class="sb-logout" (click)="logout()">
+      <div class="sb-icon"><i class="fas fa-sign-out-alt"></i></div>
+      <span class="sb-label" *ngIf="!isCollapsed">{{ ls.t('nav.logout') }}</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Mobile Overlay -->
+<div class="sb-mobile-overlay" *ngIf="isMobileOpen" (click)="closeMobileSidebar()">
+</div>

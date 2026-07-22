@@ -1,0 +1,200 @@
+<!-- Toast -->
+<div class="cp-toast-area" *ngIf="toasts.length > 0">
+  <div *ngFor="let t of toasts" class="cp-toast"
+       [class.cp-toast--ok]="t.type==='success'"
+       [class.cp-toast--fail]="t.type==='error'"
+       [class.cp-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="cp-page">
+
+  <!-- Header -->
+  <div class="cp-header">
+    <div class="cp-header__left">
+      <div class="cp-header__icon-box">
+        <i class="fas fa-triangle-exclamation"></i>
+      </div>
+      <div class="cp-header__text">
+        <span class="cp-header__gov">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <h2 class="cp-header__title">Citizen Complaint Application</h2>
+        <span class="cp-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="cp-header__badge">
+      <i class="fas fa-shield-halved"></i>
+      <span>Secure &amp; Confidential</span>
+    </div>
+  </div>
+
+  <!-- Form Card -->
+  <div class="cp-card">
+    <form [formGroup]="form" (ngSubmit)="submitComplaint()" novalidate>
+
+      <!-- Section 1: Applicant & Location -->
+      <div class="cp-section">
+        <div class="cp-section__head">
+          <div class="cp-section__icon"><i class="fas fa-user-location"></i></div>
+          <div>
+            <h3>Applicant &amp; Location</h3>
+            <p>Enter your personal details and the complaint location</p>
+          </div>
+        </div>
+
+        <div class="cp-grid-2">
+          <div class="cp-field">
+            <label>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }} <span class="req">*</span></label>
+            <div class="cp-input-wrap">
+              <i class="fas fa-user cp-ico"></i>
+              <input type="text" formControlName="name" [class.cp-invalid]="submitted && f.name.invalid" placeholder="Enter your full name">
+            </div>
+            <div class="cp-err" *ngIf="submitted && f.name.errors?.['required']">Required</div>
+            <div class="cp-err" *ngIf="submitted && f.name.errors?.['minlength']">Minimum 3 characters</div>
+          </div>
+
+          <div class="cp-field">
+            <label>{{ ls.current === "bn" ? "যোগাযোগ নম্বর" : "Contact Number" }} <span class="req">*</span></label>
+            <div class="cp-input-wrap">
+              <i class="fas fa-mobile-screen cp-ico"></i>
+              <input type="text" formControlName="contact" [class.cp-invalid]="submitted && f.contact.invalid" placeholder="01XXXXXXXXX" (input)="onContactInput($event)">
+            </div>
+            <div class="cp-err" *ngIf="submitted && f.contact.errors?.['required']">Required</div>
+            <div class="cp-err" *ngIf="submitted && f.contact.errors?.['pattern']">Enter valid BD mobile number</div>
+          </div>
+
+          <div class="cp-field">
+            <label>{{ ls.current === "bn" ? "ওয়ার্ড নং" : "Ward No" }} <span class="req">*</span></label>
+            <div class="cp-input-wrap">
+              <i class="fas fa-map-pin cp-ico"></i>
+              <input type="text" formControlName="ward" [class.cp-invalid]="submitted && f.ward.invalid" placeholder="e.g. Ward 5">
+            </div>
+            <div class="cp-err" *ngIf="submitted && f.ward.errors?.['required']">Required</div>
+          </div>
+
+          <div class="cp-field">
+            <label>Area <span class="req">*</span></label>
+            <div class="cp-input-wrap">
+              <i class="fas fa-location-dot cp-ico"></i>
+              <input type="text" formControlName="area" [class.cp-invalid]="submitted && f.area.invalid" placeholder="e.g. Mirpur, Dhanmondi">
+            </div>
+            <div class="cp-err" *ngIf="submitted && f.area.errors?.['required']">Required</div>
+          </div>
+        </div>
+
+        <div class="cp-field cp-field--full">
+          <label>Exact Location <span class="req">*</span></label>
+          <div class="cp-input-wrap">
+            <i class="fas fa-map-marker-alt cp-ico cp-ico--top"></i>
+            <textarea formControlName="location" rows="2" [class.cp-invalid]="submitted && f.location.invalid" placeholder="Describe the exact location of the issue..."></textarea>
+          </div>
+          <div class="cp-err" *ngIf="submitted && f.location.errors?.['required']">Required</div>
+        </div>
+        <div class="gps-capture-row">
+          <button type="button" class="gps-btn" (click)="useCurrentLocation()" [disabled]="gpsLoading">
+            <i class="fas" [ngClass]="gpsLoading ? 'fa-spinner fa-spin' : 'fa-location-crosshairs'"></i>
+            {{ gpsLoading ? 'Reading GPS…' : 'Use My GPS Location' }}
+          </button>
+          <div class="gps-result" *ngIf="latitude !== null && longitude !== null">
+            <i class="fas fa-circle-check"></i>
+            {{ latitude | number:'1.5-6' }}, {{ longitude | number:'1.5-6' }}
+            <button type="button" (click)="clearGps()" aria-label="Clear GPS"><i class="fas fa-times"></i></button>
+          </div>
+          <span class="gps-hint" *ngIf="latitude === null">Optional — helps officers find the exact complaint location on the GIS map.</span>
+        </div>
+      </div>
+
+      <!--Section 2: Complaint Details  -->
+      <div class="cp-section cp-section--alt">
+        <div class="cp-section__head">
+          <div class="cp-section__icon cp-section__icon--amber"><i class="fas fa-file-lines"></i></div>
+          <div>
+            <h3>{{ ls.current === "bn" ? "অভিযোগের বিবরণ" : "Complaint Details" }}</h3>
+            <p>Select the category and describe the issue in detail</p>
+          </div>
+        </div>
+
+        <div class="cp-field">
+          <label>Complaint Category <span class="req">*</span></label>
+          <div class="cp-cats">
+            <label *ngFor="let cat of categories" class="cp-cat-chip" [class.cp-cat-chip--active]="form.value.category === cat">
+              <input type="radio" formControlName="category" [value]="cat" hidden>
+              <i class="fas" [ngClass]="{
+                'fa-road':            cat === 'Road & Infrastructure',
+                'fa-droplet':         cat === 'Water Supply',
+                'fa-bolt':            cat === 'Electricity',
+                'fa-trash':           cat === 'Garbage & Sanitation',
+                'fa-water':           cat === 'Drainage',
+                'fa-lightbulb':       cat === 'Street Light',
+                'fa-volume-high':     cat === 'Noise Pollution',
+                'fa-circle-question': cat === 'Other'
+              }"></i>
+              <span>{{ cat }}</span>
+            </label>
+          </div>
+          <div class="cp-err" *ngIf="submitted && f.category.errors?.['required']">Please select a category</div>
+        </div>
+
+        <div class="cp-field cp-field--full" style="margin-top:20px;">
+          <label>{{ ls.current === "bn" ? "বিবরণ" : "Description" }} <span class="req">*</span></label>
+          <div class="cp-input-wrap">
+            <i class="fas fa-pen-to-square cp-ico cp-ico--top"></i>
+            <textarea formControlName="description" rows="5" [class.cp-invalid]="submitted && f.description.invalid" placeholder="Describe your complaint in detail. Include what happened, when it started, and how it is affecting you or your community..."></textarea>
+          </div>
+          <div class="cp-err" *ngIf="submitted && f.description.errors?.['required']">Required</div>
+          <div class="cp-err" *ngIf="submitted && f.description.errors?.['minlength']">Minimum 20 characters</div>
+          <div class="cp-char-count">{{ form.value.description?.length || 0 }} characters</div>
+        </div>
+      </div>
+
+      <!-- Section 3: Evidence Upload -->
+      <div class="cp-section">
+        <div class="cp-section__head">
+          <div class="cp-section__icon cp-section__icon--blue"><i class="fas fa-camera"></i></div>
+          <div>
+            <h3>Evidence Photo</h3>
+            <p>Attach a photo to support your complaint (optional)</p>
+          </div>
+        </div>
+
+        <!-- Image preview -->
+        <div class="cp-img-preview" *ngIf="imagePreview">
+          <img [src]="imagePreview" alt="Evidence photo">
+          <button type="button" class="cp-img-remove" (click)="removeImage()">
+            <i class="fas fa-times"></i> Remove
+          </button>
+        </div>
+
+        <!-- Upload zone -->
+        <div class="cp-upload-zone" *ngIf="!imagePreview" (click)="imgInput.click()">
+          <input #imgInput type="file" accept="image/*" (change)="onFileSelected($event)" hidden>
+          <i class="fas fa-cloud-arrow-up cp-upload-icon"></i>
+          <span class="cp-upload-label">Click to upload photo</span>
+          <span class="cp-upload-hint">JPG, PNG, WEBP · Max 5 MB</span>
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <div class="cp-footer">
+        <div class="cp-disclaimer">
+          <i class="fas fa-circle-info"></i>
+          By submitting this complaint, you confirm that the information provided is accurate.
+          False complaints may result in legal action.
+        </div>
+        <div class="cp-actions">
+          <button type="button" class="cp-btn cp-btn--reset" (click)="resetForm()">
+            <i class="fas fa-rotate-left"></i> {{ ls.current === "bn" ? "রিসেট" : "Reset" }}
+          </button>
+          <button type="submit" class="cp-btn cp-btn--submit" [disabled]="isSubmitting">
+            <i class="fas fa-paper-plane" *ngIf="!isSubmitting"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+            {{ isSubmitting ? 'Submitting...' : 'Submit Complaint' }}
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+</div>

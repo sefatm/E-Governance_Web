@@ -1,0 +1,152 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="successMsg || errorMsg">
+  <div *ngIf="successMsg" class="tl-toast tl-toast--ok">
+    <i class="fas fa-circle-check"></i><span>{{ successMsg }}</span>
+  </div>
+  <div *ngIf="errorMsg" class="tl-toast tl-toast--fail">
+    <i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- ── Header ── -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">জনস্বাস্থ্য বিজ্ঞপ্তি ব্যবস্থাপনা</h2>
+        <span class="tl-header__title-en">Public Health Notices — Health &amp; Sanitation Division</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- ── Form Card ── -->
+  <div class="tl-card">
+    <div class="tl-panel tl-panel--active">
+
+      <!-- Panel head -->
+      <div class="tl-panel__head">
+        <div class="tl-panel__icon">
+          <i class="fas fa-bullhorn"></i>
+        </div>
+        <div>
+          <h3>{{ isEditMode ? 'বিজ্ঞপ্তি সম্পাদনা করুন' : 'নতুন বিজ্ঞপ্তি যোগ করুন' }}</h3>
+          <p>জনস্বাস্থ্য সংক্রান্ত নোটিশ ও তথ্য প্রকাশ করুন</p>
+        </div>
+        <span class="tl-mode-tag" [class.edit-mode]="isEditMode">
+          {{ isEditMode ? '✏️ সম্পাদনা মোড' : '➕ নতুন বিজ্ঞপ্তি' }}
+        </span>
+      </div>
+
+      <!-- Form fields -->
+      <div class="tl-section-label">
+        <i class="fas fa-file-lines"></i> বিজ্ঞপ্তির তথ্য
+      </div>
+      <div class="tl-grid-2">
+
+        <div class="tl-field" style="grid-column:1/-1">
+          <label>{{ ls.current === "bn" ? "বিজ্ঞপ্তির শিরোনাম" : "Notification Title" }}<span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-heading tl-ico"></i>
+            <input type="text" [(ngModel)]="form.title" name="title"
+                   [class.tl-invalid]="submitted && !form.title"
+                   placeholder="বিজ্ঞপ্তির শিরোনাম লিখুন">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !form.title">
+            <i class="fas fa-circle-exclamation"></i> শিরোনাম আবশ্যক
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "তারিখ" : "Date" }}<span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-calendar tl-ico"></i>
+            <input type="date" [(ngModel)]="form.date" name="date"
+                   [class.tl-invalid]="submitted && !form.date">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !form.date">
+            <i class="fas fa-circle-exclamation"></i> তারিখ আবশ্যক
+          </div>
+        </div>
+
+        <div class="tl-field tl-field--full" style="grid-column:1/-1">
+          <label>{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-align-left tl-ico tl-ico--top"></i>
+            <textarea [(ngModel)]="form.description" name="description" rows="4"
+                      placeholder="বিজ্ঞপ্তির বিস্তারিত বিবরণ লিখুন..."></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Actions -->
+      <div class="tl-nav">
+        <button *ngIf="isEditMode" class="tl-btn tl-btn--cancel" (click)="resetForm()">
+          <i class="fas fa-times"></i> বাতিল করুন
+        </button>
+        <div style="flex:1"></div>
+        <button class="tl-btn tl-btn--submit" (click)="saveNotice()" [disabled]="isSaving">
+          <i class="fas" [ngClass]="isEditMode ? 'fa-floppy-disk' : 'fa-plus'"></i>
+          {{ isSaving ? 'সংরক্ষণ হচ্ছে...' : (isEditMode ? 'আপডেট করুন' : 'বিজ্ঞপ্তি যোগ করুন') }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Notices Table ── -->
+  <div class="tl-records-section">
+    <div class="tl-records-head">
+      <h3><i class="fas fa-list"></i> প্রকাশিত বিজ্ঞপ্তি সমূহ</h3>
+      <span class="tl-count-badge">{{ notices.length }} টি বিজ্ঞপ্তি</span>
+    </div>
+
+    <div class="tl-table-wrap">
+      <table class="tl-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>শিরোনাম</th>
+            <th>{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</th>
+            <th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let n of notices; let i = index">
+            <td class="td-num">{{ i + 1 }}</td>
+            <td><strong>{{ n.title }}</strong></td>
+            <td class="td-desc">{{ n.description || '—' }}</td>
+            <td class="td-date"><i class="fas fa-calendar-days" style="color:#9ca3af;margin-right:5px"></i>{{ n.date }}</td>
+            <td>
+              <div class="action-btns">
+                <button class="act-btn act-edit"   [title]="ls.current === 'bn' ? 'সম্পাদনা' : 'Edit'" (click)="editNotice(n)">
+                  <i class="fas fa-pen"></i>
+                </button>
+                <button class="act-btn act-delete" [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'"    (click)="deleteNotice(n.id)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="notices.length === 0">
+            <td colspan="5" class="no-data">
+              <i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#d1d5db"></i>
+              কোনো বিজ্ঞপ্তি নেই
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

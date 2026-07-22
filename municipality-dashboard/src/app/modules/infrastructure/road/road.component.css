@@ -1,0 +1,3 @@
+/* Road component — uses shared infra-form design system */
+@import '../infra-form-shared.css';
+/* Component-specific overrides (none needed — shared CSS covers all) */

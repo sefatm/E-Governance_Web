@@ -1,0 +1,236 @@
+<div class="status-container">
+
+  <h2><i class="fas fa-search-location"></i> {{ ls.current === 'bn' ? 'আবেদনের অবস্থা দেখুন' : 'Check Application Status' }}</h2>
+
+  <!-- STEP 1: Mobile Input -->
+  <div class="step-box" *ngIf="!otpSent">
+    <div class="step-label">
+      <span class="step-num">1</span>
+      {{ ls.current === 'bn' ? 'আপনার মোবাইল নম্বর দিন' : 'Enter your mobile number' }}
+    </div>
+    <div class="input-row">
+      <input type="text" [(ngModel)]="mobile"
+             [placeholder]="ls.current === 'bn' ? 'মোবাইল নম্বর (১১ ডিজিট)' : 'Mobile Number (11 digits)'"
+             maxlength="11">
+      <button (click)="sendOtp()">
+        <i class="fas fa-paper-plane"></i>
+        {{ ls.current === 'bn' ? 'OTP পাঠান' : 'Send OTP' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: OTP -->
+  <div class="step-box otp-zone" *ngIf="otpSent && !otpVerified">
+    <div class="step-label">
+      <span class="step-num">2</span>
+      {{ ls.current === 'bn' ? 'OTP যাচাই করুন' : 'Verify OTP' }}
+    </div>
+    <p class="otp-hint">{{ ls.current === 'bn' ? 'আপনার মোবাইলে OTP পাঠানো হয়েছে' : 'OTP sent to ' + mobile }}</p>
+    <div class="input-row">
+      <input type="text" [(ngModel)]="userOtp"
+             [placeholder]="ls.current === 'bn' ? 'OTP দিন' : 'Enter OTP'"
+             maxlength="6">
+      <button (click)="verifyOtp()">
+        <i class="fas fa-check-circle"></i>
+        {{ ls.current === 'bn' ? 'যাচাই করুন' : 'Verify' }}
+      </button>
+    </div>
+    <small class="resend" (click)="sendOtp()">
+      <i class="fas fa-redo"></i> Resend OTP
+    </small>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-box" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>{{ ls.current === 'bn' ? 'লোড হচ্ছে...' : 'Loading your applications...' }}</p>
+  </div>
+
+  <!-- STEP 3: RESULTS -->
+  <div class="result-box" *ngIf="otpVerified && !loading">
+
+    <div class="result-header">
+      <div class="result-title">
+        <i class="fas fa-list-check"></i>
+        {{ ls.current === 'bn' ? 'আপনার আবেদনসমূহ' : 'Your Applications' }}
+      </div>
+      <div class="result-count" *ngIf="filteredApplications.length > 0">
+        {{ filteredApplications.length }} {{ ls.current === 'bn' ? 'টি আবেদন' : 'application(s)' }}
+      </div>
+    </div>
+
+    <!-- Applications Table -->
+    <table *ngIf="filteredApplications.length > 0; else noData">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{{ ls.current === 'bn' ? 'নাম' : 'Name' }}</th>
+          <th>{{ ls.current === 'bn' ? 'ধরন' : 'Type' }}</th>
+          <th>{{ ls.current === 'bn' ? 'অবস্থা' : 'Status' }}</th>
+          <th>{{ ls.current === 'bn' ? 'বিস্তারিত' : 'Details' }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let app of filteredApplications; let i = index"
+            [class.active-row]="selectedItem === app">
+          <td class="row-num">{{ i + 1 }}</td>
+          <td class="name-cell">{{ app.name }}</td>
+          <td>
+            <span class="type-badge">
+              <i [class]="typeIcon(app.type)"></i> {{ app.type }}
+            </span>
+          </td>
+          <td>
+            <span class="status-pill" [ngClass]="statusClass(app.status)">
+              <i [class]="statusIcon(app.status)"></i> {{ app.status }}
+            </span>
+          </td>
+          <td>
+            <button class="view-btn" (click)="viewItem(app)">
+              <i class="fas fa-eye"></i>
+              {{ ls.current === 'bn' ? 'দেখুন' : 'View' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <ng-template #noData>
+      <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <p>{{ ls.current === 'bn' ? 'কোনো আবেদন পাওয়া যায়নি' : 'No applications found for this number' }}</p>
+        <small>{{ ls.current === 'bn' ? 'নিশ্চিত করুন আপনার মোবাইল নম্বর সঠিক' : 'Please make sure you used the same number during application' }}</small>
+      </div>
+    </ng-template>
+
+    <button class="btn-new-search" (click)="reset()">
+      <i class="fas fa-search"></i> {{ ls.current === 'bn' ? 'নতুন সার্চ' : 'New Search' }}
+    </button>
+  </div>
+
+  <!-- ===== CITIZEN DETAIL VIEW PANEL ===== -->
+  <div class="panel-overlay" *ngIf="selectedItem" (click)="selectedItem = null"></div>
+
+  <div class="detail-panel" *ngIf="selectedItem">
+
+    <!-- Head -->
+    <div class="panel-head">
+      <div class="panel-head-left">
+        <div class="panel-icon">
+          <i [class]="typeIcon(selectedItem.type)"></i>
+        </div>
+        <div>
+          <h3>{{ selectedItem.type }} Request</h3>
+          <span class="panel-sub">{{ selectedItem.name }}</span>
+        </div>
+      </div>
+      <button class="panel-close" (click)="selectedItem = null">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Status Banner -->
+    <div class="panel-status-bar" [ngClass]="statusClass(selectedItem.status)">
+      <i [class]="statusIcon(selectedItem.status)"></i>
+      {{ ls.current === 'bn' ? 'বর্তমান অবস্থা:' : 'Current Status:' }}
+      <strong>{{ selectedItem.status }}</strong>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline">
+      <div class="tl-step" [class.done]="true">
+        <div class="tl-dot done"><i class="fas fa-check"></i></div>
+        <div class="tl-text">
+          <strong>{{ ls.current === 'bn' ? 'আবেদন জমা' : 'Application Submitted' }}</strong>
+          <span>{{ selectedItem.details?.createdAt | date:'dd MMM yyyy' }}</span>
+        </div>
+      </div>
+      <div class="tl-step" [class.done]="selectedItem.status !== 'Pending'">
+        <div class="tl-dot" [class.done]="selectedItem.status !== 'Pending'">
+          <i class="fas" [class.fa-check]="selectedItem.status !== 'Pending'" [class.fa-clock]="selectedItem.status === 'Pending'"></i>
+        </div>
+        <div class="tl-text">
+          <strong>{{ ls.current === 'bn' ? 'পর্যালোচনাধীন' : 'Under Review' }}</strong>
+          <span>{{ selectedItem.status === 'Pending' ? 'Awaiting...' : 'Reviewed' }}</span>
+        </div>
+      </div>
+      <div class="tl-step" [class.done]="selectedItem.status === 'Resolved'" [class.rejected]="selectedItem.status === 'Rejected'">
+        <div class="tl-dot"
+             [class.done]="selectedItem.status === 'Resolved'"
+             [class.rejected]="selectedItem.status === 'Rejected'">
+          <i class="fas"
+             [class.fa-check]="selectedItem.status === 'Resolved'"
+             [class.fa-times]="selectedItem.status === 'Rejected'"
+             [class.fa-hourglass]="selectedItem.status !== 'Resolved' && selectedItem.status !== 'Rejected'"></i>
+        </div>
+        <div class="tl-text">
+          <strong>{{ selectedItem.status === 'Rejected' ? 'Rejected' : (ls.current === 'bn' ? 'সমাধান' : 'Resolution') }}</strong>
+          <span>{{ selectedItem.status === 'Resolved' ? 'Completed ✓' : selectedItem.status === 'Rejected' ? 'Not approved' : 'Pending...' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Body -->
+    <div class="panel-body">
+      <div class="info-section">
+        <div class="section-title">
+          <i class="fas fa-info-circle"></i>
+          {{ ls.current === 'bn' ? 'আবেদনের তথ্য' : 'Application Details' }}
+        </div>
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-label">{{ ls.current === 'bn' ? 'আবেদন আইডি' : 'Application ID' }}</span>
+            <span class="info-value">#{{ selectedItem.id }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">{{ ls.current === 'bn' ? 'ধরন' : 'Type' }}</span>
+            <span class="info-value">{{ selectedItem.type }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedItem.details?.ward">
+            <span class="info-label">{{ ls.current === 'bn' ? 'ওয়ার্ড' : 'Ward' }}</span>
+            <span class="info-value">{{ selectedItem.details?.ward }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedItem.details?.location">
+            <span class="info-label">{{ ls.current === 'bn' ? 'অবস্থান' : 'Location' }}</span>
+            <span class="info-value">{{ selectedItem.details?.location }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedItem.details?.district">
+            <span class="info-label">{{ ls.current === 'bn' ? 'জেলা' : 'District' }}</span>
+            <span class="info-value">{{ selectedItem.details?.district }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedItem.details?.priority">
+            <span class="info-label">{{ ls.current === 'bn' ? 'অগ্রাধিকার' : 'Priority' }}</span>
+            <span class="info-value">{{ selectedItem.details?.priority }}</span>
+          </div>
+          <div class="info-row" *ngIf="selectedItem.details?.description">
+            <span class="info-label">{{ ls.current === 'bn' ? 'বিবরণ' : 'Description' }}</span>
+            <span class="info-value desc-text">{{ selectedItem.details?.description }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="panel-footer">
+      <button class="btn-close-panel" (click)="selectedItem = null">
+        <i class="fas fa-arrow-right"></i>
+        {{ ls.current === 'bn' ? 'বন্ধ করুন' : 'Close' }}
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="otp-demo-overlay" *ngIf="showOtpPopup" (click)="closeOtpPopup()">
+  <div class="otp-demo-card" (click)="$event.stopPropagation()">
+    <button class="otp-demo-close" (click)="closeOtpPopup()">&times;</button>
+    <div class="otp-demo-icon"><i class="fas fa-shield-alt"></i></div>
+    <div class="otp-demo-kicker">SECURE VERIFICATION</div>
+    <h3>Demo OTP Code</h3>
+    <p>Use this 6-digit code to continue verification.</p>
+    <div class="otp-demo-code">{{ generatedOtp }}</div>
+    <small>Valid for 5 minutes</small>
+    <button class="otp-demo-action" (click)="closeOtpPopup()">Enter OTP</button>
+  </div>
+</div>

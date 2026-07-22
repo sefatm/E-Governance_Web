@@ -1,0 +1,106 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="successMsg || errorMsg">
+  <div *ngIf="successMsg" class="tl-toast tl-toast--ok"><i class="fas fa-circle-check"></i><span>{{ successMsg }}</span></div>
+  <div *ngIf="errorMsg"   class="tl-toast tl-toast--fail"><i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span></div>
+</div>
+
+<div class="tl-page">
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">অভিযোগ সমাধান ব্যবস্থাপনা</h2>
+        <span class="tl-header__title-en">Complaint Resolution — Citizen Complaint Management System</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <div class="tl-summary-row">
+    <div class="sum-chip sum-total"><div class="sum-icon"><i class="fas fa-clipboard-list"></i></div><div><div class="sum-label">{{ ls.current === "bn" ? "মোট" : "Total" }}</div><div class="sum-val">{{ complaints.length }}</div></div></div>
+    <div class="sum-chip sum-pending"><div class="sum-icon"><i class="fas fa-clock"></i></div><div><div class="sum-label">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</div><div class="sum-val">{{ countByStatus('Pending') }}</div></div></div>
+    <div class="sum-chip sum-progress"><div class="sum-icon"><i class="fas fa-spinner"></i></div><div><div class="sum-label">{{ ls.current === "bn" ? "চলমান" : "In Progress" }}</div><div class="sum-val">{{ countByStatus('In Progress') }}</div></div></div>
+    <div class="sum-chip sum-resolved"><div class="sum-icon"><i class="fas fa-circle-check"></i></div><div><div class="sum-label">{{ ls.current === "bn" ? "সমাধান হয়েছে" : "Resolved" }}</div><div class="sum-val">{{ countByStatus('Resolved') }}</div></div></div>
+    <div class="sum-chip sum-rejected"><div class="sum-icon"><i class="fas fa-circle-xmark"></i></div><div><div class="sum-label">{{ ls.current === "bn" ? "প্রত্যাখ্যাত" : "Rejected" }}</div><div class="sum-val">{{ countByStatus('Rejected') }}</div></div></div>
+  </div>
+
+  <div class="tl-filter-bar">
+    <div class="tl-filter-input" style="flex:2">
+      <i class="fas fa-magnifying-glass"></i>
+      <input type="text" [(ngModel)]="searchText" (input)="filterData()" placeholder="নাম বা এলাকা দিয়ে খুঁজুন...">
+    </div>
+    <div class="tl-filter-select">
+      <i class="fas fa-filter"></i>
+      <select [(ngModel)]="selectedStatus" (change)="filterData()">
+        <option value="">সকল স্ট্যাটাস</option>
+        <option>{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</option><option>{{ ls.current === "bn" ? "চলমান" : "In Progress" }}</option><option>{{ ls.current === "bn" ? "সমাধান হয়েছে" : "Resolved" }}</option><option>{{ ls.current === "bn" ? "প্রত্যাখ্যাত" : "Rejected" }}</option>
+      </select>
+    </div>
+    <button class="tl-btn-clear" (click)="clearFilter()"><i class="fas fa-rotate-left"></i> {{ ls.current === "bn" ? "মুছুন" : "Delete" }}</button>
+  </div>
+
+  <div class="tl-records-section">
+    <div class="tl-records-head">
+      <h3><i class="fas fa-gavel"></i> সমাধান তালিকা</h3>
+      <span class="tl-count-badge">{{ filteredComplaints.length }} টি অভিযোগ</span>
+    </div>
+    <div class="tl-table-wrap">
+      <table class="tl-table">
+        <thead><tr><th>#</th><th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th><th>{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</th><th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th><th>এলাকা</th><th>স্ট্যাটাস</th><th>{{ ls.current === "bn" ? "মন্তব্য" : "Comments" }}</th><th>অ্যাকশন</th></tr></thead>
+        <tbody>
+          <ng-container *ngFor="let c of filteredComplaints; let i = index">
+            <tr [class.row-expanded]="expandedIndex===i">
+              <td class="td-num">{{ i+1 }}</td>
+              <td><strong>{{ c.name }}</strong></td>
+              <td class="td-desc">{{ c.details.description }}</td>
+              <td><span class="ward-chip">{{ c.ward }}</span></td>
+              <td>{{ c.area }}</td>
+              <td>
+                <span class="status-pill" [class.s-pending]="c.status==='Pending'" [class.s-progress]="c.status==='In Progress'" [class.s-resolved]="c.status==='Resolved'" [class.s-rejected]="c.status==='Rejected'">
+                  <span class="s-dot"></span>{{ c.status }}
+                </span>
+              </td>
+              <td class="td-remarks">{{ c.remarks||'—' }}</td>
+              <td>
+                <div class="action-btns">
+                  <button class="act-btn act-view" [class.active]="expandedIndex===i" (click)="toggleDetails(i)"><i class="fas" [ngClass]="expandedIndex===i?'fa-chevron-up':'fa-eye'"></i></button>
+                  <button class="act-btn act-progress" *ngIf="c.status==='Pending'" (click)="updateStatus(c,'In Progress')"><i class="fas fa-spinner"></i></button>
+                  <button class="act-btn act-resolve" *ngIf="c.status!=='Resolved'" (click)="updateStatus(c,'Resolved')"><i class="fas fa-check"></i></button>
+                  <button class="act-btn act-reject" *ngIf="c.status!=='Rejected'" (click)="updateStatus(c,'Rejected')"><i class="fas fa-times"></i></button>
+                </div>
+              </td>
+            </tr>
+            <tr class="detail-row" *ngIf="expandedIndex===i">
+              <td colspan="8">
+                <div class="detail-box">
+                  <div class="detail-grid">
+                    <div class="detail-item"><span class="detail-label">ক্যাটাগরি</span><span class="detail-val">{{ c.details.category||'—' }}</span></div>
+                    <div class="detail-item"><span class="detail-label">যোগাযোগ</span><span class="detail-val td-mono">{{ c.details.contact||'—' }}</span></div>
+                    <div class="detail-item"><span class="detail-label">{{ ls.current === "bn" ? "অবস্থান" : "Location" }}</span><span class="detail-val">{{ c.details.location||'—' }}</span></div>
+                    <div class="detail-item detail-item--full"><span class="detail-label">{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</span><span class="detail-val">{{ c.details.description||'—' }}</span></div>
+                    <div class="detail-item" *ngIf="c.details.imageUrl"><span class="detail-label">ছবি</span><img [src]="c.details.imageUrl" alt="Evidence" class="evidence-img"></div>
+                  </div>
+                  <div class="remarks-editor">
+                    <label class="detail-label"><i class="fas fa-pen"></i> মন্তব্য লিখুন</label>
+                    <div class="remarks-row">
+                      <input type="text" [(ngModel)]="c.remarks" placeholder="সমাধানের বিবরণ লিখুন...">
+                      <button class="tl-btn tl-btn--save" (click)="saveRemarks(c)" [disabled]="savingId===c.id">
+                        <i class="fas fa-floppy-disk"></i> {{ savingId===c.id?'সংরক্ষণ...':'সংরক্ষণ' }}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+          <tr *ngIf="filteredComplaints.length===0"><td colspan="8" class="no-data"><i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#d1d5db"></i>কোনো অভিযোগ পাওয়া যায়নি</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

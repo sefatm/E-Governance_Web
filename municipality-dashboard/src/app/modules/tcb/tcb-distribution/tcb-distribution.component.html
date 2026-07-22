@@ -1,0 +1,238 @@
+<div class="dist-page">
+
+  <!-- ══ PAGE HEADER ══════════════════════════════════════════ -->
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-truck me-2" style="color:#059669"></i> TCB বিতরণ ইতিহাস</h2>
+      <p>সকল বিতরণ session ও কার্ড-ভিত্তিক বিতরণ রেকর্ড</p>
+    </div>
+    <div class="header-stats">
+      <div class="hstat-chip">
+        <i class="fas fa-layer-group"></i>
+        <span>{{ sessions.length }} Session</span>
+      </div>
+      <div class="hstat-chip open">
+        <i class="fas fa-circle"></i>
+        <span>{{ countByStatus('OPEN') }} Open</span>
+      </div>
+      <div class="hstat-chip closed">
+        <i class="fas fa-circle"></i>
+        <span>{{ countByStatus('CLOSED') }} Closed</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FILTER BAR ════════════════════════════════════════════ -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input [(ngModel)]="filterDealer" (input)="applyFilter()"
+             placeholder="ডিলার নাম বা Session Code দিয়ে খুঁজুন…" />
+    </div>
+    <select [(ngModel)]="filterWard" (change)="applyFilter()" class="f-select">
+      <option value="">{{ ls.current === "bn" ? "সকল ওয়ার্ড" : "All Wards" }}</option>
+      <option *ngFor="let w of wardList" [value]="w">ওয়ার্ড {{ w }}</option>
+    </select>
+    <select [(ngModel)]="filterStatus" (change)="applyFilter()" class="f-select">
+      <option value="">সকল স্ট্যাটাস</option>
+      <option value="OPEN">{{ ls.current === "bn" ? "খোলা" : "Open" }}</option>
+      <option value="CLOSED">{{ ls.current === "bn" ? "বন্ধ" : "Closed" }}</option>
+    </select>
+    <button class="btn-reset" (click)="resetFilter()" [title]="ls.current === 'bn' ? 'রিসেট' : 'Reset'">
+      <i class="fas fa-rotate-left"></i>
+    </button>
+  </div>
+
+  <!-- ══ CARD LOOKUP ═══════════════════════════════════════════ -->
+  <div class="lookup-panel">
+    <div class="lookup-title">
+      <i class="fas fa-id-card me-2" style="color:#059669"></i>
+      <span>কার্ড নম্বর দিয়ে বিতরণ ইতিহাস দেখুন</span>
+    </div>
+    <div class="lookup-row">
+      <input [(ngModel)]="lookupCardNo"
+             placeholder="কার্ড নং (যেমন: FAM-02-2025-00042)"
+             (keydown.enter)="lookupCard()" />
+      <button class="btn-lookup" (click)="lookupCard()" [disabled]="lookupLoading">
+        <i class="fas fa-search me-1"></i>
+        {{ lookupLoading ? 'খোঁজা হচ্ছে…' : 'খুঁজুন' }}
+      </button>
+    </div>
+
+    <div *ngIf="lookupLoading" class="lookup-loading">
+      <i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে…
+    </div>
+
+    <div *ngIf="!lookupLoading && lookupDone && cardLogs.length > 0" class="lookup-result">
+      <div class="lookup-summary">
+        <span><b>{{ cardLogs[0]?.holderName || lookupCardNo }}</b></span>
+        <span class="lbadge">মোট {{ cardLogs.length }}টি বিতরণ</span>
+      </div>
+      <div class="table-wrap">
+        <table class="dist-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>তারিখ ও সময়</th>
+              <th>Session</th>
+              <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+              <th>তেল (L)</th>
+              <th>চাল (kg)</th>
+              <th>ডাল (kg)</th>
+              <th>চিনি (kg)</th>
+              <th>নগদ (৳)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of cardLogs; let i = index">
+              <td class="td-num">{{ i + 1 }}</td>
+              <td>{{ l.scannedAt | date:'dd MMM yy, hh:mm a' }}</td>
+              <td><code>#{{ l.sessionId }}</code></td>
+              <td>{{ l.ward || '—' }}</td>
+              <td class="td-val">{{ l.oilLitre > 0 ? l.oilLitre : '—' }}</td>
+              <td class="td-val">{{ l.riceKg > 0 ? l.riceKg : '—' }}</td>
+              <td class="td-val">{{ l.lentilKg > 0 ? l.lentilKg : '—' }}</td>
+              <td class="td-val">{{ l.sugarKg > 0 ? l.sugarKg : '—' }}</td>
+              <td class="td-val">{{ l.cashAmount > 0 ? (l.cashAmount | number) : '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div *ngIf="!lookupLoading && lookupDone && cardLogs.length === 0" class="empty-lookup">
+      <i class="fas fa-inbox"></i>
+      <p>এই কার্ডের কোনো বিতরণ রেকর্ড পাওয়া যায়নি।</p>
+    </div>
+  </div>
+
+  <!-- ══ SESSION TABLE ══════════════════════════════════════════ -->
+  <div class="section-card">
+    <div class="section-head">
+      <h3><i class="fas fa-list-alt me-2"></i>সকল বিতরণ Session</h3>
+      <button class="btn-refresh" (click)="loadSessions()" [title]="ls.current === 'bn' ? 'রিফ্রেশ' : 'Refresh'">
+        <i class="fas fa-rotate-right"></i>
+      </button>
+    </div>
+
+    <div *ngIf="loadingSessions" class="state-loading">
+      <i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে…
+    </div>
+
+    <div *ngIf="!loadingSessions" class="table-wrap">
+      <table class="dist-table" *ngIf="filteredSessions.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ ls.current === "bn" ? "সেশন কোড" : "Session Code" }}</th>
+            <th>ডিলার</th>
+            <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+            <th>মাস</th>
+            <th>শুরু</th>
+            <th>শেষ</th>
+            <th>{{ ls.current === "bn" ? "স্ক্যান" : "Scan" }}</th>
+            <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+            <th>{{ ls.current === "bn" ? "বিস্তারিত" : "View Details" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of filteredSessions; let i = index"
+              [class.row-open]="s.status === 'OPEN'">
+            <td class="td-num">{{ i + 1 }}</td>
+            <td><code class="session-code">{{ s.sessionCode || '#' + s.id }}</code></td>
+            <td>{{ s.dealerName }}</td>
+            <td>{{ s.ward }}</td>
+            <td>{{ s.cycleMonth }}</td>
+            <td class="td-date">{{ s.openedAt | date:'dd MMM yy, hh:mm a' }}</td>
+            <td class="td-date">{{ s.closedAt ? (s.closedAt | date:'dd MMM yy, hh:mm a') : '—' }}</td>
+            <td class="td-scan-count">
+              <span class="scan-badge">{{ s.totalScanned }}</span>
+            </td>
+            <td>
+              <span class="status-badge"
+                [class.s-open]="s.status === 'OPEN'"
+                [class.s-closed]="s.status === 'CLOSED'">
+                <span class="s-dot"></span>{{ s.status }}
+              </span>
+            </td>
+            <td>
+              <button class="btn-detail"
+                (click)="viewSession(s.id!)"
+                [class.active]="selectedSessionId === s.id">
+                <i class="fas fa-eye"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="filteredSessions.length === 0" class="state-empty">
+        <i class="fas fa-inbox"></i>
+        <p>কোনো session পাওয়া যায়নি।</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SESSION DETAIL LOGS ═══════════════════════════════════ -->
+  <div class="section-card session-detail-section" *ngIf="activeSessionLogs.length > 0 || detailLoading">
+    <div class="section-head">
+      <h3>
+        <i class="fas fa-receipt me-2"></i>
+        Session <code>#{{ selectedSessionId }}</code> — বিতরণ তালিকা
+      </h3>
+      <div class="detail-meta" *ngIf="activeSessionLogs.length > 0">
+        <span class="meta-chip">মোট {{ activeSessionLogs.length }} জন</span>
+        <span class="meta-chip oil">🛢️ তেল {{ totalGiven('oilLitre') | number:'1.0-1' }}L</span>
+        <span class="meta-chip rice">🌾 চাল {{ totalGiven('riceKg') | number:'1.0-1' }}kg</span>
+        <span class="meta-chip cash" *ngIf="totalGiven('cashAmount') > 0">
+          💵 ৳{{ totalGiven('cashAmount') | number }}
+        </span>
+      </div>
+    </div>
+
+    <div *ngIf="detailLoading" class="state-loading">
+      <i class="fas fa-spinner fa-spin"></i> লোড হচ্ছে…
+    </div>
+
+    <div *ngIf="!detailLoading" class="table-wrap">
+      <table class="dist-table detail-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th>
+            <th>কার্ড নং</th>
+            <th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+            <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+            <th>তেল</th>
+            <th>চাল</th>
+            <th>ডাল</th>
+            <th>চিনি</th>
+            <th>{{ ls.current === "bn" ? "নগদ" : "Cash" }}</th>
+            <th>সময়</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let l of activeSessionLogs; let i = index">
+            <td class="td-num">{{ i + 1 }}</td>
+            <td class="td-name">{{ l.holderName }}</td>
+            <td><code>{{ l.cardNo }}</code></td>
+            <td>
+              <span class="type-badge type-fam" *ngIf="l.cardType === 'FAMILY'">পরিবার</span>
+              <span class="type-badge type-far" *ngIf="l.cardType === 'FARMER'">কৃষক</span>
+              <span class="type-badge type-lpg" *ngIf="l.cardType === 'LPG'">LPG</span>
+              <span class="type-badge type-vgd" *ngIf="l.cardType === 'VGD'">VGD</span>
+              <span class="type-badge" *ngIf="!['FAMILY','FARMER','LPG','VGD'].includes(l.cardType)">{{ l.cardType }}</span>
+            </td>
+            <td>{{ l.ward }}</td>
+            <td class="td-val">{{ l.oilLitre > 0 ? l.oilLitre + 'L' : '—' }}</td>
+            <td class="td-val">{{ l.riceKg > 0 ? l.riceKg + 'kg' : '—' }}</td>
+            <td class="td-val">{{ l.lentilKg > 0 ? l.lentilKg + 'kg' : '—' }}</td>
+            <td class="td-val">{{ l.sugarKg > 0 ? l.sugarKg + 'kg' : '—' }}</td>
+            <td class="td-val">{{ l.cashAmount > 0 ? ('৳' + l.cashAmount) : '—' }}</td>
+            <td class="td-date">{{ l.scannedAt | date:'hh:mm a' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

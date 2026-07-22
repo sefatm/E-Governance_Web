@@ -1,0 +1,121 @@
+<div class="map-page">
+
+  <!-- ── PAGE HEADER ── -->
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="ph-icon"><i class="fas fa-map-marked-alt"></i></div>
+      <div>
+        <h2>{{ ls.current === "bn" ? "ওয়ার্ড মানচিত্র" : "Ward Map" }}</h2>
+        <p>Madaripur Municipality — Interactive GIS Ward Boundaries</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="hs-item">
+        <span class="hs-val">{{ wards.length }}</span>
+        <span class="hs-label">Total Wards</span>
+      </div>
+      <div class="hs-div"></div>
+      <div class="hs-item">
+        <span class="hs-val">{{ totalPopulation | number }}</span>
+        <span class="hs-label">{{ ls.current === "bn" ? "জনসংখ্যা" : "Population" }}</span>
+      </div>
+      <div class="hs-div"></div>
+      <div class="hs-item">
+        <span class="hs-val">{{ activeCount }}</span>
+        <span class="hs-label">{{ ls.current === "bn" ? "সক্রিয়" : "Active" }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── BODY: Map + Sidebar ── -->
+  <div class="map-body">
+
+    <!-- LEFT: Map -->
+    <div class="map-wrap">
+
+      <!-- Filter Tabs -->
+      <div class="map-toolbar">
+        <button *ngFor="let f of filterOptions"
+                [class.active]="activeFilter === f"
+                (click)="applyFilter(f)">
+          {{ f }}
+        </button>
+        <span class="map-tip">
+          <i class="fas fa-info-circle"></i> Click a ward to see details
+        </span>
+      </div>
+
+      <!-- Leaflet Map Container -->
+      <div id="ward-map-container"></div>
+
+    </div>
+
+    <!-- RIGHT: Ward List Panel -->
+    <div class="side-panel">
+
+      <div class="sp-title">
+        <i class="fas fa-list-ul"></i> {{ ls.current === "bn" ? "ওয়ার্ড তালিকা" : "Ward List" }}
+      </div>
+
+      <div class="ward-cards">
+        <div class="ward-card"
+             *ngFor="let ward of filteredWards; let i = index"
+             [class.selected]="selectedWard?.id === ward.id"
+             (click)="selectWard(ward)">
+
+          <div class="wc-left">
+            <div class="wc-badge" [style.background]="getWardColor(ward.number - 1)">
+              {{ ward.number }}
+            </div>
+            <div class="wc-info">
+              <span class="wc-name">{{ ward.name }}</span>
+              <span class="wc-rep">{{ ward.representative }}</span>
+            </div>
+          </div>
+
+          <div class="wc-right">
+            <span class="wc-pop">{{ ward.population | number }}</span>
+            <span [class]="ward.status === 'Active' ? 'badge-active' : 'badge-inactive'">
+              {{ ward.status }}
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Selected Ward Detail -->
+      <div class="ward-detail" *ngIf="selectedWard">
+        <div class="wd-header">
+          <i class="fas fa-map-pin"></i> {{ selectedWard.name }} — Details
+        </div>
+        <div class="wd-grid">
+          <div class="wd-item">
+            <span class="wd-label">Ward ID</span>
+            <span class="wd-val">{{ selectedWard.id }}</span>
+          </div>
+          <div class="wd-item">
+            <span class="wd-label">{{ ls.current === "bn" ? "জনসংখ্যা" : "Population" }}</span>
+            <span class="wd-val">{{ selectedWard.population | number }}</span>
+          </div>
+          <div class="wd-item">
+            <span class="wd-label">Area</span>
+            <span class="wd-val">{{ selectedWard.area }} sq km</span>
+          </div>
+          <div class="wd-item">
+            <span class="wd-label">{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</span>
+            <span class="wd-val">{{ selectedWard.status }}</span>
+          </div>
+          <div class="wd-item full">
+            <span class="wd-label">Councillor</span>
+            <span class="wd-val">{{ selectedWard.representative }}</span>
+          </div>
+          <div class="wd-item full">
+            <span class="wd-label">Contact</span>
+            <span class="wd-val">{{ selectedWard.contact }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

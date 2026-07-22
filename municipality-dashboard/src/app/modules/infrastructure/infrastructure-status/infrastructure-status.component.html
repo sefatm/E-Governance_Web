@@ -1,0 +1,163 @@
+<div class="container">
+
+  <div class="page-header">
+    <div>
+      <h2>Infrastructure Applications</h2>
+      <span>Review, inspect and update infrastructure service requests</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat-chip pending-chip"><span class="sc-dot"></span>{{ countByStatus('Pending') }} Pending</div>
+      <div class="stat-chip progress-chip"><span class="sc-dot"></span>{{ countByStatus('In Progress') }} In Progress</div>
+      <div class="stat-chip resolved-chip"><span class="sc-dot"></span>{{ countByStatus('Resolved') }} Resolved</div>
+      <div class="stat-chip rejected-chip"><span class="sc-dot"></span>{{ countByStatus('Rejected') }} Rejected</div>
+    </div>
+  </div>
+
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="fas fa-search"></i>
+      <input type="text"
+             placeholder="Search by name, mobile, location, ward..."
+             [(ngModel)]="searchText"
+             (input)="filterData()">
+    </div>
+
+    <select [(ngModel)]="selectedType" (change)="filterData()">
+      <option value="">All Types</option>
+      <option value="Construction">Construction</option>
+      <option value="Road">Road</option>
+      <option value="Drainage">Drainage</option>
+      <option value="Street Light">Street Light</option>
+    </select>
+
+    <select [(ngModel)]="selectedStatus" (change)="filterData()">
+      <option value="">All Status</option>
+      <option value="Pending">Pending</option>
+      <option value="In Progress">In Progress</option>
+      <option value="Resolved">Resolved</option>
+      <option value="Rejected">Rejected</option>
+    </select>
+
+    <button class="btn-reset" (click)="reset()" title="Reset filter">
+      <i class="fas fa-rotate-left"></i>
+    </button>
+  </div>
+
+  <div class="table-wrap">
+    <div class="loading-state" *ngIf="isLoading">
+      <i class="fas fa-spinner fa-spin"></i>
+      Loading applications...
+    </div>
+
+    <div class="app-table" *ngIf="!isLoading">
+      <div class="app-head">
+        <div>#</div>
+        <div>Applicant</div>
+        <div>Type</div>
+        <div>Location</div>
+        <div>Status</div>
+        <div>Date</div>
+        <div>Actions</div>
+      </div>
+
+      <div class="app-empty" *ngIf="filteredData.length === 0">
+        <i class="fas fa-inbox"></i>
+        No applications found
+      </div>
+
+      <div class="app-record" *ngFor="let item of filteredData; let i = index">
+        <div class="app-row" [class.row-expanded]="isExpanded(item)">
+          <div class="td-num">{{ i + 1 }}</div>
+          <div>
+            <div class="applicant-cell">
+              <div class="ac-avatar">{{ applicantInitial(item) }}</div>
+              <div>
+                <span class="ac-name">{{ item.name }}</span>
+                <span class="ac-mobile">{{ item.contact }}</span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <span class="type-badge type-{{ typeClass(item.type) }}">
+              <i [class]="typeIcon(item.type)"></i>
+              {{ item.type }}
+            </span>
+          </div>
+          <div>
+            <span class="location-text">{{ item.location }}</span>
+            <span class="ward-text" *ngIf="item.details?.ward">Ward {{ item.details.ward }}</span>
+          </div>
+          <div>
+            <span class="status-badge" [ngClass]="'s-' + statusClass(item.status)">
+              <span class="s-dot"></span>{{ item.status }}
+            </span>
+          </div>
+          <div class="td-date">{{ item.date | date:'dd MMM yyyy' }}</div>
+          <div>
+            <div class="act-row">
+              <button class="act-btn view-btn" (click)="toggleDetails(item)" title="View details">
+                <i class="fas" [ngClass]="isExpanded(item) ? 'fa-eye-slash' : 'fa-eye'"></i>
+              </button>
+              <button class="act-btn progress-btn"
+                      (click)="updateStatus(item, 'In Progress')"
+                      title="Set in progress"
+                      [disabled]="item.status === 'In Progress'">
+                <i class="fas fa-spinner"></i>
+              </button>
+              <button class="act-btn approve-btn"
+                      (click)="updateStatus(item, 'Resolved')"
+                      title="Mark resolved"
+                      [disabled]="item.status === 'Resolved'">
+                <i class="fas fa-check"></i>
+              </button>
+              <button class="act-btn reject-btn"
+                      (click)="updateStatus(item, 'Rejected')"
+                      title="Reject"
+                      [disabled]="item.status === 'Rejected'">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-row" *ngIf="isExpanded(item)">
+          <div class="detail-box">
+            <div class="detail-title">
+              <i [class]="typeIcon(item.type)"></i>
+              {{ item.type }} Application Details
+            </div>
+
+            <div class="detail-grid">
+              <div class="dg-item" *ngFor="let f of item.detailFields">
+                <span class="dg-key">{{ f.key }}</span>
+                <span class="dg-val">{{ f.value }}</span>
+              </div>
+            </div>
+
+            <div class="file-section" *ngIf="item.fileEntries.length">
+              <div class="file-section-title">
+                <i class="fas fa-paperclip"></i>
+                Attached Files
+              </div>
+              <div class="file-cards">
+                <div class="file-card" *ngFor="let f of item.fileEntries">
+                  <div class="fc-label"><i class="fas fa-file"></i>{{ f.label }}</div>
+                  <div class="fc-preview">
+                    <img *ngIf="f.isImage" [src]="fileUrl(f.url)" [alt]="f.label">
+                    <div class="pdf-icon" *ngIf="!f.isImage">
+                      <i class="fas fa-file-pdf"></i>
+                      <span>Document</span>
+                    </div>
+                  </div>
+                  <a [href]="fileUrl(f.url)" target="_blank" class="fc-download">
+                    <i class="fas fa-download"></i> View / Download
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

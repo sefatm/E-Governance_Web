@@ -1,0 +1,517 @@
+<div class="tl-toast-area" *ngIf="toasts.length">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success'?'fa-circle-check':'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- ── Tab Bar ── -->
+  <div class="tl-tabs">
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='form'" (click)="switchTab('form')">
+      <i class="fas fa-file-alt"></i> {{ ls.current === "bn" ? "আবেদন করুন" : "Apply" }}
+    </button>
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='list'" (click)="switchTab('list')">
+      <i class="fas fa-list"></i> My Applications
+      <span class="tl-tab-count" *ngIf="applications.length">{{ applications.length }}</span>
+    </button>
+    <button class="tl-tab" [class.tl-tab--active]="activeTab==='status'" (click)="activeTab='status'">
+      <i class="fas fa-search"></i> {{ ls.current === "bn" ? "অবস্থা দেখুন" : "Check Status" }}
+    </button>
+  </div>
+
+  <!-- FORM TAB -->
+  <ng-container *ngIf="activeTab==='form'">
+
+    <!-- Header -->
+    <div class="tl-header">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+          <span class="tl-header__country">GOVERNMENT OF THE PEOPLE'S REPUBLIC OF BANGLADESH</span>
+          <div class="tl-header__divider"></div>
+          <h2 class="tl-header__title">পাসপোর্ট আবেদন ফরম</h2>
+          <span class="tl-header__title-en">Department of Immigration &amp; Passports</span>
+          <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+        </div>
+      </div>
+      <div class="tl-header__right">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <!-- Step bar -->
+    <div class="tl-steps">
+      <ng-container *ngFor="let s of steps; let i=index">
+        <div class="tl-step" [class.tl-step--done]="currentStep>i+1" [class.tl-step--active]="currentStep===i+1">
+          <div class="tl-step__circle">
+            <i class="fas fa-check" *ngIf="currentStep>i+1"></i>
+            <span *ngIf="currentStep<=i+1">{{ i+1 }}</span>
+          </div>
+          <span class="tl-step__label">{{ s }}</span>
+        </div>
+        <div class="tl-step__line" *ngIf="i<steps.length-1" [class.tl-step__line--done]="currentStep>i+1"></div>
+      </ng-container>
+    </div>
+
+    <div class="tl-card">
+      <form [formGroup]="passportForm" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- STEP 1 — Personal Info -->
+        <div class="tl-panel" [class.tl-panel--active]="currentStep===1">
+          <div class="tl-panel__head">
+            <div class="tl-panel__icon"><i class="fas fa-user"></i></div>
+            <div><h3>{{ ls.current === "bn" ? "ব্যক্তিগত তথ্য" : "Personal Information" }}</h3><p>Enter your personal details as per NID</p></div>
+            <span class="tl-step-tag">Step 1 of 4</span>
+          </div>
+
+          <div class="tl-grid-2">
+            <div class="tl-field" style="grid-column:1/-1">
+              <label>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-user tl-ico"></i>
+                <input formControlName="fullName" placeholder="Full name as per NID"
+                       [class.tl-invalid]="isInvalid('fullName')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-calendar tl-ico"></i>
+                <input type="date" formControlName="dob" [class.tl-invalid]="isInvalid('dob')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "জন্মস্থান" : "Place of Birth" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-location-dot tl-ico"></i>
+                <input formControlName="placeOfBirth" placeholder="District / City"
+                       [class.tl-invalid]="isInvalid('placeOfBirth')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-venus-mars tl-ico"></i>
+                <select formControlName="gender" [class.tl-invalid]="isInvalid('gender')">
+                  <option value="">Select gender</option>
+                  <option>{{ ls.current === "bn" ? "পুরুষ" : "Male" }}</option><option>{{ ls.current === "bn" ? "মহিলা" : "Female" }}</option><option>{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "জাতীয়তা" : "Nationality" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-flag tl-ico"></i>
+                <input formControlName="nationality" [class.tl-invalid]="isInvalid('nationality')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "বৈবাহিক অবস্থা" : "Marital Status" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-heart tl-ico"></i>
+                <select formControlName="maritalStatus" [class.tl-invalid]="isInvalid('maritalStatus')">
+                  <option value="">Select status</option>
+                  <option>Single</option><option>{{ ls.current === "bn" ? "বিবাহিত" : "Married" }}</option>
+                  <option>{{ ls.current === "bn" ? "তালাকপ্রাপ্ত" : "Divorced" }}</option><option>{{ ls.current === "bn" ? "বিধবা/বিধুর" : "Widowed" }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "ধর্ম" : "Religion" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-mosque tl-ico"></i>
+                <select formControlName="religion" [class.tl-invalid]="isInvalid('religion')">
+                  <option value="">Select religion</option>
+                  <option>{{ ls.current === "bn" ? "ইসলাম" : "Islam" }}</option><option>{{ ls.current === "bn" ? "হিন্দু" : "Hinduism" }}</option>
+                  <option>{{ ls.current === "bn" ? "খ্রিস্টান" : "Christianity" }}</option><option>{{ ls.current === "bn" ? "বৌদ্ধ" : "Buddhism" }}</option><option>{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+                </select>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "রক্তের গ্রুপ" : "Blood Group" }}</label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-droplet tl-ico"></i>
+                <select formControlName="bloodGroup">
+                  <option value="">{{ ls.current === "bn" ? "নির্বাচন করুন" : "Select" }}</option>
+                  <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                  <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+                </select>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Father's Name <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-user tl-ico"></i>
+                <input formControlName="fatherName" placeholder="Father's full name"
+                       [class.tl-invalid]="isInvalid('fatherName')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Mother's Name <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-user tl-ico"></i>
+                <input formControlName="motherName" placeholder="Mother's full name"
+                       [class.tl-invalid]="isInvalid('motherName')">
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-nav">
+            <span></span>
+            <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">
+              {{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 2 — Passport & Address -->
+        <div class="tl-panel" [class.tl-panel--active]="currentStep===2">
+          <div class="tl-panel__head">
+            <div class="tl-panel__icon"><i class="fas fa-passport"></i></div>
+            <div><h3>Passport Type &amp; Address</h3><p>Select passport type and provide address</p></div>
+            <span class="tl-step-tag">Step 2 of 4</span>
+          </div>
+
+          <div class="tl-grid-2">
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "পাসপোর্টের ধরন" : "Passport Type" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-book tl-ico"></i>
+                <select formControlName="passportType" (change)="onPassportTypeChange()"
+                        [class.tl-invalid]="isInvalid('passportType')">
+                  <option value="">Select type</option>
+                  <option value="Ordinary">Ordinary (৳3,450)</option>
+                  <option value="Official">Official (৳6,900)</option>
+                  <option value="Diplomatic">Diplomatic (৳6,900)</option>
+                </select>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-id-card tl-ico"></i>
+                <input formControlName="nidNumber" placeholder="10 or 17 digit NID"
+                       [class.tl-invalid]="isInvalid('nidNumber')">
+              </div>
+            </div>
+            <div class="tl-field" style="grid-column:1/-1">
+              <label>Previous Passport No (if any)</label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-passport tl-ico"></i>
+                <input formControlName="passportNoPrevious" placeholder="Leave blank if first-time">
+              </div>
+            </div>
+            <div class="tl-field" style="grid-column:1/-1">
+              <label>Current Address <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-location-dot tl-ico tl-ico--top"></i>
+                <textarea formControlName="currentAddress" rows="3"
+                          placeholder="House, Road, Area, District"
+                          [class.tl-invalid]="isInvalid('currentAddress')"></textarea>
+              </div>
+            </div>
+            <div class="tl-field" style="grid-column:1/-1">
+              <label>{{ ls.current === "bn" ? "স্থায়ী ঠিকানা" : "Permanent Address" }}</label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-house tl-ico tl-ico--top"></i>
+                <textarea formControlName="permanentAddress" rows="2"
+                          placeholder="If different from current address"></textarea>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "যোগাযোগ নম্বর" : "Contact Number" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-mobile-screen tl-ico"></i>
+                <input formControlName="contact" placeholder="01XXXXXXXXX"
+                       [class.tl-invalid]="isInvalid('contact')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "ইমেইল" : "Email" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-envelope tl-ico"></i>
+                <input formControlName="email" placeholder="example@email.com"
+                       [class.tl-invalid]="isInvalid('email')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Emergency Contact (Name &amp; Relation) <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-phone-volume tl-ico"></i>
+                <input formControlName="emergencyContactName" placeholder="e.g. Karim (Brother)"
+                       [class.tl-invalid]="isInvalid('emergencyContactName')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "জরুরি ফোন" : "Emergency Phone" }} <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-phone tl-ico"></i>
+                <input formControlName="emergencyContactPhone" placeholder="01XXXXXXXXX"
+                       [class.tl-invalid]="isInvalid('emergencyContactPhone')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Countries Previously Visited</label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-earth-asia tl-ico"></i>
+                <input formControlName="previousTravelCountries" placeholder="e.g. India, Malaysia">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>Previous Visa Numbers</label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-stamp tl-ico"></i>
+                <input formControlName="previousVisaNumbers" placeholder="e.g. V12345">
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-nav">
+            <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()">
+              <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+            </button>
+            <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">
+              {{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 3 — Documents -->
+        <div class="tl-panel" [class.tl-panel--active]="currentStep===3">
+          <div class="tl-panel__head">
+            <div class="tl-panel__icon"><i class="fas fa-file-arrow-up"></i></div>
+            <div><h3>Document Upload</h3><p>Upload required documents for verification</p></div>
+            <span class="tl-step-tag">Step 3 of 4</span>
+          </div>
+
+          <div class="tl-uploads">
+            <!-- Applicant Photo -->
+            <div class="tl-upload-card">
+              <div class="tl-upload-label">
+                <i class="fas fa-camera"></i> Applicant Photo
+                <span class="tl-upload-hint">JPG, PNG · Max 1MB</span>
+              </div>
+              <div class="tl-upload-zone tl-upload-zone--photo" *ngIf="!photoFile" (click)="photoInput.click()">
+                <input #photoInput type="file" accept="image/*" (change)="onFile($event,'photo')" hidden>
+                <i class="fas fa-user-circle tl-upload-icon"></i>
+                <span>Click to upload photo</span>
+              </div>
+              <div class="tl-photo-preview" *ngIf="photoFile">
+                <img [src]="photoPreview" alt="Applicant photo">
+                <button type="button" class="tl-remove-btn" (click)="removeFile('photo')"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+
+            <!-- NID Copy -->
+            <div class="tl-upload-card">
+              <div class="tl-upload-label">
+                <i class="fas fa-id-card"></i> NID Copy
+                <span class="tl-upload-hint">JPG, PNG, PDF · Max 2MB</span>
+              </div>
+              <div class="tl-upload-zone" *ngIf="!nidFile" (click)="nidInput.click()">
+                <input #nidInput type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onFile($event,'nid')" hidden>
+                <i class="fas fa-cloud-arrow-up tl-upload-icon"></i>
+                <span>Click to upload NID copy</span>
+              </div>
+              <div class="tl-file-preview" *ngIf="nidFile">
+                <i class="fas fa-file-lines"></i>
+                <span>{{ nidFile.name }}</span>
+                <button type="button" class="tl-remove-btn" (click)="removeFile('nid')"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+
+            <!-- Birth Certificate -->
+            <div class="tl-upload-card">
+              <div class="tl-upload-label">
+                <i class="fas fa-file-contract"></i> {{ ls.current === "bn" ? "জন্ম সনদ" : "Birth Certificate" }}
+                <span class="tl-upload-hint">JPG, PNG, PDF · Max 2MB</span>
+              </div>
+              <div class="tl-upload-zone" *ngIf="!birthFile" (click)="birthInput.click()">
+                <input #birthInput type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onFile($event,'birth')" hidden>
+                <i class="fas fa-cloud-arrow-up tl-upload-icon"></i>
+                <span>Click to upload birth certificate</span>
+              </div>
+              <div class="tl-file-preview" *ngIf="birthFile">
+                <i class="fas fa-file-lines"></i>
+                <span>{{ birthFile.name }}</span>
+                <button type="button" class="tl-remove-btn" (click)="removeFile('birth')"><i class="fas fa-times"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-err tl-file-err" *ngIf="fileError">
+            <i class="fas fa-triangle-exclamation"></i> {{ fileError }}
+          </div>
+
+          <div class="tl-nav">
+            <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()">
+              <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+            </button>
+            <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">
+              {{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- STEP 4 — Payment & Submit -->
+        <div class="tl-panel" [class.tl-panel--active]="currentStep===4">
+          <div class="tl-panel__head">
+            <div class="tl-panel__icon"><i class="fas fa-credit-card"></i></div>
+            <div><h3>Payment &amp; Submission</h3><p>Select payment method and confirm application</p></div>
+            <span class="tl-step-tag">Step 4 of 4</span>
+          </div>
+
+          <!-- Passport type summary -->
+          <div class="tl-summary-box" *ngIf="passportForm.get('passportType')?.value">
+            <div class="tl-summary-row">
+              <span><i class="fas fa-passport"></i> {{ ls.current === "bn" ? "পাসপোর্টের ধরন" : "Passport Type" }}</span>
+              <strong>{{ passportForm.get('passportType')?.value }}</strong>
+            </div>
+            <div class="tl-summary-row">
+              <span><i class="fas fa-taka-sign"></i> Fee Amount</span>
+              <strong class="tl-amount">৳ {{ passportForm.get('amount')?.value | number }}</strong>
+            </div>
+          </div>
+
+          <div class="tl-grid-2" style="margin-top:20px">
+            <div class="tl-field" style="grid-column:1/-1">
+              <label>{{ ls.current === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method" }} <span class="req">*</span></label>
+              <div class="tl-payment-grid">
+                <label class="tl-payment-opt" *ngFor="let m of paymentMethods"
+                       [class.tl-payment-opt--active]="passportForm.get('paymentMethod')?.value===m.val">
+                  <input type="radio" formControlName="paymentMethod" [value]="m.val" hidden>
+                  <i class="fas" [ngClass]="m.icon"></i>
+                  <span>{{ m.label }}</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-declaration" style="margin-top:20px">
+            <label class="tl-check-label">
+              <input type="checkbox" [(ngModel)]="agreed" [ngModelOptions]="{standalone:true}">
+              <span>
+                আমি এতদ্বারা ঘোষণা করিতেছি যে উপরে প্রদত্ত সমস্ত তথ্য সত্য ও সঠিক।
+                I hereby declare that all information provided above is true and correct.
+              </span>
+            </label>
+          </div>
+
+          <div class="tl-nav">
+            <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()">
+              <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}
+            </button>
+            <button type="submit" class="tl-btn tl-btn--submit" [disabled]="isSubmitting || !agreed">
+              <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+              <i class="fas fa-paper-plane" *ngIf="!isSubmitting"></i>
+              {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
+            </button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </ng-container>
+
+  <!-- LIST TAB -->
+  <ng-container *ngIf="activeTab==='list'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">My Passport Applications</h2>
+          <span class="tl-header__sub">Track the status of your submitted applications</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-card tl-card--list">
+      <div class="tl-loading" *ngIf="isLoading"><i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+      <table class="tl-table" *ngIf="!isLoading && applications.length">
+        <thead>
+          <tr>
+            <th>#</th><th>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }}</th><th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th><th>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</th>
+            <th>Contact</th><th>{{ ls.current === "bn" ? "পরিমাণ" : "Amount" }}</th><th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th><th>Docs</th><th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let app of applications; let i=index">
+            <td>{{ i+1 }}</td>
+            <td><strong>{{ app.fullName }}</strong></td>
+            <td>{{ app.passportType || '—' }}</td>
+            <td class="mono">{{ app.nidNumber }}</td>
+            <td>{{ app.contact }}</td>
+            <td>৳{{ app.amount | number }}</td>
+            <td>{{ app.applicationDate || '—' }}</td>
+            <td>
+              <div class="doc-icons">
+                <span [class.doc-ok]="app.photoUrl"    title="Photo"><i class="fas fa-camera"></i></span>
+                <span [class.doc-ok]="app.nidFileUrl"  [title]="ls.current === 'bn' ? 'এনআইডি' : 'NID'"><i class="fas fa-id-card"></i></span>
+                <span [class.doc-ok]="app.birthFileUrl" title="Birth"><i class="fas fa-file-contract"></i></span>
+              </div>
+            </td>
+            <td><span class="tl-badge" [ngClass]="getStatusClass(app.status)">{{ app.status || 'PENDING' }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="tl-empty" *ngIf="!isLoading && !applications.length">
+        <i class="fas fa-inbox"></i><p>No applications yet. Use the Apply tab.</p>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- STATUS TAB -->
+  <ng-container *ngIf="activeTab==='status'">
+    <div class="tl-header tl-header--list">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <h2 class="tl-header__title" style="font-size:18px">{{ ls.current === "bn" ? "আবেদনের অবস্থা দেখুন" : "Check Application Status" }}</h2>
+          <span class="tl-header__sub">Enter your NID number to check status</span>
+        </div>
+      </div>
+    </div>
+    <div class="tl-card tl-card--list" style="padding:32px">
+      <div class="tl-search-row">
+        <div class="tl-input-wrap" style="flex:1">
+          <i class="fas fa-search tl-ico"></i>
+          <input type="text" [(ngModel)]="statusSearch" placeholder="Enter NID number..." class="tl-search-input">
+        </div>
+        <button class="tl-btn tl-btn--next" (click)="checkStatus()" [disabled]="statusLoading">
+          <i class="fas fa-spinner fa-spin" *ngIf="statusLoading"></i>
+          <i class="fas fa-search" *ngIf="!statusLoading"></i>
+          {{ statusLoading ? 'Searching...' : 'Search' }}
+        </button>
+      </div>
+
+      <div class="tl-result" *ngIf="statusSearched && statusResult">
+        <div class="tl-result-head">
+          <span class="tl-badge tl-badge--lg" [ngClass]="getStatusClass(statusResult.status)">
+            {{ statusResult.status || 'PENDING' }}
+          </span>
+        </div>
+        <div class="tl-result-grid">
+          <div class="tl-result-row"><span>{{ ls.current === "bn" ? "আবেদনকারী" : "Applicant" }}</span><strong>{{ statusResult.fullName }}</strong></div>
+          <div class="tl-result-row"><span>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</span><strong>{{ statusResult.nidNumber }}</strong></div>
+          <div class="tl-result-row"><span>{{ ls.current === "bn" ? "পাসপোর্টের ধরন" : "Passport Type" }}</span><strong>{{ statusResult.passportType }}</strong></div>
+          <div class="tl-result-row"><span>{{ ls.current === "bn" ? "পরিমাণ" : "Amount" }}</span><strong>৳{{ statusResult.amount | number }}</strong></div>
+          <div class="tl-result-row"><span>Applied Date</span><strong>{{ statusResult.applicationDate }}</strong></div>
+          <div class="tl-result-row" *ngIf="statusResult.rejectReason">
+            <span>Reject Reason</span><strong class="reject-text">{{ statusResult.rejectReason }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="tl-not-found" *ngIf="statusSearched && !statusResult">
+        <i class="fas fa-circle-xmark"></i>
+        <p>No application found for NID "<strong>{{ statusSearch }}</strong>".</p>
+      </div>
+    </div>
+  </ng-container>
+
+</div>

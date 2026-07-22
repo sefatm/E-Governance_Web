@@ -1,0 +1,217 @@
+<div class="aa-page">
+
+  <!-- ── Header ── -->
+  <div class="aa-header">
+    <div>
+      <h2>Applications</h2>
+      <p>Review and approve citizen service applications</p>
+    </div>
+    <div class="aa-stats">
+      <div class="stat-chip pending-chip">
+        <span class="sc-dot"></span>
+        {{ pendingCount }} Pending
+      </div>
+      <div class="stat-chip approved-chip">
+        <span class="sc-dot"></span>
+        {{ approvedCount }} Approved
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Filter bar ── -->
+  <div class="filter-bar">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search by name or mobile..."
+             [(ngModel)]="searchText" (input)="filterData()">
+    </div>
+    <select [(ngModel)]="selectedType" (change)="filterData()" class="f-select">
+      <option value="">{{ ls.current === "bn" ? "সকল ধরন" : "All Types" }}</option>
+      <option>Birth</option><option>Death</option>
+      <option>Family</option><option>Citizen</option><option>Passport</option>
+    </select>
+    <select [(ngModel)]="selectedStatus" (change)="filterData()" class="f-select">
+      <option value="">{{ ls.current === "bn" ? "সকল অবস্থা" : "All Status" }}</option>
+      <option>{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</option><option>{{ ls.current === "bn" ? "অনুমোদিত" : "Approved" }}</option><option>{{ ls.current === "bn" ? "প্রত্যাখ্যাত" : "Rejected" }}</option>
+    </select>
+    <button class="btn-reset" (click)="resetFilter()">
+      <i class="fas fa-rotate-left"></i>
+    </button>
+  </div>
+
+  <!-- ── Table ── -->
+  <div class="table-wrap">
+    <div class="loading-state" *ngIf="isLoading">
+      <i class="fas fa-spinner fa-spin"></i> Loading applications...
+    </div>
+
+    <table class="app-table" *ngIf="!isLoading">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{{ ls.current === "bn" ? "আবেদনকারী" : "Applicant" }}</th>
+          <th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+          <th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let a of filteredApps; let i = index">
+          <!-- Main row -->
+          <tr [class.row-expanded]="expandedIndex === i">
+            <td class="td-num">{{ i+1 }}</td>
+            <td>
+              <div class="applicant-cell">
+                <div class="ac-avatar">{{ a.name?.charAt(0)?.toUpperCase() }}</div>
+                <div class="ac-info">
+                  <span class="ac-name">{{ a.name }}</span>
+                  <span class="ac-mobile">{{ a.mobile }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="type-badge" [ngClass]="typeClass(a.type)">{{ a.type }}</span>
+            </td>
+            <td class="td-date">
+              <span *ngIf="a.details?.createdAt">
+                {{ a.details.createdAt | date:'dd MMM yyyy' }}
+              </span>
+              <span *ngIf="!a.details?.createdAt" class="td-na">—</span>
+            </td>
+            <td>
+              <span class="status-badge"
+                    [class.s-pending]="a.status==='Pending'"
+                    [class.s-approved]="a.status==='Approved'"
+                    [class.s-rejected]="a.status==='Rejected'">
+                <span class="s-dot"></span>{{ a.status }}
+              </span>
+            </td>
+            <td>
+              <div class="act-row">
+                <button class="act-btn view-btn" title="View details" (click)="toggleDetails(i)">
+                  <i class="fas" [class.fa-eye]="expandedIndex !== i" [class.fa-eye-slash]="expandedIndex === i"></i>
+                </button>
+                <button class="act-btn approve-btn" [title]="approvalButtonLabel(a)"
+                        *ngIf="canApprove(a)"
+                        (click)="openApproval(a)">
+                  <i class="fas" [class.fa-user-check]="a.status !== 'First Approved'" [class.fa-stamp]="a.status === 'First Approved'"></i>
+                </button>
+                <button class="act-btn approve-btn" title="Approve"
+                        *ngIf="!isCertificateType(a) && a.status !== 'Approved'"
+                        (click)="updateStatus(a, 'Approved')">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="act-btn approve-btn" title="Upload / Update Seal"
+                        *ngIf="canUpdateSeal(a)"
+                        (click)="sealInput.click()">
+                  <i class="fas" [class.fa-spinner]="sealBusyId === (a.type + '-' + a.id)" [class.fa-spin]="sealBusyId === (a.type + '-' + a.id)" [class.fa-stamp]="sealBusyId !== (a.type + '-' + a.id)"></i>
+                </button>
+                <input #sealInput type="file" accept="image/png,image/jpeg,image/webp" hidden (change)="updateSeal(a, $event)">
+                <button class="act-btn reject-btn" [title]="ls.current === 'bn' ? 'প্রত্যাখ্যান' : 'Reject'"
+                        *ngIf="canReject(a)"
+                        (click)="updateStatus(a, 'Rejected')">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Expanded details row -->
+          <tr *ngIf="expandedIndex === i" class="detail-row">
+            <td colspan="6">
+              <div class="detail-box">
+
+                <!-- ── Info grid ── -->
+                <div class="detail-grid">
+                  <ng-container *ngFor="let item of a.detailFields">
+                    <div class="dg-item" *ngIf="item.value">
+                      <span class="dg-key">{{ formatKey(item.key) }}</span>
+                      <span class="dg-val">{{ item.value }}</span>
+                    </div>
+                  </ng-container>
+                </div>
+
+                <!-- ── Uploaded Files Birth/Death/Family/Citizen -->
+                <div class="file-section" *ngIf="a.fileEntries.length > 0">
+                  <div class="file-section-title"><i class="fas fa-paperclip"></i> Uploaded Documents</div>
+                  <div class="file-cards">
+                    <div class="file-card" *ngFor="let f of a.fileEntries">
+                      <div class="fc-label">
+                        <i class="fas fa-id-card"></i> {{ f.label }}
+                      </div>
+                      <div class="fc-preview" [class.nid-preview]="!isPdf(f.url)">
+                        <!-- PDF -->
+                        <div *ngIf="isPdf(f.url)" class="pdf-icon">
+                          <i class="fas fa-file-pdf"></i>
+                          <span>PDF Document</span>
+                        </div>
+                        <!-- Image -->
+                        <img *ngIf="!isPdf(f.url)"
+                             [src]="fileUrl(f.url)"
+                             [alt]="f.label"
+                             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                             style="width:100%;border-radius:6px;object-fit:cover">
+                        <div style="display:none;align-items:center;justify-content:center;height:80px;color:#999">
+                          <i class="fas fa-image"></i>&nbsp;Preview unavailable
+                        </div>
+                      </div>
+                      <a [href]="fileUrl(f.url)" target="_blank" class="fc-download">
+                        <i class="fas fa-download"></i> View / Download
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+
+        <tr *ngIf="filteredApps.length === 0 && !isLoading">
+          <td colspan="6" class="no-data">
+            <i class="fas fa-inbox"></i>
+            <p>No applications found</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<div class="approval-backdrop" *ngIf="approvalApp">
+  <div class="approval-modal">
+    <button class="approval-close" (click)="closeApproval()">×</button>
+    <div class="approval-icon"><i class="fas fa-file-signature"></i></div>
+    <span class="approval-kicker">TWO-STEP CERTIFICATE APPROVAL</span>
+    <h3>{{ approvalButtonLabel(approvalApp) }}</h3>
+    <p>{{ approvalApp.type }} Certificate · {{ approvalApp.name }}</p>
+
+    <div class="approval-flow">
+      <div class="flow-step done"><span>1</span><small>Application Submitted</small></div>
+      <div class="flow-line" [class.done-line]="approvalApp.status === 'First Approved' || approvalApp.status === 'Approved'"></div>
+      <div class="flow-step" [class.done]="approvalApp.status === 'First Approved' || approvalApp.status === 'Approved'"><span>2</span><small>Department Verification</small></div>
+      <div class="flow-line" [class.done-line]="approvalApp.status === 'Approved'"></div>
+      <div class="flow-step" [class.done]="approvalApp.status === 'Approved'"><span>3</span><small>Admin Final Approval</small></div>
+    </div>
+
+    <label class="signature-upload">
+      <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onSignatureSelected($event)">
+      <div *ngIf="!signaturePreview"><i class="fas fa-cloud-upload-alt"></i><strong>Upload Officer Signature</strong><small>PNG, JPG or WEBP</small></div>
+      <img *ngIf="signaturePreview" [src]="signaturePreview" alt="Signature preview">
+    </label>
+
+    <label class="signature-upload">
+      <input type="file" accept="image/png,image/jpeg,image/webp" (change)="onSealSelected($event)">
+      <div *ngIf="!sealPreview"><i class="fas fa-stamp"></i><strong>Upload Officer Seal</strong><small>PNG, JPG or WEBP</small></div>
+      <img *ngIf="sealPreview" [src]="sealPreview" alt="Seal preview">
+    </label>
+
+    <div class="approval-note"><i class="fas fa-shield-alt"></i> Department Officer performs the first verification. Admin or Super Admin performs the final approval. Each action is recorded with the authenticated account, signature and seal.</div>
+    <button class="approval-submit" [disabled]="approvalBusy || !signatureBase64 || !sealBase64" (click)="submitApproval()">
+      <i class="fas" [class.fa-spinner]="approvalBusy" [class.fa-spin]="approvalBusy" [class.fa-check-circle]="!approvalBusy"></i>
+      {{ approvalBusy ? 'Processing...' : approvalButtonLabel(approvalApp) }}
+    </button>
+  </div>
+</div>

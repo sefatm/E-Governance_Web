@@ -1,0 +1,57 @@
+<div class="container">
+  <h2>{{ ls.current === "bn" ? "স্বাস্থ্য কেন্দ্রের তথ্য" : "Health Center Information" }}</h2>
+
+  <!-- Form -->
+  <div class="form-card">
+    <h3>Add Health Center</h3>
+
+    <input type="text" [(ngModel)]="form.name" placeholder="Center Name">
+
+    <select [(ngModel)]="form.type">
+      <option value="">Select Type</option>
+      <option>Hospital</option>
+      <option>Clinic</option>
+      <option>Diagnostic Center</option>
+    </select>
+
+    <input type="text" [(ngModel)]="form.location" placeholder="Location / Address">
+
+    <input type="text" [(ngModel)]="form.contact" [placeholder]="ls.current === 'bn' ? 'যোগাযোগ নম্বর' : 'Contact Number'">
+
+    <button (click)="addCenter()">Add Center</button>
+  </div>
+
+  <!-- Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th>
+        <th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+        <th>{{ ls.current === "bn" ? "অবস্থান" : "Location" }}</th>
+        <th>Contact</th>
+        <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+      </tr>
+    </thead>
+
+    <tbody>
+  <tr *ngFor="let c of centers">
+
+    <td>{{c.name}}</td>
+    <td>{{c.type}}</td>
+    <td>{{c.location}}</td>
+    <td>{{c.contact || '-'}}</td>
+
+    <td>
+      <button class="delete" (click)="deleteCenter(c.id)">
+        {{ ls.current === "bn" ? "মুছুন" : "Delete" }}
+      </button>
+    </td>
+
+  </tr>
+
+  <tr *ngIf="centers.length === 0">
+    <td colspan="5">No health centers available</td>
+  </tr>
+</tbody>
+  </table>
+</div>

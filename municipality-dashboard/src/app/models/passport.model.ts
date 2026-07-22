@@ -1,0 +1,32 @@
+export interface PassportApplication {
+  id?: number;
+  fullName: string;
+  dob: string;
+  placeOfBirth: string;
+  gender: string;
+  nationality: string;
+  maritalStatus: string;
+  religion: string;
+  bloodGroup?: string;
+  nidNumber: string;
+  passportType: string;       
+  passportNoPrevious?: string;
+  currentAddress: string;
+  permanentAddress: string;
+  contact: string;
+  email: string;
+  fatherName: string;
+  motherName: string;
+  previousTravelCountries?: string;
+  previousVisaNumbers?: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  paymentMethod: string;
+  amount: number;             
+  status?: string;            
+  rejectReason?: string;
+  photoUrl?:     string;
+  nidFileUrl?:   string;
+  birthFileUrl?: string;       
+  applicationDate?: string;    
+}

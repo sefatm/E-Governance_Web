@@ -1,0 +1,512 @@
+<div class="page-wrapper">
+
+  <!-- HEADER -->
+  <div class="cert-header">
+    <div class="cert-logo">
+      <img src="assets/photo/bangladesh-govt.png" alt="Government Logo" />
+    </div>
+    <div class="cert-title-block">
+      <div class="gov-line">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</div>
+      <h1 class="cert-title">Birth &amp; Death Certificate</h1>
+      <div class="cert-sub">{{ ls.current === "bn" ? "ইউনিয়ন পরিষদ / পৌরসভা — নাগরিক সেবা পোর্টাল" : "Union Parishad / Municipality — Citizen Service Portal" }}</div>
+      <span class="cert-badge">&#127959; Official Application Form</span>
+    </div>
+    <div class="cert-logo cert-logo-right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Seal" />
+    </div>
+  </div>
+
+  <!-- TAB SWITCHER -->
+  <div class="tab-row">
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'birth'"
+      (click)="switchTab('birth')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+      </svg>
+      {{ ls.current === "bn" ? "জন্ম সনদ" : "Birth Certificate" }}
+    </button>
+    <button
+      class="tab-btn"
+      [class.active]="activeTab === 'death'"
+      (click)="switchTab('death')">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      {{ ls.current === "bn" ? "মৃত্যু সনদ" : "Death Certificate" }}
+    </button>
+  </div>
+
+  <!--  BIRTH FORM -->
+  <div class="form-card" *ngIf="activeTab === 'birth'">
+    <form [formGroup]="birthForm" (ngSubmit)="onSubmitBirth()">
+
+      <!-- Personal Info -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot green"></span>
+          <h3>{{ ls.current === "bn" ? "শিশুর ব্যক্তিগত তথ্য" : "Child's Personal Information" }}</h3>
+        </div>
+        <div class="g2">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পূর্ণ নাম (বাংলায়)" : "Full Name (Bangla)" }} <span class="req">*</span></label>
+            <input type="text" formControlName="nameBn" placeholder="e.g. সিফাত মাহমুদ"
+              [class.invalid]="isInvalid(birthForm, 'nameBn')" />
+            <span class="err" *ngIf="isInvalid(birthForm, 'nameBn')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পূর্ণ নাম (ইংরেজিতে)" : "Full Name (English)" }} <span class="req">*</span></label>
+            <input type="text" formControlName="nameEn" placeholder="e.g. Md. Sefat Mahmud"
+              [class.invalid]="isInvalid(birthForm, 'nameEn')" />
+            <span class="err" *ngIf="isInvalid(birthForm, 'nameEn')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }} <span class="req">*</span></label>
+            <input type="date" formControlName="dob"
+              [class.invalid]="isInvalid(birthForm, 'dob')" />
+            <span class="err" *ngIf="isInvalid(birthForm, 'dob')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "জন্মস্থান" : "Place of Birth" }} <span class="req">*</span></label>
+            <input type="text" formControlName="placeOfBirth" placeholder="Hospital / Home / Village"
+              [class.invalid]="isInvalid(birthForm, 'placeOfBirth')" />
+            <span class="err" *ngIf="isInvalid(birthForm, 'placeOfBirth')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }} <span class="req">*</span></label>
+            <select formControlName="gender" [class.invalid]="isInvalid(birthForm, 'gender')">
+              <option value="">{{ ls.current === "bn" ? "— নির্বাচন করুন —" : "— Select —" }}</option>
+              <option value="Male">{{ ls.current === "bn" ? "পুরুষ" : "Male" }}</option>
+              <option value="Female">{{ ls.current === "bn" ? "মহিলা" : "Female" }}</option>
+              <option value="Other">{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+            </select>
+            <span class="err" *ngIf="isInvalid(birthForm, 'gender')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "রক্তের গ্রুপ" : "Blood Group" }}</label>
+            <select formControlName="bloodGroup">
+              <option value="">{{ ls.current === "bn" ? "— নির্বাচন করুন —" : "— Select —" }}</option>
+              <option>A+</option><option>A-</option>
+              <option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option>
+              <option>O+</option><option>O-</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }} <span class="req">*</span></label>
+            <input type="tel" formControlName="mobile" placeholder="01XXXXXXXXX"
+              [class.invalid]="isInvalid(birthForm, 'mobile')" />
+            <span class="err" *ngIf="isInvalid(birthForm, 'mobile')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "ইমেইল ঠিকানা" : "Email Address" }}</label>
+            <input type="email" formControlName="email" placeholder="example@mail.com" />
+          </div>
+          <div class="field full">
+            <label>{{ ls.current === "bn" ? "বর্তমান ঠিকানা" : "Present Address" }} <span class="req">*</span></label>
+            <input type="text" formControlName="presentAddress"
+              placeholder="Village/Area, Post Office, Upazila, District"
+              [class.invalid]="isInvalid(birthForm, 'presentAddress')" />
+            <span class="err" *ngIf="isInvalid(birthForm, 'presentAddress')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field full">
+            <label>{{ ls.current === "bn" ? "স্থায়ী ঠিকানা" : "Permanent Address" }} <span class="req">*</span></label>
+            <textarea formControlName="permanentAddress"
+              placeholder="Permanent address if different from present address"
+              [class.invalid]="isInvalid(birthForm, 'permanentAddress')"></textarea>
+            <span class="err" *ngIf="isInvalid(birthForm, 'permanentAddress')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Father's Info -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot blue"></span>
+          <h3>{{ ls.current === "bn" ? "পিতার তথ্য" : "Father's Information" }}</h3>
+        </div>
+        <div class="sub-card">
+          <div class="g3">
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "পিতার পূর্ণ নাম" : "Father's Full Name" }} <span class="req">*</span></label>
+              <input type="text" formControlName="fathersName" placeholder="Father's name"
+                [class.invalid]="isInvalid(birthForm, 'fathersName')" />
+              <span class="err" *ngIf="isInvalid(birthForm, 'fathersName')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "পিতার জন্ম তারিখ" : "Father's Date of Birth" }}</label>
+              <input type="date" formControlName="fathersDob" />
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "পিতার এনআইডি নম্বর" : "Father's NID Number" }} <span class="req">*</span></label>
+              <input type="text" formControlName="fathersNid" placeholder="10 or 17 digits"
+                [class.invalid]="isInvalid(birthForm, 'fathersNid')" />
+              <span class="err" *ngIf="isInvalid(birthForm, 'fathersNid')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "পিতার মোবাইল" : "Father's Mobile" }}</label>
+              <input type="tel" formControlName="fathersMobile" placeholder="01XXXXXXXXX" />
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "পিতার ইমেইল" : "Father's Email" }}</label>
+              <input type="email" formControlName="fathersEmail" placeholder="email@mail.com" />
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "পিতার এনআইডি ফাইল" : "Father's NID File" }} <span class="req">*</span></label>
+              <div class="upload-zone" (click)="fatherNidInput.click()"
+                [class.has-file]="files['fatherNid']">
+                <input #fatherNidInput type="file" accept=".jpg,.jpeg,.png,.pdf"
+                  (change)="onFileChange($event, 'fatherNid')" hidden />
+                <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+                <div class="upload-title">{{ ls.current === "bn" ? "পিতার এনআইডি আপলোড" : "Upload Father's NID" }}</div>
+                <div class="upload-hint">{{ ls.current === "bn" ? "JPG, PNG বা PDF · সর্বোচ্চ ৫MB" : "JPG, PNG or PDF · Max 5MB" }}</div>
+              </div>
+              <div class="file-preview" *ngIf="files['fatherNid']">
+                <span>📄</span>
+                <span class="file-name">{{ files['fatherNid']?.name }}</span>
+                <button type="button" class="file-remove" (click)="removeFile('fatherNid')">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mother's Info -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot pink"></span>
+          <h3>{{ ls.current === "bn" ? "মাতার তথ্য" : "Mother's Information" }}</h3>
+        </div>
+        <div class="sub-card">
+          <div class="g3">
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "মাতার পূর্ণ নাম" : "Mother's Full Name" }} <span class="req">*</span></label>
+              <input type="text" formControlName="mothersName" placeholder="Mother's name"
+                [class.invalid]="isInvalid(birthForm, 'mothersName')" />
+              <span class="err" *ngIf="isInvalid(birthForm, 'mothersName')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "মাতার জন্ম তারিখ" : "Mother's Date of Birth" }}</label>
+              <input type="date" formControlName="mothersDob" />
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "মাতার এনআইডি নম্বর" : "Mother's NID Number" }} <span class="req">*</span></label>
+              <input type="text" formControlName="mothersNid" placeholder="10 or 17 digits"
+                [class.invalid]="isInvalid(birthForm, 'mothersNid')" />
+              <span class="err" *ngIf="isInvalid(birthForm, 'mothersNid')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "মাতার মোবাইল" : "Mother's Mobile" }}</label>
+              <input type="tel" formControlName="mothersMobile" placeholder="01XXXXXXXXX" />
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "মাতার ইমেইল" : "Mother's Email" }}</label>
+              <input type="email" formControlName="mothersEmail" placeholder="email@mail.com" />
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "মাতার এনআইডি ফাইল" : "Mother's NID File" }} <span class="req">*</span></label>
+              <div class="upload-zone" (click)="motherNidInput.click()"
+                [class.has-file]="files['motherNid']">
+                <input #motherNidInput type="file" accept=".jpg,.jpeg,.png,.pdf"
+                  (change)="onFileChange($event, 'motherNid')" hidden />
+                <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+                <div class="upload-title">{{ ls.current === "bn" ? "মাতার এনআইডি আপলোড" : "Upload Mother's NID" }}</div>
+                <div class="upload-hint">{{ ls.current === "bn" ? "JPG, PNG বা PDF · সর্বোচ্চ ৫MB" : "JPG, PNG or PDF · Max 5MB" }}</div>
+              </div>
+              <div class="file-preview" *ngIf="files['motherNid']">
+                <span>📄</span>
+                <span class="file-name">{{ files['motherNid']?.name }}</span>
+                <button type="button" class="file-remove" (click)="removeFile('motherNid')">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vaccine Card -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot teal"></span>
+          <h3>{{ ls.current === "bn" ? "টিকা কার্ড (ইপিআই কার্ড)" : "Vaccine Card (EPI Card)" }}</h3>
+        </div>
+        <div class="sub-card">
+          <div class="field">
+            <label>Child's Vaccine / EPI Card <span class="req">*</span></label>
+            <div class="upload-zone upload-zone--lg" (click)="vaccineInput.click()"
+              [class.has-file]="files['vaccine']">
+              <input #vaccineInput type="file" accept=".jpg,.jpeg,.png,.pdf" (change)="onFileChange($event, 'vaccine')" hidden />
+              <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+              </svg>
+              <div class="upload-title">{{ ls.current === "bn" ? "টিকা / ইপিআই কার্ড আপলোড" : "Upload Vaccine / EPI Card" }}</div>
+              <div class="upload-hint">Scan or photo of child's EPI vaccination card · JPG, PNG, PDF · Max 5MB</div>
+            </div>
+            <div class="file-preview" *ngIf="files['vaccine']">
+              <span>📋</span>
+              <span class="file-name">{{ files['vaccine']?.name }}</span>
+              <button type="button" class="file-remove" (click)="removeFile('vaccine')">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency & Payment -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot green"></span>
+          <h3>Emergency Contact &amp; Payment</h3>
+        </div>
+        <div class="g2">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "জরুরি যোগাযোগের নাম" : "Emergency Contact Name" }}</label>
+            <input type="text" formControlName="emergencyName" placeholder="Contact person's name" />
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "জরুরি ফোন" : "Emergency Phone" }}</label>
+            <input type="tel" formControlName="emergencyPhone" placeholder="01XXXXXXXXX" />
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method" }} <span class="req">*</span></label>
+            <select formControlName="paymentMethod" [class.invalid]="isInvalid(birthForm, 'paymentMethod')">
+              <option value="">{{ ls.current === "bn" ? "— নির্বাচন করুন —" : "— Select —" }}</option>
+              <option value="Cash">{{ ls.current === "bn" ? "নগদ" : "Cash" }}</option>
+              <option value="bKash">{{ ls.current === "bn" ? "বিকাশ" : "bKash" }}</option>
+              <option value="Rocket">{{ ls.current === "bn" ? "রকেট" : "Rocket" }}</option>
+              <option value="Nagad">{{ ls.current === "bn" ? "নগদ" : "Nagad" }}</option>
+            </select>
+            <span class="err" *ngIf="isInvalid(birthForm, 'paymentMethod')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পরিমাণ (টাকা)" : "Amount (BDT)" }} <span class="req">*</span></label>
+            <input type="number" formControlName="amount" placeholder="e.g. 100"
+              [class.invalid]="isInvalid(birthForm, 'amount')" />
+            <span class="err" *ngIf="isInvalid(birthForm, 'amount')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">{{ ls.current === "bn" ? "আবেদন জমা দিন →" : "Submit Application →" }}</span>
+          <span *ngIf="loading">{{ ls.current === "bn" ? "জমা হচ্ছে..." : "Submitting..." }}</span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="resetBirthForm()">{{ ls.current === "bn" ? "ফর্ম রিসেট" : "Reset Form" }}</button>
+        <div class="success-badge" *ngIf="birthSuccess">{{ ls.current === "bn" ? "✓ আবেদন সফলভাবে জমা হয়েছে" : "✓ Application submitted successfully" }}</div>
+      </div>
+    </form>
+  </div>
+
+  <!-- DEATH FORM -->
+  <div class="form-card" *ngIf="activeTab === 'death'">
+    <form [formGroup]="deathForm" (ngSubmit)="onSubmitDeath()">
+
+      <!-- Deceased Info -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot red"></span>
+          <h3>{{ ls.current === "bn" ? "মৃত ব্যক্তির তথ্য" : "Deceased Person's Information" }}</h3>
+        </div>
+        <div class="g2">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পূর্ণ নাম (বাংলায়)" : "Full Name (Bangla)" }} <span class="req">*</span></label>
+            <input type="text" formControlName="nameBn" placeholder="Full name in Bangla"
+              [class.invalid]="isInvalid(deathForm, 'nameBn')" />
+            <span class="err" *ngIf="isInvalid(deathForm, 'nameBn')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পূর্ণ নাম (ইংরেজিতে)" : "Full Name (English)" }} <span class="req">*</span></label>
+            <input type="text" formControlName="nameEn" placeholder="Full name in English"
+              [class.invalid]="isInvalid(deathForm, 'nameEn')" />
+            <span class="err" *ngIf="isInvalid(deathForm, 'nameEn')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }}</label>
+            <input type="date" formControlName="dob" />
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "মৃত্যু তারিখ" : "Date of Death" }} <span class="req">*</span></label>
+            <input type="date" formControlName="dateOfDeath"
+              [class.invalid]="isInvalid(deathForm, 'dateOfDeath')" />
+            <span class="err" *ngIf="isInvalid(deathForm, 'dateOfDeath')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "মৃত্যুস্থান" : "Place of Death" }} <span class="req">*</span></label>
+            <input type="text" formControlName="placeOfDeath" placeholder="Hospital / Home / Village"
+              [class.invalid]="isInvalid(deathForm, 'placeOfDeath')" />
+            <span class="err" *ngIf="isInvalid(deathForm, 'placeOfDeath')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }} <span class="req">*</span></label>
+            <select formControlName="gender" [class.invalid]="isInvalid(deathForm, 'gender')">
+              <option value="">{{ ls.current === "bn" ? "— নির্বাচন করুন —" : "— Select —" }}</option>
+              <option value="Male">{{ ls.current === "bn" ? "পুরুষ" : "Male" }}</option>
+              <option value="Female">{{ ls.current === "bn" ? "মহিলা" : "Female" }}</option>
+              <option value="Other">{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+            </select>
+            <span class="err" *ngIf="isInvalid(deathForm, 'gender')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "জন্ম নিবন্ধন নং" : "Birth Registration No." }}</label>
+            <input type="text" formControlName="birthNo" placeholder="If available" />
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }}</label>
+            <input type="text" formControlName="nid" placeholder="10 or 17 digits" />
+          </div>
+          <div class="field full">
+            <label>{{ ls.current === "bn" ? "বর্তমান ঠিকানা" : "Present Address" }} <span class="req">*</span></label>
+            <input type="text" formControlName="presentAddress"
+              placeholder="Village/Area, Post Office, Upazila, District"
+              [class.invalid]="isInvalid(deathForm, 'presentAddress')" />
+            <span class="err" *ngIf="isInvalid(deathForm, 'presentAddress')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field full">
+            <label>{{ ls.current === "bn" ? "স্থায়ী ঠিকানা" : "Permanent Address" }} <span class="req">*</span></label>
+            <textarea formControlName="permanentAddress"
+              placeholder="Permanent address of the deceased"
+              [class.invalid]="isInvalid(deathForm, 'permanentAddress')"></textarea>
+            <span class="err" *ngIf="isInvalid(deathForm, 'permanentAddress')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Applicant Info -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot green"></span>
+          <h3>{{ ls.current === "bn" ? "আবেদনকারীর তথ্য" : "Applicant Information" }}</h3>
+        </div>
+        <div class="g2">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "আবেদনকারীর নাম" : "Applicant's Name" }} <span class="req">*</span></label>
+            <input type="text" formControlName="applicantName" placeholder="Full name of applicant"
+              [class.invalid]="isInvalid(deathForm, 'applicantName')" />
+            <span class="err" *ngIf="isInvalid(deathForm, 'applicantName')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "মৃত ব্যক্তির সাথে সম্পর্ক" : "Relationship to Deceased" }} <span class="req">*</span></label>
+            <select formControlName="relation" [class.invalid]="isInvalid(deathForm, 'relation')">
+              <option value="">{{ ls.current === "bn" ? "— নির্বাচন করুন —" : "— Select —" }}</option>
+              <option value="Son">{{ ls.current === "bn" ? "পুত্র" : "Son" }}</option>
+              <option value="Daughter">{{ ls.current === "bn" ? "কন্যা" : "Daughter" }}</option>
+              <option value="Husband">{{ ls.current === "bn" ? "স্বামী" : "Husband" }}</option>
+              <option value="Wife">{{ ls.current === "bn" ? "স্ত্রী" : "Wife" }}</option>
+              <option value="Father">{{ ls.current === "bn" ? "পিতা" : "Father" }}</option>
+              <option value="Mother">{{ ls.current === "bn" ? "মাতা" : "Mother" }}</option>
+              <option value="Brother">{{ ls.current === "bn" ? "ভাই" : "Brother" }}</option>
+              <option value="Sister">{{ ls.current === "bn" ? "বোন" : "Sister" }}</option>
+              <option value="Other">{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+            </select>
+            <span class="err" *ngIf="isInvalid(deathForm, 'relation')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }} <span class="req">*</span></label>
+            <input type="tel" formControlName="mobile" placeholder="01XXXXXXXXX"
+              [class.invalid]="isInvalid(deathForm, 'mobile')" />
+            <span class="err" *ngIf="isInvalid(deathForm, 'mobile')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "ইমেইল ঠিকানা" : "Email Address" }}</label>
+            <input type="email" formControlName="email" placeholder="email@mail.com" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Uploads -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot red"></span>
+          <h3>{{ ls.current === "bn" ? "প্রয়োজনীয় কাগজপত্র আপলোড" : "Required Documents Upload" }}</h3>
+        </div>
+        <div class="sub-card">
+          <div class="g2">
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "মৃত ব্যক্তির এনআইডি" : "Deceased's NID Card" }} <span class="req">*</span></label>
+              <div class="upload-zone" (click)="deathNidInput.click()"
+                [class.has-file]="files['deathNid']">
+                <input #deathNidInput type="file" accept=".jpg,.jpeg,.png,.pdf"
+                  (change)="onFileChange($event, 'deathNid')" hidden />
+                <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+                <div class="upload-title">{{ ls.current === "bn" ? "এনআইডি কার্ড আপলোড" : "Upload NID Card" }}</div>
+                <div class="upload-hint">{{ ls.current === "bn" ? "JPG, PNG বা PDF · সর্বোচ্চ ৫MB" : "JPG, PNG or PDF · Max 5MB" }}</div>
+              </div>
+              <div class="file-preview" *ngIf="files['deathNid']">
+                <span>🪪</span>
+                <span class="file-name">{{ files['deathNid']?.name }}</span>
+                <button type="button" class="file-remove" (click)="removeFile('deathNid')">✕</button>
+              </div>
+            </div>
+            <div class="field">
+              <label>{{ ls.current === "bn" ? "চিকিৎসা / দাফন সনদ" : "Medical / Funeral Certificate" }} <span class="req">*</span></label>
+              <div class="upload-zone" (click)="medicalInput.click()"
+                [class.has-file]="files['medical']">
+                <input #medicalInput type="file" accept=".jpg,.jpeg,.png,.pdf"
+                  (change)="onFileChange($event, 'medical')" hidden />
+                <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+                </svg>
+                <div class="upload-title">{{ ls.current === "bn" ? "চিকিৎসা / দাফন সনদ" : "Medical / Funeral Certificate" }}</div>
+                <div class="upload-hint">Doctor's certificate or burial receipt · Max 5MB</div>
+              </div>
+              <div class="file-preview" *ngIf="files['medical']">
+                <span>🏥</span>
+                <span class="file-name">{{ files['medical']?.name }}</span>
+                <button type="button" class="file-remove" (click)="removeFile('medical')">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment -->
+      <div class="section">
+        <div class="section-head">
+          <span class="section-dot green"></span>
+          <h3>{{ ls.current === "bn" ? "পেমেন্টের বিবরণ" : "Payment Details" }}</h3>
+        </div>
+        <div class="g2">
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method" }} <span class="req">*</span></label>
+            <select formControlName="paymentMethod" [class.invalid]="isInvalid(deathForm, 'paymentMethod')">
+              <option value="">{{ ls.current === "bn" ? "— নির্বাচন করুন —" : "— Select —" }}</option>
+              <option value="Cash">{{ ls.current === "bn" ? "নগদ" : "Cash" }}</option>
+              <option value="bKash">{{ ls.current === "bn" ? "বিকাশ" : "bKash" }}</option>
+              <option value="Rocket">{{ ls.current === "bn" ? "রকেট" : "Rocket" }}</option>
+              <option value="Nagad">{{ ls.current === "bn" ? "নগদ" : "Nagad" }}</option>
+            </select>
+            <span class="err" *ngIf="isInvalid(deathForm, 'paymentMethod')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+          <div class="field">
+            <label>{{ ls.current === "bn" ? "পরিমাণ (টাকা)" : "Amount (BDT)" }} <span class="req">*</span></label>
+            <input type="number" formControlName="amount" placeholder="e.g. 150"
+              [class.invalid]="isInvalid(deathForm, 'amount')" />
+            <span class="err" *ngIf="isInvalid(deathForm, 'amount')">{{ ls.current === "bn" ? "আবশ্যক" : "Required" }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="submit-row">
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          <span *ngIf="!loading">{{ ls.current === "bn" ? "আবেদন জমা দিন →" : "Submit Application →" }}</span>
+          <span *ngIf="loading">{{ ls.current === "bn" ? "জমা হচ্ছে..." : "Submitting..." }}</span>
+        </button>
+        <button type="button" class="btn-secondary" (click)="resetDeathForm()">{{ ls.current === "bn" ? "ফর্ম রিসেট" : "Reset Form" }}</button>
+        <div class="success-badge" *ngIf="deathSuccess">{{ ls.current === "bn" ? "✓ আবেদন সফলভাবে জমা হয়েছে" : "✓ Application submitted successfully" }}</div>
+      </div>
+    </form>
+  </div>
+
+</div>

@@ -1,0 +1,23 @@
+<div class="layout" [class.mobile-sidebar-open]="isMobileOpen">
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [isCollapsed]="isCollapsed"
+    [isMobileOpen]="isMobileOpen"
+    (sidebarToggle)="toggleSidebar()">
+  </app-sidebar>
+
+  <!-- Main Area -->
+  <div class="main" [class.collapsed]="isCollapsed">
+
+    <app-navbar (toggleSidebar)="toggleSidebar()"></app-navbar>
+    <div class="scroll-area">
+      <div class="content">
+        <router-outlet></router-outlet>
+      </div>
+
+      <app-footer></app-footer>
+
+    </div>
+  </div>
+</div>

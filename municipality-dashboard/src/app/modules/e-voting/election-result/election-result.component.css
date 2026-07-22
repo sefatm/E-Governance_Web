@@ -1,0 +1,29 @@
+/* election-result.component.css */
+.result-page{max-width:900px;margin:0 auto}
+.page-header{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#0f7a3f,#0a5524);border-radius:13px;padding:18px 22px;margin-bottom:20px;color:#fff}
+.ph-icon{width:48px;height:48px;background:rgba(255,255,255,.18);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.ph-title{font-size:18px;font-weight:700;margin:0 0 3px}
+.ph-sub{font-size:13px;color:rgba(255,255,255,.75);margin:0}
+.filter-bar{background:#fff;border:1px solid #dce8dc;border-radius:12px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(10,87,52,.07)}
+.filter-bar label{font-size:13px;font-weight:600;color:#1a2e1a;white-space:nowrap}
+.filter-bar select{flex:1;padding:9px 12px;border:1.5px solid #dce8dc;border-radius:8px;font-size:13px;outline:none;font-family:inherit}
+.filter-bar select:focus{border-color:#0f7a3f}
+.loading-box{text-align:center;padding:40px;color:#5a7a5a;font-size:14px}
+.winner-banner{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#0f7a3f,#0a5524);border-radius:13px;padding:18px 22px;margin-bottom:14px;color:#fff}
+.wb-crown{font-size:30px;color:#ffd700}
+.wb-label{font-size:11px;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.5px}
+.wb-name{font-size:20px;font-weight:700}
+.wb-party{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px}
+.wb-votes{margin-left:auto;font-size:36px;font-weight:700;color:#ffd700}
+.total-chip{display:inline-flex;align-items:center;gap:7px;background:#e8f5ee;color:#0f7a3f;border-radius:20px;padding:6px 14px;font-size:13px;margin-bottom:14px}
+.chart-card{background:#fff;border:1px solid #dce8dc;border-radius:13px;padding:18px 20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(10,87,52,.07)}
+.result-table-wrap{background:#fff;border:1px solid #dce8dc;border-radius:13px;overflow:hidden;box-shadow:0 2px 8px rgba(10,87,52,.07)}
+.result-table{width:100%;border-collapse:collapse}
+.result-table th{background:#0f7a3f;color:#fff;padding:11px 14px;font-size:12px;font-weight:600;text-align:left}
+.result-table td{padding:10px 14px;font-size:13px;color:#1a2e1a;border-bottom:1px solid #f0f4f0}
+.result-table tr:last-child td{border-bottom:none}
+.result-table tr:hover td{background:#f5faf5}
+.winner-row td{background:#e8f5ee!important}
+.badge-win{background:#0f7a3f;color:#fff;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.badge-loss{background:#f0f4f0;color:#5a7a5a;padding:3px 9px;border-radius:5px;font-size:11px;font-weight:600}
+.no-data{text-align:center;padding:40px;color:#9ab09a;font-size:14px;display:flex;align-items:center;justify-content:center;gap:9px}

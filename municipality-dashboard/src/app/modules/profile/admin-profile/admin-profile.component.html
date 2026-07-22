@@ -1,0 +1,128 @@
+<div class="profile-page">
+
+  <!-- Header Card -->
+  <div class="profile-header-card">
+    <div class="avatar-wrap">
+      <img *ngIf="photoPreview"
+           [src]="photoPreview"
+           class="avatar-img"
+           alt="Profile Photo"
+           (error)="photoPreview = ''">
+      <div *ngIf="!photoPreview" class="avatar-circle">
+        {{ currentUser?.name?.charAt(0)?.toUpperCase() }}
+      </div>
+
+      <label class="avatar-edit-btn" title="Change photo">
+        <i class="fas fa-camera"></i>
+        <input type="file" accept="image/*" (change)="onPhotoSelected($event)" style="display:none">
+      </label>
+    </div>
+
+    <div class="header-info">
+      <h2>{{ currentUser?.name }}</h2>
+      <span class="role-badge" [style.background]="getRoleColor()">
+        {{ currentUser?.role }}
+      </span>
+      <p class="email-sub">{{ currentUser?.email }}</p>
+
+      <div *ngIf="selectedFile" class="upload-row">
+        <span class="file-name"><i class="fas fa-image"></i> {{ selectedFile.name }}</span>
+        <button class="btn-upload" (click)="onUploadPhoto()" [disabled]="photoLoading">
+          <i class="fas" [class.fa-upload]="!photoLoading" [class.fa-spinner]="photoLoading"
+             [class.fa-spin]="photoLoading"></i>
+          {{ photoLoading ? 'Uploading...' : 'Upload Photo' }}
+        </button>
+      </div>
+
+      <div class="photo-msg success-msg" *ngIf="photoMsg">
+        {{ photoMsg }}
+      </div>
+
+      <div class="photo-msg error-msg" *ngIf="photoError">
+        {{ photoError }}
+      </div>
+    </div>
+  </div>
+
+  <div class="cards-row">
+
+    <!-- Profile Update Card -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fas fa-user-edit"></i> Edit Profile
+      </div>
+
+      <div class="alert success" *ngIf="successMsg">
+        <i class="fas fa-check-circle"></i> {{ successMsg }}
+      </div>
+      <div class="alert error" *ngIf="errorMsg">
+        <i class="fas fa-times-circle"></i> {{ errorMsg }}
+      </div>
+
+      <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <div class="form-group">
+          <label><i class="fas fa-user"></i> {{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }}</label>
+          <input type="text" formControlName="name" placeholder="Enter your full name">
+          <span class="field-err" *ngIf="profileForm.get('name')?.invalid && profileForm.get('name')?.touched">
+            Name is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-envelope"></i> {{ ls.current === "bn" ? "ইমেইল ঠিকানা" : "Email Address" }}</label>
+          <input type="email" formControlName="email" placeholder="Enter your email">
+          <span class="field-err" *ngIf="profileForm.get('email')?.invalid && profileForm.get('email')?.touched">
+            Valid email is required
+          </span>
+        </div>
+
+        <button type="submit" class="btn-primary" [disabled]="profileForm.invalid || isLoading">
+          <i class="fas" [class.fa-save]="!isLoading" [class.fa-spinner]="isLoading" [class.fa-spin]="isLoading"></i>
+          {{ isLoading ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </form>
+    </div>
+
+    <!-- Change Password Card -->
+    <div class="card">
+      <div class="card-title">
+        <i class="fas fa-lock"></i> {{ ls.current === "bn" ? "পাসওয়ার্ড পরিবর্তন" : "Change Password" }}
+      </div>
+
+      <div class="alert success" *ngIf="pwSuccess">
+        <i class="fas fa-check-circle"></i> {{ pwSuccess }}
+      </div>
+      <div class="alert error" *ngIf="pwError">
+        <i class="fas fa-times-circle"></i> {{ pwError }}
+      </div>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+        <div class="form-group">
+          <label><i class="fas fa-unlock"></i> {{ ls.current === "bn" ? "বর্তমান পাসওয়ার্ড" : "Current Password" }}</label>
+          <input type="password" formControlName="currentPassword" placeholder="Enter current password">
+          <span class="field-err" *ngIf="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
+            Current password is required
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-key"></i> {{ ls.current === "bn" ? "নতুন পাসওয়ার্ড" : "New Password" }}</label>
+          <input type="password" formControlName="password" placeholder="Minimum 6 characters">
+          <span class="field-err" *ngIf="passwordForm.get('password')?.invalid && passwordForm.get('password')?.touched">
+            Password must be at least 6 characters
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-key"></i> Confirm New Password</label>
+          <input type="password" formControlName="confirmPassword" placeholder="Re-enter new password">
+        </div>
+
+        <button type="submit" class="btn-danger" [disabled]="passwordForm.invalid">
+          <i class="fas fa-lock"></i> Update Password
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>

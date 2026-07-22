@@ -1,0 +1,249 @@
+<div class="ur-page">
+
+  <!-- ── Header ── -->
+  <div class="ur-header">
+    <div class="ur-header-left">
+      <h1><i class="ti ti-users-group"></i> User Management</h1>
+      <p>Role assignment &amp; approval control</p>
+    </div>
+    <div class="ur-stats">
+      <div class="stat-pill pending-pill" (click)="switchTab('pending')" title="Show pending">
+        <span class="stat-dot dot-pending"></span>
+        <span>{{ pendingUsers.length }} Pending</span>
+      </div>
+      <div class="stat-pill active-pill" (click)="switchTab('all')" title="Show all">
+        <span class="stat-dot dot-active"></span>
+        <span>{{ activeCount }} Active</span>
+      </div>
+      <div class="stat-pill inactive-pill" (click)="switchTab('all')" title="Show all">
+        <span class="stat-dot dot-inactive"></span>
+        <span>{{ inactiveCount }} Inactive</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Tabs ── -->
+  <div class="ur-tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'pending'" (click)="switchTab('pending')">
+      <i class="ti ti-clock"></i> Pending Approval
+      <span class="badge" *ngIf="pendingUsers.length > 0">{{ pendingUsers.length }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'all'" (click)="switchTab('all')">
+      <i class="ti ti-users"></i> All Users
+    </button>
+  </div>
+
+  <!-- ════════════════════════════════
+       TAB 1 — PENDING APPROVALS
+       ════════════════════════════════ -->
+  <div *ngIf="activeTab === 'pending'">
+
+    <div class="loading-state" *ngIf="isLoading">
+      <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>&nbsp;Loading...
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading && pendingUsers.length === 0">
+      <i class="ti ti-circle-check"></i>
+      <p>No pending approvals — all caught up!</p>
+    </div>
+
+    <div class="section-label" *ngIf="!isLoading && pendingUsers.length > 0">Awaiting review</div>
+
+    <div class="pending-grid" *ngIf="!isLoading && pendingUsers.length > 0">
+      <div class="pending-card" *ngFor="let u of pendingUsers">
+
+        <!-- Top row: avatar + info + status badge -->
+        <div class="pc-top">
+          <div class="pc-avatar" [ngClass]="avatarClass(u.role)">
+            {{ u.name?.charAt(0)?.toUpperCase() }}
+          </div>
+          <div class="pc-info">
+            <span class="pc-name">{{ u.name }}</span>
+            <span class="pc-email">{{ u.email }}</span>
+            <span class="pc-date" *ngIf="u.createdAt">
+              <i class="ti ti-calendar-event"></i>
+              {{ u.createdAt | date:'dd MMM yyyy' }}
+            </span>
+          </div>
+          <span class="pc-status-badge">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</span>
+        </div>
+
+        <!-- Requested role -->
+        <div class="pc-role-row">
+          <i class="ti ti-user-check"></i>
+          <span>Requested role:</span>
+          <span class="req-role-badge role-badge" [ngClass]="roleClass(u.role)">{{ u.role }}</span>
+        </div>
+
+        <!-- Admin can override role before approving -->
+        <div class="pc-role-override">
+          <label>Assign role:</label>
+          <select #pendingRoleSelect class="role-select-sm">
+            <option *ngFor="let r of roles" [value]="r" [selected]="r === u.role">{{ r }}</option>
+          </select>
+        </div>
+
+        <div class="pc-actions">
+          <button class="btn-approve" (click)="approveUser(u, pendingRoleSelect.value)">
+            <i class="ti ti-check"></i> {{ ls.current === "bn" ? "অনুমোদন" : "Approve" }}
+          </button>
+          <button class="btn-reject" (click)="rejectUser(u)">
+            <i class="ti ti-x"></i> {{ ls.current === "bn" ? "প্রত্যাখ্যান" : "Reject" }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════
+       TAB 2 — ALL USERS
+       ════════════════════════════════ -->
+  <div *ngIf="activeTab === 'all'">
+
+    <!-- Filter bar -->
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Search by name or email…"
+               [(ngModel)]="searchText" (input)="filterData()">
+      </div>
+      <select [(ngModel)]="filterRole" (change)="filterData()" class="filter-select">
+        <option value="">{{ ls.current === "bn" ? "সকল ভূমিকা" : "All Roles" }}</option>
+        <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+      </select>
+      <select [(ngModel)]="filterStatus" (change)="filterData()" class="filter-select">
+        <option value="">{{ ls.current === "bn" ? "সকল অবস্থা" : "All Status" }}</option>
+        <option value="Active">{{ ls.current === "bn" ? "সক্রিয়" : "Active" }}</option>
+        <option value="Inactive">{{ ls.current === "bn" ? "নিষ্ক্রিয়" : "Inactive" }}</option>
+        <option value="Pending">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</option>
+      </select>
+      <button class="btn-clear" (click)="clearFilter()">
+        <i class="ti ti-refresh"></i> {{ ls.current === "bn" ? "রিসেট" : "Reset" }}
+      </button>
+    </div>
+
+    <div class="loading-state" *ngIf="isLoading">
+      <i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i>&nbsp;Loading users...
+    </div>
+
+    <div class="section-label" *ngIf="!isLoading">{{ filteredUsers.length }} user(s) found</div>
+
+    <div class="table-wrap" *ngIf="!isLoading">
+      <table class="ur-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>{{ ls.current === "bn" ? "ভূমিকা" : "Role" }}</th>
+            <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+            <th>Change Role</th>
+            <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of filteredUsers; let i = index"
+              [class.is-you]="u.id === getCurrentUserId()"
+              [class.is-pending]="u.status === 'Pending'">
+
+            <td class="td-num">{{ i + 1 }}</td>
+
+            <!-- User cell -->
+            <td>
+              <div class="user-cell">
+                <div class="uc-avatar"
+                     [ngClass]="u.status === 'Pending' ? 'pending-avatar' : avatarClass(u.role)">
+                  {{ u.name?.charAt(0)?.toUpperCase() }}
+                </div>
+                <div class="uc-info">
+                  <span class="uc-name">
+                    {{ u.name }}
+                    <span class="you-tag" *ngIf="u.id === getCurrentUserId()">You</span>
+                  </span>
+                  <span class="uc-email">{{ u.email }}</span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Role badge -->
+            <td>
+              <span class="role-badge" [ngClass]="roleClass(u.role)">{{ u.role }}</span>
+            </td>
+
+            <!-- Status badge -->
+            <td>
+              <span class="status-badge"
+                    [class.s-active]="u.status === 'Active'"
+                    [class.s-inactive]="u.status === 'Inactive'"
+                    [class.s-pending]="u.status === 'Pending'">
+                <span class="s-dot"></span>{{ u.status }}
+              </span>
+            </td>
+
+            <!-- Role select -->
+            <td>
+              <select [ngModel]="u.role" #roleSelect class="role-select-sm"
+                      [disabled]="u.id === getCurrentUserId() || u.status === 'Pending'">
+                <option *ngFor="let r of roles" [value]="r">{{ r }}</option>
+              </select>
+            </td>
+
+            <!-- Action buttons -->
+            <td>
+              <div class="action-row">
+
+                <!-- Pending row: approve button -->
+                <button *ngIf="u.status === 'Pending'"
+                        class="act-btn approve-btn"
+                        title="Approve user"
+                        (click)="approveUser(u, roleSelect.value)">
+                  <i class="ti ti-user-check"></i>
+                </button>
+
+                <!-- Active/Inactive row: save role button -->
+                <button *ngIf="u.status !== 'Pending'"
+                        class="act-btn save-btn"
+                        title="Save role change"
+                        [disabled]="isSaving || u.id === getCurrentUserId()"
+                        (click)="updateRole(u, roleSelect.value)">
+                  <i class="ti ti-check"></i>
+                </button>
+
+                <!-- Toggle active / inactive -->
+                <button class="act-btn"
+                        [class.toggle-on]="u.status === 'Active'"
+                        [class.toggle-off]="u.status !== 'Active'"
+                        [disabled]="u.id === getCurrentUserId() || u.status === 'Pending'"
+                        [title]="u.status === 'Active' ? 'Deactivate' : 'Activate'"
+                        (click)="toggleStatus(u)">
+                  <i class="ti"
+                     [class.ti-toggle-right]="u.status === 'Active'"
+                     [class.ti-toggle-left]="u.status !== 'Active'"></i>
+                </button>
+
+                <!-- Delete -->
+                <button class="act-btn delete-btn"
+                        title="Delete user"
+                        [disabled]="u.id === getCurrentUserId()"
+                        (click)="deleteUser(u.id)">
+                  <i class="ti ti-trash"></i>
+                </button>
+
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="filteredUsers.length === 0">
+            <td colspan="6" class="no-data">
+              <i class="ti ti-mood-empty" style="font-size:22px;display:block;margin-bottom:6px"></i>
+              No users match the current filter.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Toast (appended to body via TS) -->
+</div>

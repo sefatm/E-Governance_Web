@@ -1,0 +1,52 @@
+<footer class="footer">
+
+  <div class="footer-main">
+
+    <!-- Brand -->
+    <div class="footer-brand">
+      <div class="brand-logo">
+        <i class="fas fa-landmark"></i>
+      </div>
+      <div>
+        <div class="brand-title">{{ ls.t('nav.eGovernance') }}</div>
+        <div class="brand-sub">Municipality</div>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="v-divider"></div>
+
+    <!-- Contact -->
+    <div class="footer-contact">
+      <span class="contact-item">
+        <i class="fas fa-map-marker-alt"></i> Municipality, Dhaka, Bangladesh
+      </span>
+      <span class="contact-item">
+        <i class="fas fa-phone"></i> +8801728444584
+      </span>
+      <span class="contact-item">
+        <i class="fas fa-envelope"></i> info&#64;municipality.gov.bd
+      </span>
+      <span class="contact-item">
+        <i class="fas fa-globe"></i> municipality.gov.bd
+      </span>
+    </div>
+
+    <!-- Right: Gov badge -->
+    <div class="footer-gov">
+      <i class="fas fa-shield-alt"></i>
+      <div>
+        <div class="gov-title">{{ ls.current === 'bn' ? 'গণপ্রজাতন্ত্রী বাংলাদেশ সরকার' : 'Government of Bangladesh' }}</div>
+        <div class="gov-sub">{{ ls.current === 'bn' ? 'সবকিছুর উপরে দেশ।' : 'Nation over everything.' }}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom copyright -->
+  <div class="footer-bottom">
+    <span>{{ ls.t('ft.rights') }}</span>
+    <span class="footer-version">v1.0.0</span>
+  </div>
+
+</footer>

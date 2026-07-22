@@ -1,0 +1,359 @@
+<!-- ══════════════════════════════════════════════════════════════════
+     payment-gateway.component.html
+     Steps: 1 Citizen Info → 2 Payment Details → 3 Confirm & Pay
+            → 4 Pending Confirm (provider TxnId) → Receipt
+     ══════════════════════════════════════════════════════════════════ -->
+
+<!-- Toast Area -->
+<div class="tl-toast-area" *ngIf="toasts.length">
+  <div *ngFor="let t of toasts" class="tl-toast"
+       [class.tl-toast--ok]="t.type==='success'"
+       [class.tl-toast--fail]="t.type==='error'"
+       [class.tl-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- ══ SUCCESS — Receipt ══ -->
+  <ng-container *ngIf="success && receipt">
+    <div class="tl-header">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+          <span class="tl-header__country">GOVERNMENT OF THE PEOPLE'S REPUBLIC OF BANGLADESH</span>
+          <div class="tl-header__divider"></div>
+          <h2 class="tl-header__title">পেমেন্ট রশিদ</h2>
+          <span class="tl-header__title-en">Official Payment Receipt</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tl-card receipt-card" id="print-area">
+      <div class="receipt-success-icon"><i class="fas fa-circle-check"></i></div>
+      <h3 class="receipt-title">পেমেন্ট সফল হয়েছে!</h3>
+      <p class="receipt-sub">আপনার পেমেন্ট সম্পন্ন হয়েছে এবং রশিদ তৈরি হয়েছে।</p>
+
+      <div class="receipt-body">
+        <div class="receipt-no-row">
+          <span>রশিদ নম্বর</span>
+          <strong class="receipt-no">{{ receipt.receiptNo }}</strong>
+        </div>
+        <div class="receipt-divider"></div>
+        <div class="receipt-grid">
+          <div class="receipt-row"><span>নাগরিকের নাম</span><strong>{{ receipt.citizenName }}</strong></div>
+          <div class="receipt-row"><span>NID নম্বর</span><strong>{{ receipt.citizenNid }}</strong></div>
+          <div class="receipt-row"><span>{{ ls.current === "bn" ? "সেবার ধরন" : "Service Type" }}</span><strong>{{ receipt.serviceType }}</strong></div>
+          <div class="receipt-row"><span>{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</span><strong>{{ receipt.description || '—' }}</strong></div>
+          <div class="receipt-row"><span>{{ ls.current === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method" }}</span><strong>{{ receipt.method }}</strong></div>
+          <div class="receipt-row"><span>Transaction Ref</span><strong class="mono">{{ createdTxn?.txnRef }}</strong></div>
+          <div class="receipt-row"><span>তারিখ ও সময়</span><strong>{{ receipt.issuedAt | date:'dd MMM yyyy, hh:mm a' }}</strong></div>
+        </div>
+        <div class="receipt-divider"></div>
+        <div class="receipt-amount-row">
+          <span>মোট পরিশোধিত পরিমাণ</span>
+          <strong class="receipt-amount">৳ {{ receipt.amount | number:'1.2-2' }}</strong>
+        </div>
+      </div>
+
+      <div class="receipt-actions no-print">
+        <button class="tl-btn tl-btn--back" (click)="printReceipt()">
+          <i class="fas fa-print"></i> প্রিন্ট করুন
+        </button>
+        <button class="tl-btn tl-btn--pdf" (click)="downloadPdf()">
+          <i class="fas fa-file-pdf"></i> PDF ডাউনলোড
+        </button>
+        <button class="tl-btn tl-btn--submit" (click)="resetForm()">
+          <i class="fas fa-plus"></i> নতুন পেমেন্ট
+        </button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ══ FORM — Steps 1-3 + Pending Confirm (Step 4) ══ -->
+  <ng-container *ngIf="!success">
+
+    <div class="tl-header">
+      <div class="tl-header__left">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+        <div class="tl-header__text">
+          <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+          <span class="tl-header__country">GOVERNMENT OF THE PEOPLE'S REPUBLIC OF BANGLADESH</span>
+          <div class="tl-header__divider"></div>
+          <h2 class="tl-header__title">অনলাইন পেমেন্ট পোর্টাল</h2>
+          <span class="tl-header__title-en">Municipal Online Payment Portal — Secure &amp; Official</span>
+          <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+        </div>
+      </div>
+      <div class="tl-header__right">
+        <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+      </div>
+    </div>
+
+    <!-- Step Indicators (only steps 1-3) -->
+    <div class="tl-steps" *ngIf="currentStep <= 3">
+      <ng-container *ngFor="let s of steps; let i=index">
+        <div class="tl-step"
+             [class.tl-step--done]="currentStep > i+1"
+             [class.tl-step--active]="currentStep === i+1">
+          <div class="tl-step__circle">
+            <i class="fas fa-check" *ngIf="currentStep > i+1"></i>
+            <span *ngIf="currentStep <= i+1">{{ i+1 }}</span>
+          </div>
+          <span class="tl-step__label">{{ s }}</span>
+        </div>
+        <div class="tl-step__line" *ngIf="i < steps.length-1"
+             [class.tl-step__line--done]="currentStep > i+1"></div>
+      </ng-container>
+    </div>
+
+    <div class="tl-card">
+      <form [formGroup]="paymentForm" (ngSubmit)="submitPayment()" novalidate>
+
+        <!-- ─── STEP 1 — Citizen Info ─── -->
+        <div class="tl-panel" [class.tl-panel--active]="currentStep===1">
+          <div class="tl-panel__head">
+            <div class="tl-panel__icon"><i class="fas fa-user"></i></div>
+            <div><h3>{{ ls.current === "bn" ? "নাগরিক তথ্য" : "Citizen Information" }}</h3><p>আপনার ব্যক্তিগত তথ্য প্রদান করুন</p></div>
+            <span class="tl-step-tag">ধাপ ১ / ৩</span>
+          </div>
+          <div class="tl-grid-2">
+            <div class="tl-field">
+              <label>NID নম্বর <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-id-card tl-ico"></i>
+                <input formControlName="citizenNid" placeholder="জাতীয় পরিচয়পত্র নম্বর" [class.tl-invalid]="isInvalid('citizenNid')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "পূর্ণ নাম" : "Full Name" }}<span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-user tl-ico"></i>
+                <input formControlName="citizenName" placeholder="NID অনুযায়ী পূর্ণ নাম" [class.tl-invalid]="isInvalid('citizenName')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }}<span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-mobile-screen tl-ico"></i>
+                <input formControlName="mobile" placeholder="01XXXXXXXXX" [class.tl-invalid]="isInvalid('mobile')">
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "ইমেইল ঠিকানা" : "Email Address" }}</label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-envelope tl-ico"></i>
+                <input formControlName="email" type="email" placeholder="ঐচ্ছিক">
+              </div>
+            </div>
+          </div>
+          <div class="tl-nav">
+            <span></span>
+            <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">
+              {{ ls.current === "bn" ? "পরবর্তী" : "Next" }}<i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ─── STEP 2 — Payment Details ─── -->
+        <div class="tl-panel" [class.tl-panel--active]="currentStep===2">
+          <div class="tl-panel__head">
+            <div class="tl-panel__icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div><h3>পেমেন্ট বিবরণ</h3><p>সেবা ও পরিমাণ নির্বাচন করুন</p></div>
+            <span class="tl-step-tag">ধাপ ২ / ৩</span>
+          </div>
+          <div class="tl-grid-2">
+            <div class="tl-field">
+              <label>{{ ls.current === "bn" ? "সেবার ধরন" : "Service Type" }}<span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-tag tl-ico"></i>
+                <select formControlName="serviceType" [class.tl-invalid]="isInvalid('serviceType')">
+                  <option value="">সেবা বেছে নিন</option>
+                  <option value="WaterBill">পানি বিল — Water Bill</option>
+                  <option value="TradeLicense">ট্রেড লাইসেন্স — Trade License</option>
+                  <option value="HoldingTax">হোল্ডিং ট্যাক্স — Holding Tax</option>
+                  <option value="ETender">ই-টেন্ডার — E-Tender</option>
+                  <option value="BirthCertificate">জন্ম সনদ — Birth Certificate</option>
+                  <option value="Other">অন্যান্য — Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="tl-field">
+              <label>পরিমাণ (৳) <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-bangladeshi-taka-sign tl-ico"></i>
+                <input type="number" formControlName="amount" placeholder="০.০০" min="1" [class.tl-invalid]="isInvalid('amount')">
+              </div>
+            </div>
+            <div class="tl-field" style="grid-column:1/-1">
+              <label>বিবরণ / রেফারেন্স</label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-note-sticky tl-ico"></i>
+                <input formControlName="description" placeholder="যেমনঃ মিটার নং, হোল্ডিং নং, লাইসেন্স নং">
+              </div>
+            </div>
+          </div>
+
+          <div class="pm-section-label">{{ ls.current === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method" }}<span class="req">*</span></div>
+          <div class="tl-payment-grid">
+            <label *ngFor="let m of paymentMethods" class="tl-payment-opt"
+                   [class.tl-payment-opt--active]="paymentForm.get('method')?.value === m.val">
+              <input type="radio" formControlName="method" [value]="m.val" hidden>
+              <i class="fas" [ngClass]="m.icon"></i>
+              <span>{{ m.label }}</span>
+            </label>
+          </div>
+
+          <!-- Mobile money TxnId -->
+          <div class="method-fields"
+               *ngIf="paymentForm.get('method')?.value && paymentForm.get('method')?.value !== 'Card' && paymentForm.get('method')?.value !== 'Bank'">
+            <div class="tl-field">
+              <label>{{ selectedMethod()?.label }} Transaction ID <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-hashtag tl-ico"></i>
+                <input formControlName="providerTxnId" placeholder="যেমনঃ 8N5XXXXXX">
+              </div>
+            </div>
+          </div>
+
+          <!-- Card fields -->
+          <div class="method-fields" *ngIf="paymentForm.get('method')?.value === 'Card'">
+            <div class="tl-grid-2">
+              <div class="tl-field" style="grid-column:1/-1">
+                <label>{{ ls.current === "bn" ? "কার্ড নম্বর" : "Card Number" }}<span class="req">*</span></label>
+                <div class="tl-input-wrap">
+                  <i class="fas fa-credit-card tl-ico"></i>
+                  <input formControlName="cardNumber" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">
+                </div>
+              </div>
+              <div class="tl-field">
+                <label>কার্ডধারীর নাম <span class="req">*</span></label>
+                <div class="tl-input-wrap">
+                  <i class="fas fa-user tl-ico"></i>
+                  <input formControlName="cardName" placeholder="Name on card">
+                </div>
+              </div>
+              <div class="tl-field">
+                <label>মেয়াদ <span class="req">*</span></label>
+                <div class="tl-input-wrap">
+                  <i class="fas fa-calendar tl-ico"></i>
+                  <input type="month" formControlName="cardExpiry">
+                </div>
+              </div>
+              <div class="tl-field">
+                <label>CVV <span class="req">*</span></label>
+                <div class="tl-input-wrap">
+                  <i class="fas fa-lock tl-ico"></i>
+                  <input type="password" formControlName="cardCvv" placeholder="XXX" maxlength="4">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bank -->
+          <div class="method-fields" *ngIf="paymentForm.get('method')?.value === 'Bank'">
+            <div class="tl-field">
+              <label>ব্যাংক Transaction / Challan নম্বর <span class="req">*</span></label>
+              <div class="tl-input-wrap">
+                <i class="fas fa-building-columns tl-ico"></i>
+                <input formControlName="bankTxnId" placeholder="ব্যাংক রেফারেন্স নম্বর">
+              </div>
+            </div>
+          </div>
+
+          <div class="tl-nav">
+            <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()">
+              <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পূর্ববর্তী" : "Previous" }}</button>
+            <button type="button" class="tl-btn tl-btn--next" (click)="nextStep()">
+              {{ ls.current === "bn" ? "পরবর্তী" : "Next" }}<i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- ─── STEP 3 — Confirm & Pay ─── -->
+        <div class="tl-panel" [class.tl-panel--active]="currentStep===3">
+          <div class="tl-panel__head">
+            <div class="tl-panel__icon"><i class="fas fa-shield-check"></i></div>
+            <div><h3>নিশ্চিত করুন ও পেমেন্ট করুন</h3><p>পেমেন্টের বিবরণ যাচাই করুন</p></div>
+            <span class="tl-step-tag">ধাপ ৩ / ৩</span>
+          </div>
+
+          <div class="pay-summary">
+            <div class="pay-sum-row"><span>নাগরিকের নাম</span><strong>{{ paymentForm.get('citizenName')?.value || '—' }}</strong></div>
+            <div class="pay-sum-row"><span>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</span><strong class="mono">{{ paymentForm.get('citizenNid')?.value || '—' }}</strong></div>
+            <div class="pay-sum-row"><span>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</span><strong>{{ paymentForm.get('mobile')?.value || '—' }}</strong></div>
+            <div class="pay-sum-row"><span>{{ ls.current === "bn" ? "সেবার ধরন" : "Service Type" }}</span><strong>{{ paymentForm.get('serviceType')?.value || '—' }}</strong></div>
+            <div class="pay-sum-row"><span>{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</span><strong>{{ paymentForm.get('description')?.value || '—' }}</strong></div>
+            <div class="pay-sum-row"><span>{{ ls.current === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method" }}</span><strong>{{ paymentForm.get('method')?.value || '—' }}</strong></div>
+            <div class="pay-sum-row pay-sum-total">
+              <span>মোট পরিমাণ</span>
+              <strong class="pay-amount">৳ {{ paymentForm.get('amount')?.value | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+
+          <div class="tl-declaration">
+            <label class="tl-check-label">
+              <input type="checkbox" formControlName="agree">
+              <span>
+                আমি এতদ্বারা ঘোষণা করিতেছি যে উপরে প্রদত্ত সমস্ত তথ্য সত্য ও সঠিক এবং পেমেন্টের শর্তাবলী মানিয়া চলতে সম্মত।
+              </span>
+            </label>
+          </div>
+
+          <div class="tl-nav">
+            <button type="button" class="tl-btn tl-btn--back" (click)="prevStep()">
+              <i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পূর্ববর্তী" : "Previous" }}</button>
+            <button type="submit" class="tl-btn tl-btn--submit"
+                    [disabled]="isSubmitting || !paymentForm.get('agree')?.value">
+              <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+              <i class="fas fa-lock" *ngIf="!isSubmitting"></i>
+              {{ isSubmitting ? 'প্রক্রিয়া হচ্ছে...' : 'পেমেন্ট করুন — ৳ ' + (paymentForm.get('amount')?.value | number:'1.2-2') }}
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+      <!-- ─── STEP 4 — Pending Confirm (after initiate) ─── -->
+      <div class="tl-panel tl-panel--active" *ngIf="currentStep === 4 && pendingTxn">
+        <div class="tl-panel__head">
+          <div class="tl-panel__icon" style="background:#f59e0b"><i class="fas fa-hourglass-half"></i></div>
+          <div><h3>পেমেন্ট নিশ্চিত করুন</h3><p>Transaction ID দিয়ে পেমেন্ট সম্পন্ন করুন</p></div>
+          <span class="tl-step-tag pending-tag">অপেক্ষমান</span>
+        </div>
+
+        <div class="pending-info">
+          <div class="pending-row"><span>Transaction Ref</span><strong class="mono">{{ pendingTxn.txnRef }}</strong></div>
+          <div class="pending-row"><span>{{ ls.current === "bn" ? "পরিমাণ" : "Quantity" }}</span><strong class="green">৳ {{ pendingTxn.amount | number:'1.2-2' }}</strong></div>
+          <div class="pending-row"><span>পদ্ধতি</span><strong>{{ pendingTxn.method }}</strong></div>
+          <div class="pending-row"><span>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</span><strong class="yellow">{{ pendingTxn.status }}</strong></div>
+        </div>
+
+        <div class="tl-field" style="margin:20px 0">
+          <label>আপনার {{ pendingTxn.method }} Transaction ID লিখুন <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-hashtag tl-ico"></i>
+            <input [(ngModel)]="providerTxnIdInput" name="providerTxnIdInput"
+                   placeholder="যেমনঃ 8N5A2BXXXX বা Challan নং">
+          </div>
+          <small class="hint">bKash/Nagad/Rocket থেকে পেমেন্ট করে Transaction ID এখানে দিন।</small>
+        </div>
+
+        <div class="tl-nav">
+          <button class="tl-btn tl-btn--back" (click)="cancelPayment()">
+            <i class="fas fa-xmark"></i> বাতিল করুন
+          </button>
+          <button class="tl-btn tl-btn--submit" (click)="confirmPayment()" [disabled]="isConfirming">
+            <i class="fas fa-spinner fa-spin" *ngIf="isConfirming"></i>
+            <i class="fas fa-circle-check" *ngIf="!isConfirming"></i>
+            {{ isConfirming ? 'নিশ্চিত হচ্ছে...' : 'পেমেন্ট সম্পন্ন করুন' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>

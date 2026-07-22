@@ -1,0 +1,107 @@
+<div class="form-container">
+  <div class="form-card">
+
+    <!-- Header -->
+    <div class="card-header">
+      <div class="header-icon">
+        <i class="fas fa-receipt" style="color:#fff;font-size:18px"></i>
+      </div>
+      <div>
+        <h2>Paying withholding tax</h2>
+        <p>Holding Tax Payment — Pay outstanding taxes online</p>
+      </div>
+    </div>
+
+    <div class="gov-form">
+
+      <!-- ── STEP 1: Holding No Search ── -->
+      <div class="section-label">Search by Holding Number</div>
+
+      <div class="search-row">
+        <div class="input-group" style="flex:1; margin-bottom:0">
+          <label>{{ ls.current === "bn" ? "হোল্ডিং নম্বর" : "Holding Number" }} <span class="req">*</span></label>
+          <input
+            type="text"
+            [(ngModel)]="searchHoldingNo"
+            name="searchHoldingNo"
+            placeholder="যেমনঃ H-001"
+            (keyup.enter)="searchHolding()"
+          />
+        </div>
+        <button class="btn-search" (click)="searchHolding()" [disabled]="isSearching">
+          <i class="fas" [class.fa-magnifying-glass]="!isSearching" [class.fa-spinner]="isSearching" [class.fa-spin]="isSearching"></i>
+          {{ isSearching ? 'Searching...' : 'View Information' }}
+        </button>
+      </div>
+
+      <!-- Error -->
+      <div class="alert-error" *ngIf="searchError">
+        <i class="fas fa-circle-exclamation"></i> {{ searchError }}
+      </div>
+
+      <!-- ── STEP 2: Due Info + Proceed ── -->
+      <ng-container *ngIf="dueInfo">
+
+        <div class="due-card">
+          <div class="due-card__header">
+            <i class="fas fa-file-invoice-dollar"></i>
+            <span>Due Information — Holding No: <strong>{{ dueInfo.holdingNo }}</strong></span>
+          </div>
+
+          <div class="due-grid">
+            <div class="due-item">
+              <span class="dl">Owner's Name</span>
+              <span class="dv">{{ dueInfo.ownerName }}</span>
+            </div>
+            <div class="due-item">
+              <span class="dl">Total Assessed Tax</span>
+              <span class="dv">৳ {{ dueInfo.totalAssessed | number }}</span>
+            </div>
+            <div class="due-item">
+              <span class="dl">Already Paid</span>
+              <span class="dv paid">৳ {{ dueInfo.totalPaid | number }}</span>
+            </div>
+            <div class="due-item">
+              <span class="dl">{{ ls.current === "bn" ? "বকেয়া পরিমাণ" : "Due Amount" }}</span>
+              <span class="dv due">৳ {{ dueInfo.due | number }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Amount Input -->
+        <div class="section-label" style="margin-top:24px">{{ ls.current === "bn" ? "পেমেন্টের পরিমাণ" : "Payment Amount" }}</div>
+        <div class="row">
+          <div class="input-group">
+            <label>{{ ls.current === "bn" ? "পরিমাণ (টাকা)" : "Amount (BDT)" }} <span class="req">*</span></label>
+            <input
+              type="number"
+              [(ngModel)]="customAmount"
+              name="customAmount"
+              [max]="dueInfo.due"
+              min="1"
+              placeholder="Enter the amount to pay"
+            />
+            <small class="hint">Maximum ৳{{ dueInfo.due | number }} can be paid.</small>
+          </div>
+        </div>
+
+        <!-- Proceed Button -->
+        <div class="btn-row">
+          <button class="btn-outline" (click)="reset()">
+            <i class="fas fa-rotate-left"></i> search again
+          </button>
+          <button
+            class="btn-submit"
+            (click)="proceedToPayment()"
+            [disabled]="!customAmount || customAmount <= 0 || customAmount > dueInfo.due"
+          >
+            <i class="fas fa-lock"></i>
+            Pay Online — ৳{{ customAmount | number }}
+          </button>
+        </div>
+
+      </ng-container>
+
+    </div>
+  </div>
+</div>

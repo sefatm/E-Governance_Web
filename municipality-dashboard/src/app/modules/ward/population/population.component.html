@@ -1,0 +1,114 @@
+<div class="pop-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="ph-icon"><i class="fas fa-users"></i></div>
+      <div>
+        <h2 class="ph-title">Ward Population Data</h2>
+        <p class="ph-sub">Population statistics by ward with year-over-year comparison</p>
+      </div>
+    </div>
+    <div class="year-tabs">
+      <button class="ytab" [class.active]="selectedYear==='2024'"
+              (click)="selectedYear='2024'; updateChart()">2024</button>
+      <button class="ytab" [class.active]="selectedYear==='2025'"
+              (click)="selectedYear='2025'; updateChart()">2025</button>
+      <button class="ytab" [class.active]="selectedYear==='2026'"
+              (click)="selectedYear='2026'; updateChart()">2026</button>
+    </div>
+  </div>
+
+  <!-- Summary KPIs -->
+  <div class="kpi-row" *ngIf="current.length > 0">
+    <div class="kpi-card">
+      <div class="kpi-ico blue"><i class="fas fa-users"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Total Population</span>
+        <span class="kpi-val">{{totalPop | number}}</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico green"><i class="fas fa-sort-amount-up"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Highest Ward</span>
+        <span class="kpi-val">{{highestWard?.name || ('Ward ' + highestWard?.number)}}</span>
+        <span class="kpi-sub">{{highestWard?.population | number}} people</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico orange"><i class="fas fa-sort-amount-down"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Lowest Ward</span>
+        <span class="kpi-val">{{lowestWard?.name || ('Ward ' + lowestWard?.number)}}</span>
+        <span class="kpi-sub">{{lowestWard?.population | number}} people</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico purple"><i class="fas fa-calculator"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Average per Ward</span>
+        <span class="kpi-val">{{avgPop | number}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="card-box">
+    <div class="box-head">
+      <div class="box-title-wrap">
+        <div class="box-icon"><i class="fas fa-chart-bar"></i></div>
+        <div>
+          <h3 class="box-title">Population by Ward — {{selectedYear}}</h3>
+          <p class="box-sub">Hover over bars to see exact count</p>
+        </div>
+      </div>
+    </div>
+    <div style="height:260px; position:relative;">
+      <canvas id="populationChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Data table with growth % -->
+  <div class="card-box">
+    <div class="box-head">
+      <div class="box-title-wrap">
+        <div class="box-icon"><i class="fas fa-table"></i></div>
+        <h3 class="box-title">Population Details — {{selectedYear}}</h3>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table class="pop-table">
+        <thead>
+          <tr>
+            <th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+            <th>Population ({{selectedYear}})</th>
+            <th>% of Total</th>
+            <th>Growth vs {{+selectedYear - 1}}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let w of current">
+            <td><strong>{{w.name || ('Ward ' + w.number)}}</strong></td>
+            <td>{{w.population | number}}</td>
+            <td>
+              <div class="pct-wrap">
+                <div class="pct-bar" [style.width]="(w.population / totalPop * 100).toFixed(1) + '%'"></div>
+                <span>{{(w.population / totalPop * 100).toFixed(1)}}%</span>
+              </div>
+            </td>
+            <td>
+              <span class="growth" [class.up]="growthPct(w) > 0" [class.flat]="growthPct(w) === 0">
+                <i class="fas" [class.fa-arrow-up]="growthPct(w) > 0"
+                               [class.fa-minus]="growthPct(w) === 0"
+                               [class.fa-arrow-down]="growthPct(w) < 0"></i>
+                {{growthPct(w) > 0 ? '+' : ''}}{{growthPct(w)}}%
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

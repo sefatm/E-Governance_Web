@@ -1,0 +1,75 @@
+<div class="container">
+
+  <h2><i class="fas fa-chart-bar"></i> Holding Tax Collection Report</h2>
+
+  <!-- Summary Card -->
+  <div class="summary-card" *ngIf="!isLoading && filteredData.length > 0">
+    <div class="sum-item">
+      <span class="sum-label">{{ ls.current === "bn" ? "মোট রেকর্ড" : "Total Records" }}</span>
+      <span class="sum-val">{{ filteredData.length }}</span>
+    </div>
+    <div class="sum-item">
+      <span class="sum-label">Total Collected</span>
+      <span class="sum-val green">{{ totalCollected | number }} BDT</span>
+    </div>
+  </div>
+
+  <!-- FIX: Date filter inputs added (fromDate/toDate were in TS but missing from HTML) -->
+  <div class="filter-box">
+    <input type="text" [(ngModel)]="searchText"
+           placeholder="Search by Holding No or Owner Name"
+           (input)="search()">
+
+    <label>From:</label>
+    <input type="date" [(ngModel)]="fromDate" (change)="search()">
+
+    <label>To:</label>
+    <input type="date" [(ngModel)]="toDate" (change)="search()">
+
+    <button class="btn-reload" (click)="loadData()">
+      <i class="fas fa-sync-alt"></i> {{ ls.current === "bn" ? "রিফ্রেশ" : "Refresh" }}
+    </button>
+    <button class="btn-clear" (click)="clearFilter()">
+      <i class="fas fa-times"></i> Clear
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+  </div>
+
+  <!-- Table -->
+  <table *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Holding No</th>
+        <th>{{ ls.current === "bn" ? "মালিকের নাম" : "Owner Name" }}</th>
+        <th>Amount Collected</th>
+        <th>{{ ls.current === "bn" ? "পেমেন্ট পদ্ধতি" : "Payment Method" }}</th>
+        <th>{{ ls.current === "bn" ? "লেনদেন আইডি" : "Transaction ID" }}</th>
+        <th>{{ ls.current === "bn" ? "পেমেন্টের তারিখ" : "Payment Date" }}</th>
+        <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of filteredData; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td><strong>{{ item.holdingNo }}</strong></td>
+        <td>{{ item.ownerName }}</td>
+        <td>{{ item.amount | number }} BDT</td>
+        <td>{{ item.method || '—' }}</td>
+        <td>{{ item.txnId || '—' }}</td>
+        <td>{{ item.paymentDate || '—' }}</td>
+        <td><span class="badge-paid">{{ item.status || 'Paid' }}</span></td>
+      </tr>
+      <tr *ngIf="filteredData.length === 0">
+        <td colspan="8" class="empty-row">
+          <i class="fas fa-inbox"></i> No payment records found
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</div>

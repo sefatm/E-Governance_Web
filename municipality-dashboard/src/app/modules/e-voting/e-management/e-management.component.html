@@ -1,0 +1,205 @@
+<div class="em-toast-wrap" *ngIf="toast">
+  <div class="em-toast" [class.em-toast--ok]="toast.type==='success'" [class.em-toast--err]="toast.type==='error'">
+    <i class="fas" [ngClass]="toast.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    {{ toast.msg }}
+  </div>
+</div>
+
+<div class="em-page">
+
+  <!-- ══════════════════ FORM SECTION ══════════════════ -->
+  <div class="em-form-section">
+
+    <!-- Official Header -->
+    <div class="em-official-header">
+      <img src="assets/photo/bangladesh-govt.png" alt="Govt" class="em-logo em-logo--left" onerror="this.style.display='none'">
+      <div class="em-official-text">
+        <span class="em-bn-title">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="em-en-title">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="em-divider-line"></div>
+        <span class="em-form-title">নির্বাচন ব্যবস্থাপনা ফরম</span>
+        <span class="em-form-sub">Election Management Declaration Form — E-Voting System</span>
+      </div>
+      <img src="assets/photo/election_commission.png" alt="Election Commission" class="em-logo em-logo--right" onerror="this.style.display='none'">
+    </div>
+
+    <!-- Form Body -->
+    <div class="em-form-body">
+
+      <div class="em-section-tag">
+        <i class="fas fa-landmark"></i> Election information
+        <span class="em-edit-badge" *ngIf="isEditMode"><i class="fas fa-pen"></i> Edit Mode</span>
+      </div>
+
+      <div class="em-grid">
+
+        <div class="em-field em-field--full">
+          <label>{{ ls.current === "bn" ? "নির্বাচনের নাম" : "Election Name" }} <span class="req">*</span></label>
+          <div class="em-input-wrap">
+            <i class="fas fa-scroll em-ico"></i>
+            <input type="text" [(ngModel)]="form.name" name="name"
+                   [class.em-invalid]="submitted && !form.name"
+                   placeholder="e.g., 10th Municipal Corporation General Election 2026">
+          </div>
+          <div class="em-err" *ngIf="submitted && !form.name"><i class="fas fa-circle-exclamation"></i> Election name is required</div>
+        </div>
+
+        <div class="em-field">
+          <label>Election Type <span class="req">*</span></label>
+          <div class="em-input-wrap">
+            <i class="fas fa-landmark em-ico"></i>
+            <select [(ngModel)]="form.type" name="type" [class.em-invalid]="submitted && !form.type">
+              <option value="">Select Type</option>
+              <option value="National">National Parliament</option>
+              <option value="City Corporation">City Corporation</option>
+              <option value="Municipality">Municipality / পৌরসভা</option>
+            </select>
+          </div>
+          <div class="em-err" *ngIf="submitted && !form.type"><i class="fas fa-circle-exclamation"></i> Election type is required</div>
+        </div>
+
+        <div class="em-field">
+          <label>Area / Seat</label>
+          <div class="em-input-wrap">
+            <i class="fas fa-map-marker-alt em-ico"></i>
+            <input type="text" [(ngModel)]="form.area" name="area" placeholder="e.g., Madaripur Municipality">
+          </div>
+        </div>
+
+        <div class="em-field">
+          <label>{{ ls.current === "bn" ? "শুরুর তারিখ" : "Start Date" }} <span class="req">*</span></label>
+          <div class="em-input-wrap">
+            <i class="fas fa-calendar-day em-ico"></i>
+            <input type="date" [(ngModel)]="form.startDate" name="startDate"
+                   [class.em-invalid]="submitted && !form.startDate">
+          </div>
+          <div class="em-err" *ngIf="submitted && !form.startDate"><i class="fas fa-circle-exclamation"></i> Start date is required</div>
+        </div>
+
+        <div class="em-field">
+          <label>{{ ls.current === "bn" ? "শেষের তারিখ" : "End Date" }} <span class="req">*</span></label>
+          <div class="em-input-wrap">
+            <i class="fas fa-calendar-check em-ico"></i>
+            <input type="date" [(ngModel)]="form.endDate" name="endDate"
+                   [class.em-invalid]="submitted && !form.endDate">
+          </div>
+          <div class="em-err" *ngIf="submitted && !form.endDate"><i class="fas fa-circle-exclamation"></i> End date is required</div>
+        </div>
+
+        <div class="em-field">
+          <label>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</label>
+          <div class="em-input-wrap">
+            <i class="fas fa-toggle-on em-ico"></i>
+            <select [(ngModel)]="form.status" name="status">
+              <option value="UPCOMING">⏳ Upcoming</option>
+              <option value="ACTIVE">✅ Active</option>
+              <option value="COMPLETED">🏁 Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="em-field em-field--full">
+          <label>{{ ls.current === "bn" ? "বিবরণ" : "Description" }}</label>
+          <div class="em-input-wrap">
+            <i class="fas fa-align-left em-ico em-ico--top"></i>
+            <textarea [(ngModel)]="form.description" name="description" rows="3"
+                      placeholder="Write a brief description about the election..."></textarea>
+          </div>
+        </div>
+
+      </div><!-- /em-grid -->
+
+      <!-- Action buttons -->
+      <div class="em-actions">
+        <button class="em-btn em-btn--reset" (click)="reset()" *ngIf="isEditMode || form.name">
+          <i class="fas fa-rotate-left"></i> {{ ls.current === "bn" ? "রিসেট" : "Reset" }}
+        </button>
+        <button class="em-btn em-btn--save" (click)="save()" [disabled]="isSaving">
+          <i class="fas fa-spinner fa-spin" *ngIf="isSaving"></i>
+          <i class="fas fa-floppy-disk" *ngIf="!isSaving"></i>
+          {{ isSaving ? 'Saving...' : (isEditMode ? 'Update' : 'Save Election') }}
+        </button>
+      </div>
+
+    </div><!-- /em-form-body -->
+  </div><!-- /em-form-section -->
+
+
+  <!-- ══════════════════ LIST SECTION ══════════════════ -->
+  <div class="em-list-section">
+
+    <div class="em-list-header">
+      <div class="em-list-title">
+        <i class="fas fa-list-check"></i>
+        Election List
+        <span class="em-count-badge">{{ elections.length }}</span>
+      </div>
+      <button class="em-refresh-btn" (click)="load()" [title]="ls.current === 'bn' ? 'রিফ্রেশ' : 'Refresh'">
+        <i class="fas fa-arrows-rotate"></i>
+      </button>
+    </div>
+
+    <!-- Empty state -->
+    <div class="em-empty" *ngIf="elections.length === 0">
+      <i class="fas fa-box-open"></i>
+      <p>No elections found.</p>
+      <small>Fill out the form above to create your first election.</small>
+    </div>
+
+    <!-- Election cards -->
+    <div class="em-card-grid">
+      <div class="em-election-card" *ngFor="let e of elections">
+
+        <div class="em-card-top">
+          <div class="em-card-meta">
+            <span class="em-type-chip">{{ e.type }}</span>
+            <span class="em-status-chip"
+              [class.em-status--active]="e.status?.toUpperCase()==='ACTIVE'"
+              [class.em-status--upcoming]="e.status?.toUpperCase()==='UPCOMING'"
+              [class.em-status--completed]="e.status?.toUpperCase()==='COMPLETED'">
+              {{ e.status }}
+            </span>
+          </div>
+          <div class="em-card-actions">
+            <button class="em-icon-btn em-icon-btn--danger" (click)="delete(e.id)" [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="em-card-name">{{ e.name }}</div>
+        <div class="em-card-area" *ngIf="e.area"><i class="fas fa-map-marker-alt"></i> {{ e.area }}</div>
+
+        <div class="em-card-dates">
+          <span><i class="fas fa-play"></i> {{ e.startDate | date:'dd MMM yyyy' }}</span>
+          <span class="em-date-arrow">→</span>
+          <span><i class="fas fa-flag-checkered"></i> {{ e.endDate | date:'dd MMM yyyy' }}</span>
+        </div>
+
+        <div class="em-card-desc" *ngIf="e.description">{{ e.description }}</div>
+
+        <!-- Status controls -->
+        <div class="em-status-controls">
+          <button class="em-status-btn em-status-btn--upcoming"
+            [class.em-status-btn--active-state]="e.status?.toUpperCase()==='UPCOMING'"
+            (click)="changeStatus(e.id!, 'UPCOMING')">
+            <i class="fas fa-clock"></i> Upcoming
+          </button>
+          <button class="em-status-btn em-status-btn--active"
+            [class.em-status-btn--active-state]="e.status?.toUpperCase()==='ACTIVE'"
+            (click)="changeStatus(e.id!, 'ACTIVE')">
+            <i class="fas fa-circle-play"></i> {{ ls.current === "bn" ? "সক্রিয়" : "Active" }}
+          </button>
+          <button class="em-status-btn em-status-btn--completed"
+            [class.em-status-btn--active-state]="e.status?.toUpperCase()==='COMPLETED'"
+            (click)="changeStatus(e.id!, 'COMPLETED')">
+            <i class="fas fa-flag-checkered"></i> {{ ls.current === "bn" ? "সম্পন্ন" : "Completed" }}
+          </button>
+        </div>
+
+      </div><!-- /em-election-card -->
+    </div><!-- /em-card-grid -->
+
+  </div><!-- /em-list-section -->
+
+</div><!-- /em-page -->

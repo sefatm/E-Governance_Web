@@ -1,0 +1,183 @@
+<div class="container">
+
+  <h2>Online Payment Management</h2>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <i class="fas fa-check-circle"></i>
+      <div class="sc-num">৳ {{ totalCollected | number }}</div>
+      <div class="sc-lbl">Total Collected</div>
+    </div>
+    <div class="stat-card sc-blue">
+      <i class="fas fa-receipt"></i>
+      <div class="sc-num">{{ completedCount }}</div>
+      <div class="sc-lbl">{{ ls.current === "bn" ? "সম্পন্ন" : "Completed" }}</div>
+    </div>
+    <div class="stat-card sc-yellow">
+      <i class="fas fa-clock"></i>
+      <div class="sc-num">{{ pendingCount }}</div>
+      <div class="sc-lbl">{{ ls.current === "bn" ? "অপেক্ষমাণ" : "Pending" }}</div>
+    </div>
+    <div class="stat-card sc-red">
+      <i class="fas fa-times-circle"></i>
+      <div class="sc-num">{{ failedCount }}</div>
+      <div class="sc-lbl">{{ ls.current === "bn" ? "ব্যর্থ" : "Failed" }}</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tab-bar">
+    <button class="tab" [class.active]="activeTab==='transactions'" (click)="activeTab='transactions'">
+      <i class="fas fa-exchange-alt"></i> Transactions ({{ transactions.length }})
+    </button>
+    <button class="tab" [class.active]="activeTab==='receipts'" (click)="activeTab='receipts'">
+      <i class="fas fa-file-invoice"></i> Receipts ({{ receipts.length }})
+    </button>
+  </div>
+
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+  </div>
+
+  <!-- TRANSACTIONS TAB -->
+  <div *ngIf="activeTab==='transactions' && !isLoading">
+
+    <!-- Filters -->
+    <div class="filter-box">
+      <input type="text" placeholder="Search by name / NID / Ref..." [(ngModel)]="searchText" (input)="filterData()">
+
+      <select [(ngModel)]="filterStatus" (change)="filterData()">
+        <option value="">{{ ls.current === "bn" ? "সকল অবস্থা" : "All Status" }}</option>
+        <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+      </select>
+
+      <select [(ngModel)]="filterService" (change)="filterData()">
+        <option value="">All Services</option>
+        <option *ngFor="let s of services" [value]="s">{{ s }}</option>
+      </select>
+
+      <select [(ngModel)]="filterMethod" (change)="filterData()">
+        <option value="">All Methods</option>
+        <option *ngFor="let m of methods" [value]="m">{{ m }}</option>
+      </select>
+
+      <button (click)="clearFilter()">Clear</button>
+    </div>
+
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Transaction Ref</th>
+          <th>Citizen</th>
+          <th>Service</th>
+          <th>{{ ls.current === "bn" ? "পরিমাণ" : "Amount" }}</th>
+          <th>Method</th>
+          <th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let t of filteredTxns; let i=index">
+
+          <!-- Main Row -->
+          <tr>
+            <td>{{ i+1 }}</td>
+            <td><span class="mono">{{ t.txnRef }}</span></td>
+            <td>
+              <div>{{ t.citizenName }}</div>
+              <div class="sub-text">{{ t.citizenNid }}</div>
+            </td>
+            <td>{{ t.serviceType }}</td>
+            <td><b>৳ {{ t.amount | number }}</b></td>
+            <td>{{ t.method }}</td>
+            <td>{{ t.createdAt | date:'dd/MM/yy' }}</td>
+            <td>
+              <span [ngClass]="statusClass(t.status!)">{{ t.status }}</span>
+            </td>
+            <td>
+              <div class="action-cell">
+                <button class="icon-btn" (click)="toggleDetails(i)" [title]="ls.current === 'bn' ? 'দেখুন' : 'View'">
+                  <i class="fa fa-eye"></i>
+                </button>
+                <button class="icon-btn refund-btn"
+                  *ngIf="t.status === 'Completed'"
+                  (click)="refund(t.id!)" title="Refund">
+                  <i class="fas fa-undo"></i>
+                </button>
+                <button class="icon-btn"
+                  *ngIf="t.status === 'Completed'"
+                  (click)="downloadReceiptPdfByTxn(t.id)" title="Download Receipt PDF">
+                  <i class="fas fa-file-pdf"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Details Row -->
+          <tr *ngIf="expandedIndex === i">
+            <td colspan="9">
+              <div class="details-box">
+                <p><b>Mobile:</b> {{ t.mobile }}</p>
+                <p *ngIf="t.email"><b>Email:</b> {{ t.email }}</p>
+                <p *ngIf="t.description"><b>Description:</b> {{ t.description }}</p>
+                <p *ngIf="t.providerTxnId"><b>Provider TXN ID:</b> {{ t.providerTxnId }}</p>
+                <p *ngIf="t.cardLast4"><b>Card:</b> **** {{ t.cardLast4 }}</p>
+                <p *ngIf="t.paidAt"><b>Paid At:</b> {{ t.paidAt | date:'dd MMM yyyy, hh:mm a' }}</p>
+                <p *ngIf="t.failureReason" style="color:#dc2626"><b>Failure Reason:</b> {{ t.failureReason }}</p>
+              </div>
+            </td>
+          </tr>
+
+        </ng-container>
+
+        <tr *ngIf="filteredTxns.length === 0">
+          <td colspan="9">No transactions found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RECEIPTS TAB -->
+  <div *ngIf="activeTab==='receipts' && !isLoading">
+    <table class="app-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Receipt No</th>
+          <th>Citizen</th>
+          <th>Service</th>
+          <th>{{ ls.current === "bn" ? "পরিমাণ" : "Amount" }}</th>
+          <th>Method</th>
+          <th>Issued Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of receipts; let i=index">
+          <td>{{ i+1 }}</td>
+          <td><span class="mono">{{ r.receiptNo }}</span></td>
+          <td>
+            <div>{{ r.citizenName }}</div>
+            <div class="sub-text">{{ r.citizenNid }}</div>
+          </td>
+          <td>{{ r.serviceType }}</td>
+          <td><b>৳ {{ r.amount | number }}</b></td>
+          <td>{{ r.method }}</td>
+          <td>{{ r.issuedAt | date:'dd/MM/yy, hh:mm a' }}</td>
+          <td>
+            <button class="icon-btn" (click)="downloadReceiptPdfById(r.id, r.receiptNo)" title="Download Receipt PDF">
+              <i class="fas fa-file-pdf"></i>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="receipts.length === 0">
+          <td colspan="8">No receipts found.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>

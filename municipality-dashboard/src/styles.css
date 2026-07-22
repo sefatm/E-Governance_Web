@@ -1,0 +1,52 @@
+/* Global styles */
+@import "./styles-admin-data-view.css";
+
+@media print {
+  /* Hide Sidebar */
+  app-sidebar,
+  .sidebar {
+    display: none !important;
+  }
+
+  /* Hide Navbar / Topbar */
+  app-navbar,
+  .topbar {
+    display: none !important;
+  }
+
+  /* Hide Footer */
+  app-footer,
+  footer {
+    display: none !important;
+  }
+
+  /* Remove sidebar margin — full width print */
+  .main,
+  .main.collapsed {
+    margin-left: 0 !important;
+  }
+
+  /* Hide everything EXCEPT the receipt area */
+  body * {
+    visibility: hidden;
+  }
+
+  /* Show only the receipt card and its children */
+  #receipt-print,
+  #receipt-print * {
+    visibility: visible;
+  }
+
+  /* Position receipt at top-left of page */
+  #receipt-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+
+  /* Clean page for print */
+  body {
+    background: #fff !important;
+  }
+}

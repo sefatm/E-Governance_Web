@@ -1,0 +1,46 @@
+<div class="container">
+  <h2>Super Admin Users</h2>
+
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+  </div>
+
+  <table class="app-table" *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th>
+        <th>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}</th>
+        <th>{{ ls.current === "bn" ? "ভূমিকা" : "Role" }}</th>
+        <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+        <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of users; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>
+          <div class="user-avatar-row">
+            <div class="avatar">{{ u.name?.charAt(0)?.toUpperCase() }}</div>
+            <span>{{ u.name }}</span>
+          </div>
+        </td>
+        <td>{{ u.email }}</td>
+        <td><span class="role-tag">{{ u.role }}</span></td>
+        <td>
+          <span class="status-badge" [class.active]="u.status === 'Active'" [class.inactive]="u.status !== 'Active'">
+            {{ u.status }}
+          </span>
+        </td>
+        <td>
+          <button class="btn-toggle" [class.btn-deactivate]="u.status === 'Active'" [class.btn-activate]="u.status !== 'Active'" (click)="toggleStatus(u)">
+            {{ u.status === 'Active' ? 'Deactivate' : 'Activate' }}
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="users.length === 0 && !isLoading">
+        <td colspan="6" class="no-data">No users found for this role.</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

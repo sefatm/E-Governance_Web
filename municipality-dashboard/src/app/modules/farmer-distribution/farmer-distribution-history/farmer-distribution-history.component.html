@@ -1,0 +1,307 @@
+<!-- farmer-distribution-history.component.html -->
+<div class="dist-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h2><i class="fas fa-seedling me-2" style="color:#059669"></i> কৃষক স্টক ও বিতরণ ব্যবস্থাপনা</h2>
+      <p>স্টক এন্ট্রি, অবশিষ্ট মজুদ, কার্ডভিত্তিক বিতরণ ও সম্পূর্ণ ইতিহাস এক জায়গায়</p>
+    </div>
+    <div class="header-stats">
+      <div class="hstat-chip">
+        <i class="fas fa-wheat-awn"></i>
+        <span>{{ totalFertilizer | number:'1.0-1' }} kg সার</span>
+      </div>
+      <div class="hstat-chip seed">
+        <i class="fas fa-leaf"></i>
+        <span>{{ totalSeed | number:'1.0-1' }} kg বীজ</span>
+      </div>
+      <div class="hstat-chip farmer">
+        <i class="fas fa-users"></i>
+        <span>{{ logs.length }} কৃষক</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="cycle-select">
+      <label>চক্র (মাস)</label>
+      <input type="month" [(ngModel)]="selectedCycle" (change)="loadCycle()">
+    </div>
+    <select [(ngModel)]="filterWard" (change)="applyFilter()" class="f-select">
+      <option value="">{{ ls.current === "bn" ? "সকল ওয়ার্ড" : "All Wards" }}</option>
+      <option *ngFor="let w of wardList" [value]="w">ওয়ার্ড {{ w }}</option>
+    </select>
+    <select [(ngModel)]="filterSeason" (change)="applyFilter()" class="f-select">
+      <option value="">সকল মৌসুম</option>
+      <option>রবি (শীতকালীন)</option>
+      <option>খরিফ-১ (গ্রীষ্মকালীন)</option>
+      <option>খরিফ-২ (বর্ষাকালীন)</option>
+    </select>
+    <button class="btn-refresh" (click)="loadCycle()" [title]="ls.current === 'bn' ? 'রিফ্রেশ' : 'Refresh'">
+      <i class="fas fa-rotate-right"></i>
+    </button>
+    <button class="btn-csv" (click)="exportCsv()">
+      <i class="fas fa-file-csv"></i> CSV
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       STOCK MANAGEMENT SECTION (নতুন)
+       ══════════════════════════════════════════════════ -->
+
+  <!-- Stock entry form -->
+  <div class="form-card">
+    <div class="form-card-head" (click)="stockFormOpen=!stockFormOpen" style="cursor:pointer">
+      <h3><i class="fas fa-boxes-stacked me-2"></i>স্টক যোগ / আপডেট করুন</h3>
+      <i class="fas" [class.fa-chevron-up]="stockFormOpen" [class.fa-chevron-down]="!stockFormOpen"></i>
+    </div>
+    <div class="form-body" *ngIf="stockFormOpen">
+      <div class="form-grid">
+        <div class="field-group">
+          <label>চক্র (মাস) <span class="req">*</span></label>
+          <input type="month" [(ngModel)]="stockForm.cycleMonth">
+        </div>
+        <div class="field-group">
+          <label>Batch/লট নং</label>
+          <input [(ngModel)]="stockForm.batchNo" placeholder="যেমন: BATCH-2025-06">
+        </div>
+        <div class="field-group">
+          <label>সার মজুদ (kg) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="stockForm.fertilizerKg" min="0" placeholder="0">
+        </div>
+        <div class="field-group">
+          <label>বীজ মজুদ (kg) <span class="req">*</span></label>
+          <input type="number" [(ngModel)]="stockForm.seedKg" min="0" placeholder="0">
+        </div>
+        <div class="field-group">
+          <label>কীটনাশক মজুদ (লিটার)</label>
+          <input type="number" [(ngModel)]="stockForm.pesticideLitre" min="0" placeholder="0">
+        </div>
+        <div class="field-group">
+          <label>{{ ls.current === "bn" ? "মন্তব্য" : "Comments" }}</label>
+          <input [(ngModel)]="stockForm.note" placeholder="ঐচ্ছিক">
+        </div>
+      </div>
+      <div class="form-footer">
+        <button class="btn-save" (click)="saveStock()" [disabled]="stockSaving">
+          <i class="fas" [class.fa-floppy-disk]="!stockSaving"
+             [class.fa-spinner]="stockSaving" [class.fa-spin]="stockSaving"></i>
+          {{ stockSaving ? 'সংরক্ষণ হচ্ছে...' : 'স্টক সংরক্ষণ করুন' }}
+        </button>
+        <button class="btn-clear" (click)="clearStockForm()">
+          <i class="fas fa-xmark"></i> Clear
+        </button>
+        <span class="form-msg" *ngIf="stockMsg" [class.error]="stockError">
+          <i class="fas" [class.fa-check-circle]="!stockError"
+             [class.fa-exclamation-triangle]="stockError"></i>
+          {{ stockMsg }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stock summary table -->
+  <div class="section-card stock-section">
+    <div class="section-head">
+      <h3><i class="fas fa-warehouse me-2"></i>স্টক সারসংক্ষেপ</h3>
+      <button class="btn-refresh" (click)="loadStock()" [title]="ls.current === 'bn' ? 'রিফ্রেশ' : 'Refresh'">
+        <i class="fas fa-rotate-right"></i>
+      </button>
+    </div>
+
+    <!-- Totals chips -->
+    <div class="stock-totals" *ngIf="!stockLoading && stockList.length > 0">
+      <div class="stotal-chip fertilizer">
+        <i class="fas fa-wheat-awn"></i>
+        <div>
+          <span class="sv">{{ totalStockFertilizer | number:'1.0-1' }} kg</span>
+          <label>মোট সার মজুদ</label>
+        </div>
+      </div>
+      <div class="stotal-chip seed">
+        <i class="fas fa-leaf"></i>
+        <div>
+          <span class="sv">{{ totalStockSeed | number:'1.0-1' }} kg</span>
+          <label>মোট বীজ মজুদ</label>
+        </div>
+      </div>
+      <div class="stotal-chip pesticide">
+        <i class="fas fa-flask"></i>
+        <div>
+          <span class="sv">{{ totalStockPesticide | number:'1.0-1' }} L</span>
+          <label>মোট কীটনাশক</label>
+        </div>
+      </div>
+      <div class="stotal-chip distributed">
+        <i class="fas fa-truck"></i>
+        <div>
+          <span class="sv">{{ totalFertilizer + totalSeed | number:'1.0-1' }} kg</span>
+          <label>এই চক্রে বিতরণ</label>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="stockLoading" class="state-loading">
+      <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+
+    <div *ngIf="!stockLoading" class="table-wrap">
+      <table class="stock-table" *ngIf="stockList.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>চক্র</th>
+            <th>Batch নং</th>
+            <th>সার মজুদ (kg)</th>
+            <th>বিতরণ (kg)</th>
+            <th>অবশিষ্ট (kg)</th>
+            <th>বীজ মজুদ (kg)</th>
+            <th>বীজ বিতরণ (kg)</th>
+            <th>বীজ বাকি (kg)</th>
+            <th>কীটনাশক (L)</th>
+            <th>{{ ls.current === "bn" ? "অগ্রগতি" : "Progress" }}</th>
+            <th>{{ ls.current === "bn" ? "মন্তব্য" : "Comments" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of stockList; let i=index"
+              [class.row-low]="s.fertilizerRemaining < s.fertilizerKg * 0.2">
+            <td class="td-num">{{ i+1 }}</td>
+            <td><code>{{ s.cycleMonth }}</code></td>
+            <td class="td-batch">{{ s.batchNo || '—' }}</td>
+            <td class="td-item">{{ s.fertilizerKg | number:'1.0-1' }}</td>
+            <td class="td-dist">{{ s.fertilizerDistributed | number:'1.0-1' }}</td>
+            <td>
+              <b [class.low]="s.fertilizerRemaining < s.fertilizerKg * 0.2"
+                 [class.zero]="s.fertilizerRemaining <= 0">
+                {{ s.fertilizerRemaining | number:'1.0-1' }}
+              </b>
+            </td>
+            <td class="td-item">{{ s.seedKg | number:'1.0-1' }}</td>
+            <td class="td-dist">{{ s.seedDistributed | number:'1.0-1' }}</td>
+            <td>
+              <b [class.low]="s.seedRemaining < s.seedKg * 0.2"
+                 [class.zero]="s.seedRemaining <= 0">
+                {{ s.seedRemaining | number:'1.0-1' }}
+              </b>
+            </td>
+            <td class="td-item">{{ s.pesticideLitre || 0 | number:'1.0-1' }}</td>
+            <td class="td-progress">
+              <div class="progress-bar">
+                <div class="progress-fill"
+                     [class.high]="getFertPct(s) >= 60"
+                     [class.full]="getFertPct(s) >= 90"
+                     [style.width.%]="getFertPct(s)"></div>
+              </div>
+              <span class="pct-label">{{ getFertPct(s) }}% বিতরণ</span>
+            </td>
+            <td class="td-note">{{ s.note || '—' }}</td>
+          </tr>
+        </tbody>
+        <!-- Total row -->
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="3" class="total-label">{{ ls.current === "bn" ? "মোট" : "Total" }}</td>
+            <td class="td-item"><b>{{ totalStockFertilizer | number:'1.0-1' }}</b></td>
+            <td class="td-dist"><b>{{ totalDistFertilizer | number:'1.0-1' }}</b></td>
+            <td><b>{{ totalStockFertilizer - totalDistFertilizer | number:'1.0-1' }}</b></td>
+            <td class="td-item"><b>{{ totalStockSeed | number:'1.0-1' }}</b></td>
+            <td class="td-dist"><b>{{ totalDistSeed | number:'1.0-1' }}</b></td>
+            <td><b>{{ totalStockSeed - totalDistSeed | number:'1.0-1' }}</b></td>
+            <td class="td-item"><b>{{ totalStockPesticide | number:'1.0-1' }}</b></td>
+            <td colspan="2"></td>
+          </tr>
+        </tfoot>
+      </table>
+      <div *ngIf="stockList.length === 0" class="state-empty">
+        <i class="fas fa-boxes-stacked"></i>
+        <p>এই চক্রের জন্য কোনো স্টক এন্ট্রি নেই।</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       CARD LOOKUP SECTION
+       ══════════════════════════════════════════════════ -->
+  <div class="lookup-panel">
+    <div class="lookup-title">
+      <i class="fas fa-id-card me-2" style="color:#059669"></i>
+      কার্ড নম্বর দিয়ে ইতিহাস দেখুন
+    </div>
+    <div class="lookup-row">
+      <input [(ngModel)]="lookupCardNo" placeholder="FRM-02-2025-XXXXX"
+             (keydown.enter)="lookupCard()">
+      <button class="btn-lookup" (click)="lookupCard()" [disabled]="lookupLoading">
+        <i class="fas fa-search me-1"></i>
+        {{ lookupLoading ? 'খোঁজা হচ্ছে...' : 'খুঁজুন' }}
+      </button>
+    </div>
+
+    <div *ngIf="cardLogs.length > 0" class="lookup-result">
+      <div class="lookup-summary">
+        <b>{{ cardLogs[0].farmerName }}</b>
+        <span class="lbadge">{{ cardLogs.length }}টি বিতরণ</span>
+      </div>
+      <table class="dist-table">
+        <thead><tr>
+          <th>#</th><th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th><th>মৌসুম</th><th>চক্র</th>
+          <th>সার (kg)</th><th>বীজ (kg)</th><th>বিতরণকারী</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let l of cardLogs; let i=index">
+            <td class="td-num">{{ i+1 }}</td>
+            <td>{{ l.distDate | date:'dd MMM yy' }}</td>
+            <td>{{ l.season }}</td>
+            <td><code>{{ l.cycleMonth }}</code></td>
+            <td class="td-val">{{ l.fertilizerKg > 0 ? l.fertilizerKg : '—' }}</td>
+            <td class="td-val">{{ l.seedKg > 0 ? l.seedKg : '—' }}</td>
+            <td class="td-by">{{ l.distributedBy }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div *ngIf="lookupDone && cardLogs.length === 0 && !lookupLoading" class="empty-lookup">
+      <i class="fas fa-inbox"></i><p>এই কার্ডের কোনো বিতরণ রেকর্ড নেই।</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       CYCLE LOG TABLE
+       ══════════════════════════════════════════════════ -->
+  <div class="section-card">
+    <div class="section-head">
+      <h3><i class="fas fa-table me-2"></i>{{ selectedCycle }} চক্রের বিতরণ</h3>
+    </div>
+
+    <div *ngIf="isLoading" class="state-loading">
+      <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+
+    <div *ngIf="!isLoading" class="table-wrap">
+      <table class="dist-table" *ngIf="filteredLogs.length > 0">
+        <thead><tr>
+          <th>#</th><th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th><th>কার্ড নং</th><th>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</th>
+          <th>মৌসুম</th><th>সার (kg)</th><th>বীজ (kg)</th>
+          <th>{{ ls.current === "bn" ? "তারিখ" : "Date" }}</th><th>বিতরণকারী</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngFor="let l of filteredLogs; let i=index">
+            <td class="td-num">{{ i+1 }}</td>
+            <td class="td-name">{{ l.farmerName }}</td>
+            <td><code>{{ l.cardNo }}</code></td>
+            <td>{{ l.ward || '—' }}</td>
+            <td>{{ l.season }}</td>
+            <td class="td-val">{{ l.fertilizerKg > 0 ? l.fertilizerKg : '—' }}</td>
+            <td class="td-val">{{ l.seedKg > 0 ? l.seedKg : '—' }}</td>
+            <td class="td-date">{{ l.distDate | date:'dd MMM yy' }}</td>
+            <td class="td-by">{{ l.distributedBy }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="filteredLogs.length === 0" class="state-empty">
+        <i class="fas fa-inbox"></i><p>এই চক্রে কোনো বিতরণ রেকর্ড নেই।</p>
+      </div>
+    </div>
+  </div>
+
+</div>

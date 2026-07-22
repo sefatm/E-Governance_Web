@@ -1,0 +1,180 @@
+<div class="ward-page">
+
+  <!-- Success / Error -->
+  <div class="msg msg--ok"   *ngIf="successMsg">✅ {{ successMsg }}</div>
+  <div class="msg msg--fail" *ngIf="errorMsg">⚠️ {{ errorMsg }}</div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="ph-icon"><i class="fas fa-map"></i></div>
+      <div>
+        <h2 class="ph-title">Ward Management</h2>
+        <p class="ph-sub">Manage all wards, population data and councillor information</p>
+      </div>
+    </div>
+    <button class="add-btn" (click)="openAdd()">
+      <i class="fas fa-plus"></i> Add Ward
+    </button>
+  </div>
+
+  <!-- KPI cards -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-ico green"><i class="fas fa-map-marker-alt"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Total Wards</span>
+        <span class="kpi-val">{{wards.length}}</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico blue"><i class="fas fa-users"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Total Population</span>
+        <span class="kpi-val">{{totalPopulation | number}}</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico green"><i class="fas fa-check-circle"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Active Wards</span>
+        <span class="kpi-val">{{activeCount}}</span>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-ico orange"><i class="fas fa-pause-circle"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Inactive Wards</span>
+        <span class="kpi-val">{{wards.length - activeCount}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="fas fa-search"></i>
+      <input type="text" placeholder="Search ward name or councillor..." [(ngModel)]="searchText">
+    </div>
+    <select [(ngModel)]="filterStatus">
+      <option value="">{{ ls.current === "bn" ? "সকল অবস্থা" : "All Status" }}</option>
+      <option value="Active">{{ ls.current === "bn" ? "সক্রিয়" : "Active" }}</option>
+      <option value="Inactive">{{ ls.current === "bn" ? "নিষ্ক্রিয়" : "Inactive" }}</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table class="ward-table">
+      <thead>
+        <tr>
+          <th>No.</th><th>Ward Name</th><th>{{ ls.current === "bn" ? "জনসংখ্যা" : "Population" }}</th>
+          <th>Area (km²)</th><th>Councillor</th><th>Contact</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th><th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+  
+        <tr *ngFor="let w of filtered">
+          <td class="td-center">{{w.number}}</td>
+          <td><strong>{{w.name}}</strong></td>
+          <td>{{w.population | number}}</td>
+          <td class="td-center">{{w.area || '—'}}</td>
+          <td>
+            <div class="councillor-cell">
+              <div class="c-av"><i class="fas fa-user-tie"></i></div>
+              {{w.representative || '—'}}
+            </div>
+          </td>
+          <td class="td-contact">{{w.contact || '—'}}</td>
+          <td>
+            <span class="status-badge" [class.active]="w.status==='Active'" [class.inactive]="w.status==='Inactive'">
+              {{w.status}}
+            </span>
+          </td>
+
+          <td>
+            <div class="action-row">
+              <button class="act-btn edit"   (click)="openEdit(w)"         [title]="ls.current === 'bn' ? 'সম্পাদনা' : 'Edit'"><i class="fas fa-edit"></i></button>
+              <button class="act-btn toggle" (click)="toggleStatus(w)"     title="Toggle Status">
+                <i class="fas" [class.fa-toggle-on]="w.status==='Active'" [class.fa-toggle-off]="w.status!=='Active'"></i>
+              </button>
+              <button class="act-btn del"    (click)="delete(w)"           [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'"><i class="fas fa-trash"></i></button>
+            </div>
+          </td>
+        </tr>
+        
+        <tr *ngIf="filtered.length === 0">
+          <td colspan="8" class="no-data"><i class="fas fa-inbox"></i> No wards found</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal-backdrop" *ngIf="showForm" (click)="cancel()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+
+      <div class="modal-head">
+        <h3>{{ editId === null ? 'Add New Ward' : 'Edit Ward' }}</h3>
+        <button class="modal-close" (click)="cancel()"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Error inside modal -->
+        <div class="msg msg--fail" *ngIf="errorMsg" style="margin-bottom:12px">⚠️ {{ errorMsg }}</div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>{{ ls.current === "bn" ? "ওয়ার্ড নম্বর" : "Ward Number" }} <span class="req">*</span></label>
+            <input type="number" [(ngModel)]="form.number" placeholder="e.g. 1">
+          </div>
+          <div class="form-group">
+            <label>Ward Name <span class="req">*</span></label>
+            <input type="text" [(ngModel)]="form.name" placeholder="e.g. Ward 01">
+          </div>
+          <div class="form-group">
+            <label>{{ ls.current === "bn" ? "জনসংখ্যা" : "Population" }}</label>
+            <input type="number" [(ngModel)]="form.population" placeholder="e.g. 12000">
+          </div>
+          <div class="form-group">
+            <label>Area (km²)</label>
+            <input type="number" step="0.01" [(ngModel)]="form.area" placeholder="e.g. 2.4">
+          </div>
+          <div class="form-group full">
+            <label>Councillor / Representative</label>
+            <input type="text" [(ngModel)]="form.representative" placeholder="Full name">
+          </div>
+          <div class="form-group">
+            <label>{{ ls.current === "bn" ? "যোগাযোগ নম্বর" : "Contact Number" }}</label>
+            <input type="text" [(ngModel)]="form.contact" placeholder="01XXXXXXXXX">
+          </div>
+          <div class="form-group">
+            <label>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</label>
+            <select [(ngModel)]="form.status">
+              <option value="Active">{{ ls.current === "bn" ? "সক্রিয়" : "Active" }}</option>
+              <option value="Inactive">{{ ls.current === "bn" ? "নিষ্ক্রিয়" : "Inactive" }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn-cancel" (click)="cancel()">{{ ls.current === "bn" ? "বাতিল" : "Cancel" }}</button>
+        <button class="btn-save" (click)="save()" [disabled]="isSubmitting">
+          <i class="fas" [ngClass]="isSubmitting ? 'fa-spinner fa-spin' : 'fa-save'"></i>
+          {{ isSubmitting ? 'Saving...' : (editId === null ? 'Add Ward' : 'Update Ward') }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Extra CSS additions needed in ward-list.component.css -->
+<style id="ward-extra-styles">
+.msg { padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 12px; }
+.msg--ok   { background: #f0fdf4; border-left: 4px solid #16a34a; color: #166534; }
+.msg--fail { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; }
+</style>

@@ -1,0 +1,150 @@
+/* footer.component.css — Compact single-row design */
+
+.footer {
+  flex-shrink: 0;   
+  background: linear-gradient(90deg, #072d17 0%, #0a3d20 50%, #072d17 100%);
+  color: rgba(255, 255, 255, 0.80);
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  border-top: 3px solid #0f7a3f;
+}
+
+/* ── Main row: Brand | Divider | Contact | Gov badge ── */
+.footer-main {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 14px 28px;
+  flex-wrap: wrap;
+}
+
+/* Brand */
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  width: 38px;
+  height: 38px;
+  background: rgba(15, 122, 63, 0.30);
+  border: 1.5px solid rgba(15, 122, 63, 0.50);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  color: #86efac;
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.brand-sub {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.50);
+  margin-top: 1px;
+}
+
+/* Vertical divider */
+.v-divider {
+  width: 1px;
+  height: 38px;
+  background: rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+/* Contact items */
+.footer-contact {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.60);
+  white-space: nowrap;
+}
+
+.contact-item i {
+  color: #86efac;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+/* Gov badge */
+.footer-gov {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 10px;
+  padding: 7px 14px;
+}
+
+.footer-gov > i {
+  font-size: 18px;
+  color: #86efac;
+  flex-shrink: 0;
+}
+
+.gov-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.80);
+  line-height: 1.2;
+}
+
+.gov-sub {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* ── Bottom copyright strip ── */
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 28px;
+  background: rgba(0, 0, 0, 0.20);
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.38);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer-version {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
+  padding: 2px 9px;
+  color: rgba(255, 255, 255, 0.40);
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .footer-main   { padding: 12px 20px; gap: 16px; }
+  .footer-bottom { padding: 7px 20px; }
+  .v-divider     { display: none; }
+  .footer-gov    { display: none; }
+  .footer-contact { gap: 12px; }
+}
+
+@media (max-width: 600px) {
+  .footer-contact { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .footer-bottom  { flex-direction: column; gap: 4px; align-items: flex-start; }
+}

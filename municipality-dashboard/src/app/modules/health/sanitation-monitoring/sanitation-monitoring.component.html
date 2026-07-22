@@ -1,0 +1,190 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="successMsg || errorMsg">
+  <div *ngIf="successMsg" class="tl-toast tl-toast--ok">
+    <i class="fas fa-circle-check"></i><span>{{ successMsg }}</span>
+  </div>
+  <div *ngIf="errorMsg" class="tl-toast tl-toast--fail">
+    <i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span>
+  </div>
+</div>
+
+<div class="tl-page">
+
+  <!-- ── Header ── -->
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">পয়ঃনিষ্কাশন পর্যবেক্ষণ ও অভিযোগ</h2>
+        <span class="tl-header__title-en">Sanitation Monitoring &amp; Complaint — Health &amp; Sanitation Division</span>
+        <span class="tl-header__sub">Fields marked <span class="req">*</span> are mandatory</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Gov Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- ── Form Card ── -->
+  <div class="tl-card">
+    <div class="tl-panel tl-panel--active">
+
+      <!-- Panel head -->
+      <div class="tl-panel__head">
+        <div class="tl-panel__icon"><i class="fas fa-toilet"></i></div>
+        <div>
+          <h3>নতুন পরিদর্শন / অভিযোগ দাখিল করুন</h3>
+          <p>পয়ঃনিষ্কাশন সংক্রান্ত যেকোনো সমস্যা এখানে জানান</p>
+        </div>
+      </div>
+
+      <!-- Section: Reporter Info -->
+      <div class="tl-section-label">
+        <i class="fas fa-user"></i> রিপোর্টকারীর তথ্য
+      </div>
+      <div class="tl-grid-2">
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "নাম" : "Name" }}</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-user tl-ico"></i>
+            <input type="text" [(ngModel)]="form.name" placeholder="আপনার নাম (ঐচ্ছিক)">
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}<span style="color:#6b7280;font-size:11px">(বিজ্ঞপ্তি পেতে)</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-envelope tl-ico"></i>
+            <input type="email" [(ngModel)]="form.email" placeholder="example@email.com (ঐচ্ছিক)">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Section: Complaint Info -->
+      <div class="tl-section-label" style="margin-top:24px">
+        <i class="fas fa-map-marker-alt"></i> {{ ls.current === "bn" ? "অভিযোগের বিবরণ" : "Complaint Details" }}</div>
+      <div class="tl-grid-2">
+
+        <div class="tl-field">
+          <label>এলাকা / অবস্থান <span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-location-dot tl-ico"></i>
+            <input type="text" [(ngModel)]="form.area"
+                   [class.tl-invalid]="submitted && !form.area"
+                   placeholder="এলাকার নাম / ঠিকানা">
+          </div>
+          <div class="tl-err" *ngIf="submitted && !form.area">
+            <i class="fas fa-circle-exclamation"></i> এলাকা আবশ্যক
+          </div>
+        </div>
+
+        <div class="tl-field">
+          <label>{{ ls.current === "bn" ? "সমস্যার ধরন" : "Issue Type" }}<span class="req">*</span></label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-triangle-exclamation tl-ico"></i>
+            <select [(ngModel)]="form.issue" [class.tl-invalid]="submitted && !form.issue">
+              <option value="">সমস্যা নির্বাচন করুন</option>
+              <option>ময়লার উপচে পড়া</option>
+              <option>ড্রেন বন্ধ</option>
+              <option>নোংরা পরিবেশ</option>
+              <option>খোলা ড্রেন</option>
+              <option>দুর্গন্ধ সমস্যা</option>
+              <option>{{ ls.current === "bn" ? "অন্যান্য" : "Other" }}</option>
+            </select>
+          </div>
+          <div class="tl-err" *ngIf="submitted && !form.issue">
+            <i class="fas fa-circle-exclamation"></i> সমস্যার ধরন আবশ্যক
+          </div>
+        </div>
+
+        <div class="tl-field tl-field--full" style="grid-column:1/-1">
+          <label>বিস্তারিত বিবরণ</label>
+          <div class="tl-input-wrap">
+            <i class="fas fa-pen tl-ico tl-ico--top"></i>
+            <textarea [(ngModel)]="form.description" rows="3"
+                      placeholder="সমস্যার বিস্তারিত বর্ণনা দিন..."></textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Submit button -->
+      <div class="tl-nav" style="justify-content:flex-end">
+        <button class="tl-btn tl-btn--submit" (click)="addRecord()" [disabled]="isSubmitting">
+          <i class="fas fa-paper-plane"></i>
+          {{ isSubmitting ? 'দাখিল হচ্ছে...' : 'দাখিল করুন' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Records Table ── -->
+  <div class="tl-records-section">
+    <div class="tl-records-head">
+      <h3><i class="fas fa-list-check"></i> দাখিলকৃত অভিযোগ সমূহ</h3>
+      <span class="tl-count-badge">{{ records.length }} টি রেকর্ড</span>
+    </div>
+
+    <div class="tl-table-wrap">
+      <table class="tl-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>রিপোর্টকারী</th>
+            <th>এলাকা</th>
+            <th>{{ ls.current === "bn" ? "সমস্যার ধরন" : "Issue Type" }}</th>
+            <th>{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</th>
+            <th>{{ ls.current === "bn" ? "ইমেইল" : "Email" }}</th>
+            <th>স্ট্যাটাস</th>
+            <th>অ্যাকশন</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of records; let i = index">
+            <td class="td-num">{{ i + 1 }}</td>
+            <td>{{ r.name || '—' }}</td>
+            <td><strong>{{ r.area }}</strong></td>
+            <td>
+              <span class="issue-badge">{{ r.issue }}</span>
+            </td>
+            <td class="td-desc">{{ r.description || '—' }}</td>
+            <td class="td-mono">{{ r.email || '—' }}</td>
+            <td>
+              <span class="status-pill"
+                [class.s-pending]="r.status === 'Pending'"
+                [class.s-resolved]="r.status === 'Resolved'">
+                <span class="s-dot"></span>{{ r.status }}
+              </span>
+            </td>
+            <td>
+              <div class="action-btns">
+                <button class="act-btn act-pending"  [title]="ls.current === 'bn' ? 'অপেক্ষমাণ' : 'Pending'"  (click)="updateStatus(r, 'Pending')">
+                  <i class="fas fa-clock"></i>
+                </button>
+                <button class="act-btn act-resolved" [title]="ls.current === 'bn' ? 'সমাধান হয়েছে' : 'Resolved'" (click)="updateStatus(r, 'Resolved')">
+                  <i class="fas fa-circle-check"></i>
+                </button>
+                <button class="act-btn act-delete"   [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'"   (click)="deleteRecord(r.id)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="records.length === 0">
+            <td colspan="8" class="no-data">
+              <i class="fas fa-inbox" style="font-size:28px;display:block;margin-bottom:8px;color:#d1d5db"></i>
+              কোনো রেকর্ড পাওয়া যায়নি
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>

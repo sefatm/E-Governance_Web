@@ -1,0 +1,110 @@
+<div class="page-wrapper">
+
+  <h2>Voter Approval Panel</h2>
+
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="spinner"></div>
+    <span>{{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</span>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="!isLoading && errorMessage" class="error-state">
+    <span class="error-icon">⚠</span>
+    <span>{{ errorMessage }}</span>
+    <button class="btn-retry" (click)="loadVoters()">Try again</button>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!isLoading && !errorMessage && voters.length === 0" class="empty-state">
+    No voter registrations found.
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrapper" *ngIf="!isLoading && !errorMessage && voters.length > 0">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th>
+          <th>{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</th>
+          <th>{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</th>
+          <th>Election Type</th>
+          <th>Zone</th>
+          <th>Center</th>
+          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+          <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Actions" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of voters; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ v.name }}</td>
+          <td>{{ v.nid }}</td>
+          <td>{{ v.mobile }}</td>
+          <td>{{ v.electionType }}</td>
+          <td>{{ v.zoneId }}</td>
+          <td>{{ v.centerId }}</td>
+
+          <td>
+            <span [ngClass]="{
+              'badge-pending':  v.status?.toUpperCase() === 'PENDING',
+              'badge-approved': v.status?.toUpperCase() === 'APPROVED',
+              'badge-rejected': v.status?.toUpperCase() === 'REJECTED'
+            }">{{ v.status }}</span>
+          </td>
+
+          <td class="action-cell">
+            <ng-container *ngIf="v.status?.toUpperCase() === 'PENDING'">
+              <button class="btn-approve" (click)="approve(v.id)">✓ Approve</button>
+              <button class="btn-reject"  (click)="toggleReject(v)">✗ Reject</button>
+              <div *ngIf="v.showReject" class="reject-box">
+                <input type="text" [(ngModel)]="v.rejectReason" placeholder="Enter reason..." />
+                <button class="btn-confirm" (click)="confirmReject(v)">{{ ls.current === "bn" ? "নিশ্চিত করুন" : "Confirm" }}</button>
+              </div>
+            </ng-container>
+
+            <button class="btn-view"   (click)="viewVoter(v)">👁 View</button>
+            <button class="btn-delete" (click)="deleteVoter(v.id)">🗑</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div *ngIf="selectedVoter !== null" class="modal-overlay" (click)="closeView()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Voter Details</h3>
+      <button class="btn-close" (click)="closeView()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "নাম" : "Name" }}</span>             <span class="value">{{ selectedVoter.name }}</span></div>
+      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</span>             <span class="value">{{ selectedVoter.nid }}</span></div>
+      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }}</span>     <span class="value">{{ selectedVoter.dob }}</span></div>
+      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "লিঙ্গ" : "Gender" }}</span>           <span class="value">{{ selectedVoter.gender }}</span></div>
+      <div class="detail-row"><span class="label">Father's Name</span>       <span class="value">{{ selectedVoter.fatherName }}</span></div>
+      <div class="detail-row"><span class="label">Mother's Name</span>       <span class="value">{{ selectedVoter.motherName }}</span></div>
+      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</span>          <span class="value">{{ selectedVoter.mobile }}</span></div>
+      <div class="detail-row"><span class="label">District</span>            <span class="value">{{ selectedVoter.district }}</span></div>
+      <div class="detail-row"><span class="label">Upazila</span>          <span class="value">{{ selectedVoter.upazila }}</span></div>
+      <div class="detail-row"><span class="label">Area</span>           <span class="value">{{ selectedVoter.area }}</span></div>
+      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "ঠিকানা" : "Address" }}</span>          <span class="value">{{ selectedVoter.address }}</span></div>
+      <div class="detail-row"><span class="label">Election Type</span>  <span class="value">{{ selectedVoter.electionType }}</span></div>
+      <div class="detail-row">
+        <span class="label">{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</span>
+        <span class="value" [ngClass]="{
+          'badge-pending':  selectedVoter.status?.toUpperCase() === 'PENDING',
+          'badge-approved': selectedVoter.status?.toUpperCase() === 'APPROVED',
+          'badge-rejected': selectedVoter.status?.toUpperCase() === 'REJECTED'
+        }">{{ selectedVoter.status }}</span>
+      </div>
+      <div class="detail-row" *ngIf="selectedVoter.rejectReason">
+        <span class="label">Reject Reason</span>
+        <span class="value badge-rejected">{{ selectedVoter.rejectReason }}</span>
+      </div>
+    </div>
+  </div>
+</div>

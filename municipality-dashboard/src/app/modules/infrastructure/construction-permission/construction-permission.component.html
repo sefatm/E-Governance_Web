@@ -1,0 +1,219 @@
+<div class="if-toast-area" *ngIf="toasts.length > 0">
+  <div *ngFor="let t of toasts" class="if-toast" [class.if-toast--ok]="t.type==='success'" [class.if-toast--fail]="t.type==='error'" [class.if-toast--out]="t.removing">
+    <i class="fas" [ngClass]="t.type==='success' ? 'fa-circle-check' : 'fa-circle-xmark'"></i>
+    <span>{{ t.message }}</span>
+  </div>
+</div>
+
+<div class="if-page">
+  <div class="if-header">
+    <div class="if-header__top">
+      <div class="if-header__logo-box">
+        <img src="assets/photo/bangladesh-govt.png" class="if-header__logo-img" onerror="this.style.display='none'">
+      </div>
+      <div class="if-header__text">
+        <span class="if-header__gov-bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="if-header__gov-en">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="if-header__title">নির্মাণ অনুমতি আবেদন ফরম</span>
+        <span class="if-header__title-en">{{ ls.current === "bn" ? "ভবন নির্মাণ অনুমতি আবেদন ফর্ম" : "Building Construction Permission Application Form" }}</span>
+      </div>
+      <img src="assets/photo/bangladesh-govt.png" class="if-header__logo-img-right" onerror="this.style.display='none'">
+    </div>
+    <div class="if-header__note">Fields marked <span>*</span> are mandatory</div>
+  </div>
+
+  <div class="if-steps">
+    <ng-container *ngFor="let s of steps; let i = index">
+      <div class="if-step" [class.if-step--active]="currentStep===i+1" [class.if-step--done]="currentStep>i+1">
+        <div class="if-step__circle">
+          <i class="fas fa-check" *ngIf="currentStep>i+1"></i>
+          <span *ngIf="currentStep<=i+1">{{i+1}}</span>
+        </div>
+        <span class="if-step__label">{{s}}</span>
+      </div>
+      <div class="if-step__line" [class.if-step__line--done]="currentStep>i+1" *ngIf="i<steps.length-1"></div>
+    </ng-container>
+  </div>
+
+  <div class="if-card">
+    <form novalidate>
+
+      <!-- Step 1 -->
+      <div class="if-panel" [class.if-panel--active]="currentStep===1">
+        <div class="if-panel__head">
+          <div class="if-panel__icon"><i class="fas fa-user-tie"></i></div>
+          <div><h3>{{ ls.current === "bn" ? "ব্যক্তিগত তথ্য" : "Personal Information" }}</h3><p>Enter applicant and property location details</p></div>
+          <span class="if-step-tag">Step 1 of 3</span>
+        </div>
+        <div class="if-grid-2">
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "আবেদনকারীর নাম" : "Applicant Name" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-user if-ico"></i>
+              <input type="text" [(ngModel)]="form.applicantName" name="applicantName" [class.invalid]="submitted&&!form.applicantName" placeholder="Full name as per NID">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Father / Guardian Name</label>
+            <div class="if-input-wrap"><i class="fas fa-user if-ico"></i>
+              <input type="text" [(ngModel)]="form.guardianName" name="guardianName" placeholder="Father or guardian name">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "এনআইডি নম্বর" : "NID Number" }}</label>
+            <div class="if-input-wrap"><i class="fas fa-id-card if-ico"></i>
+              <input type="text" [(ngModel)]="form.nid" name="nid" placeholder="10/13/17 digit NID">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "যোগাযোগ নম্বর" : "Contact Number" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-mobile-screen if-ico"></i>
+              <input type="text" [(ngModel)]="form.contact" name="contact" [class.invalid]="submitted&&!form.contact" placeholder="01XXXXXXXXX" (input)="onContactInput($event)">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Email</label>
+            <div class="if-input-wrap"><i class="fas fa-envelope if-ico"></i>
+              <input type="email" [(ngModel)]="form.email" name="email" placeholder="name@example.com">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>District <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-map if-ico"></i>
+              <input type="text" [(ngModel)]="form.district" name="district" [class.invalid]="submitted&&!form.district" placeholder="e.g. Dhaka">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Upazila <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-map-pin if-ico"></i>
+              <input type="text" [(ngModel)]="form.upazila" name="upazila" [class.invalid]="submitted&&!form.upazila" placeholder="Enter upazila">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-hashtag if-ico"></i>
+              <input type="text" [(ngModel)]="form.ward" name="ward" [class.invalid]="submitted&&!form.ward" placeholder="Ward number">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Plot / Holding No <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-home if-ico"></i>
+              <input type="text" [(ngModel)]="form.plotNo" name="plotNo" [class.invalid]="submitted&&!form.plotNo" placeholder="Plot or holding number">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Construction Location <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-location-dot if-ico"></i>
+              <input type="text" [(ngModel)]="form.location" name="location" [class.invalid]="submitted&&!form.location" placeholder="Area or road name">
+            </div>
+          </div>
+        </div>
+        <div class="if-nav"><span></span>
+          <button type="button" class="if-btn if-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="if-panel" [class.if-panel--active]="currentStep===2">
+        <div class="if-panel__head">
+          <div class="if-panel__icon"><i class="fas fa-building"></i></div>
+          <div><h3>Building Details</h3><p>Provide construction and engineer information</p></div>
+          <span class="if-step-tag">Step 2 of 3</span>
+        </div>
+        <div class="if-grid-2">
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "ভবনের ধরন" : "Building Type" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-building if-ico"></i>
+              <select [(ngModel)]="form.buildingType" name="buildingType" [class.invalid]="submitted&&!form.buildingType">
+                <option value="">Select type</option>
+                <option>Residential</option><option>Commercial</option>
+                <option>Mixed Use</option><option>Industrial</option>
+                <option>Religious</option><option>Educational</option>
+              </select>
+            </div>
+          </div>
+          <div class="if-field">
+            <label>{{ ls.current === "bn" ? "তলার সংখ্যা" : "Number of Floors" }} <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-layer-group if-ico"></i>
+              <input type="number" [(ngModel)]="form.floors" name="floors" [class.invalid]="submitted&&!form.floors" placeholder="e.g. 3">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Total Area (sq ft) <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-ruler-combined if-ico"></i>
+              <input type="number" [(ngModel)]="form.area" name="area" [class.invalid]="submitted&&!form.area" placeholder="e.g. 1200">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Land Size</label>
+            <div class="if-input-wrap"><i class="fas fa-vector-square if-ico"></i>
+              <input type="text" [(ngModel)]="form.landSize" name="landSize" placeholder="e.g. 5 Katha">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Construction Start Date <span class="req">*</span></label>
+            <div class="if-input-wrap"><i class="fas fa-calendar if-ico"></i>
+              <input type="date" [(ngModel)]="form.startDate" name="startDate" [class.invalid]="submitted&&!form.startDate">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Engineer / Architect Name</label>
+            <div class="if-input-wrap"><i class="fas fa-helmet-safety if-ico"></i>
+              <input type="text" [(ngModel)]="form.engineerName" name="engineerName" placeholder="Licensed engineer name">
+            </div>
+          </div>
+          <div class="if-field">
+            <label>Engineer License No</label>
+            <div class="if-input-wrap"><i class="fas fa-certificate if-ico"></i>
+              <input type="text" [(ngModel)]="form.licenseNo" name="licenseNo" placeholder="Engineering license number">
+            </div>
+          </div>
+        </div>
+        <div class="if-field if-field--full">
+          <label>Additional Description</label>
+          <div class="if-input-wrap"><i class="fas fa-pen-to-square if-ico if-ico--top"></i>
+            <textarea [(ngModel)]="form.description" name="description" rows="3" placeholder="Any additional information..."></textarea>
+          </div>
+        </div>
+        <div class="if-nav">
+          <button type="button" class="if-btn if-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}</button>
+          <button type="button" class="if-btn if-btn--next" (click)="nextStep()">{{ ls.current === "bn" ? "পরবর্তী" : "Next" }} <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="if-panel" [class.if-panel--active]="currentStep===3">
+        <div class="if-panel__head">
+          <div class="if-panel__icon"><i class="fas fa-file-signature"></i></div>
+          <div><h3>Declaration &amp; Submit</h3><p>Review your details and submit</p></div>
+          <span class="if-step-tag">Step 3 of 3</span>
+        </div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:20px;font-size:13px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div><span style="color:#64748b">Applicant:</span> <strong>{{form.applicantName}}</strong></div>
+            <div><span style="color:#64748b">Contact:</span> <strong>{{form.contact}}</strong></div>
+            <div><span style="color:#64748b">Location:</span> <strong>{{form.district}}, {{form.upazila}}</strong></div>
+            <div><span style="color:#64748b">Plot No:</span> <strong>{{form.plotNo}}</strong></div>
+            <div><span style="color:#64748b">Building Type:</span> <strong>{{form.buildingType}}</strong></div>
+            <div><span style="color:#64748b">Floors:</span> <strong>{{form.floors}}</strong></div>
+            <div><span style="color:#64748b">Area:</span> <strong>{{form.area}} sq ft</strong></div>
+            <div><span style="color:#64748b">Start Date:</span> <strong>{{form.startDate}}</strong></div>
+          </div>
+        </div>
+        <div class="if-declaration">
+          <label class="if-check-label">
+            <input type="checkbox" [(ngModel)]="agree" name="agree">
+            <span>I hereby declare that all information provided is true and correct, and I agree to comply with all local building regulations and laws.</span>
+          </label>
+        </div>
+        <div class="if-nav">
+          <button type="button" class="if-btn if-btn--back" (click)="prevStep()"><i class="fas fa-arrow-left"></i> {{ ls.current === "bn" ? "পিছনে" : "Back" }}</button>
+          <button type="button" class="if-btn if-btn--submit" (click)="submitForm()" [disabled]="isSubmitting">
+            <i class="fas fa-paper-plane" *ngIf="!isSubmitting"></i>
+            <i class="fas fa-spinner fa-spin" *ngIf="isSubmitting"></i>
+            {{ isSubmitting ? 'Submitting...' : 'Submit Application' }}
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

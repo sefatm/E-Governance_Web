@@ -1,0 +1,119 @@
+<!-- src/app/modules/tcb/tcb-scan/tcb-scan.component.html -->
+
+<div class="tcb-wrap">
+
+  <!-- ── SESSION SETUP (before open) ─────────────────────── -->
+  <div *ngIf="!sessionOpen" class="session-setup card">
+    <h2>TCB বিতরণ — Session শুরু করুন</h2>
+
+    <div class="form-row">
+      <label>{{ ls.current === "bn" ? "ডিলারের নাম" : "Dealer Name" }}</label>
+      <input [(ngModel)]="dealerName" placeholder="আপনার নাম" />
+    </div>
+    <div class="form-row">
+      <label>{{ ls.current === "bn" ? "ওয়ার্ড নম্বর" : "Ward Number" }}</label>
+      <input [(ngModel)]="ward" placeholder="যেমন: 02" />
+    </div>
+    <div class="form-row">
+      <label>মাস (YYYY-MM)</label>
+      <input [(ngModel)]="cycleMonth" type="month" />
+    </div>
+
+    <button class="btn-primary" (click)="openSession()">Session শুরু করুন</button>
+  </div>
+
+  <!-- ── ACTIVE SESSION ────────────────────────────────────── -->
+  <div *ngIf="sessionOpen" class="session-active">
+
+    <!-- Header bar -->
+    <div class="session-bar">
+      <div class="session-info">
+        <span class="badge green">● OPEN</span>
+        <span><b>{{ sessionCode }}</b></span>
+        <span>ওয়ার্ড {{ ward }} · {{ cycleMonth }}</span>
+        <span class="scanned-count">স্ক্যান: <b>{{ totalScanned }}</b></span>
+      </div>
+      <button class="btn-danger-sm" (click)="closeSession()">Session বন্ধ</button>
+    </div>
+
+    <!-- Stock summary -->
+    <div *ngIf="stockSummary" class="stock-bar">
+      <span>তেল: {{ stockSummary.oilLitre | number:'1.0-1' }}L</span>
+      <span>চাল: {{ stockSummary.riceKg | number:'1.0-1' }}kg</span>
+      <span>ডাল: {{ stockSummary.lentilKg | number:'1.0-1' }}kg</span>
+      <span>চিনি: {{ stockSummary.sugarKg | number:'1.0-1' }}kg</span>
+      <span *ngIf="stockSummary.cashAmount > 0">নগদ: ৳{{ stockSummary.cashAmount | number }}</span>
+      <span class="remaining">বাকি: {{ stockSummary.remaining }} কার্ড</span>
+    </div>
+
+    <div class="scan-area">
+
+      <!-- QR Scanner -->
+      <div class="scanner-panel card">
+        <div id="qr-reader" [class.hidden]="!scannerActive" style="width:100%;max-width:320px;margin:0 auto;"></div>
+
+        <div *ngIf="!scannerActive" class="scanner-placeholder" (click)="startScanner()">
+          <div class="qr-icon">📷</div>
+          <p>ক্যামেরা চালু করতে ক্লিক করুন</p>
+        </div>
+
+        <div class="scanner-btns">
+          <button *ngIf="!scannerActive" class="btn-primary" (click)="startScanner()">{{ ls.current === "bn" ? "স্ক্যান শুরু" : "Start Scan" }}</button>
+          <button *ngIf="scannerActive"  class="btn-warn"    (click)="stopScanner()">{{ ls.current === "bn" ? "স্ক্যান বন্ধ" : "Stop Scan" }}</button>
+        </div>
+
+        <!-- Manual entry fallback -->
+        <div class="manual-row">
+          <input [(ngModel)]="manualCardNo"
+                 placeholder="কার্ড নম্বর টাইপ করুন (যেমন: FAM-02-2025-00042)"
+                 (keydown.enter)="submitManual()" />
+          <button class="btn-secondary" (click)="submitManual()" [disabled]="isScanning">→</button>
+        </div>
+      </div>
+
+      <!-- Result panel -->
+      <div class="result-panel">
+
+        <div *ngIf="isScanning" class="result-loading">
+          <div class="spinner"></div>
+          <p>যাচাই করা হচ্ছে…</p>
+        </div>
+
+        <div *ngIf="lastResult && !isScanning"
+             class="result-card"
+             [class.success]="lastResult.success"
+             [class.fail]="!lastResult.success">
+
+          <div class="result-icon">{{ lastResult.success ? '✅' : '❌' }}</div>
+          <p class="result-message">{{ lastResult.message }}</p>
+
+          <div *ngIf="lastResult.success" class="result-details">
+            <div class="detail-row"><span>{{ ls.current === "bn" ? "কার্ড ধারক" : "Card Holder" }}</span><b>{{ lastResult.holderName }}</b></div>
+            <div class="detail-row"><span>কার্ড নং</span><b>{{ lastResult.cardNo }}</b></div>
+            <div class="detail-row"><span>{{ ls.current === "bn" ? "ধরন" : "Type" }}</span><b>{{ lastResult.cardType }}</b></div>
+            <div class="items-given">
+              <div *ngIf="lastResult.oil   && lastResult.oil   > 0" class="item">🛢️ তেল {{ lastResult.oil }}L</div>
+              <div *ngIf="lastResult.rice  && lastResult.rice  > 0" class="item">🌾 চাল {{ lastResult.rice }}kg</div>
+              <div *ngIf="lastResult.lentil && lastResult.lentil > 0" class="item">🥣 ডাল {{ lastResult.lentil }}kg</div>
+              <div *ngIf="lastResult.sugar && lastResult.sugar > 0" class="item">🍚 চিনি {{ lastResult.sugar }}kg</div>
+              <div *ngIf="lastResult.cash  && lastResult.cash  > 0" class="item">💵 নগদ ৳{{ lastResult.cash }}</div>
+            </div>
+            <div class="scan-time">{{ lastResult.scannedAt }}</div>
+          </div>
+        </div>
+
+        <!-- Recent scans log -->
+        <div *ngIf="sessionLogs.length > 0" class="recent-logs">
+          <h4>সর্বশেষ বিতরণ</h4>
+          <div *ngFor="let log of sessionLogs.slice(0, 8)" class="log-row">
+            <span class="log-name">{{ log.holderName }}</span>
+            <span class="log-card">{{ log.cardNo }}</span>
+            <span class="log-time">{{ log.scannedAt | date:'HH:mm' }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,227 @@
+<!-- farmer-distribution-scan.component.html -->
+<div class="fd-wrap">
+
+  <!-- ══ SESSION SETUP ═════════════════════════════════════ -->
+  <div *ngIf="!sessionOpen" class="setup-card">
+    <div class="setup-head">
+      <div class="setup-icon"><i class="fas fa-seedling"></i></div>
+      <div>
+        <h2>কৃষক সার/বীজ বিতরণ</h2>
+        <p>বিতরণ শুরু করতে নিচের তথ্য পূরণ করুন</p>
+      </div>
+    </div>
+
+    <div class="setup-grid">
+      <div class="field-group">
+        <label>বিতরণকারীর নাম <span class="req">*</span></label>
+        <div class="input-wrap"><i class="fas fa-user ico"></i>
+          <input [(ngModel)]="officerName" placeholder="অফিসার / ডিলারের নাম">
+        </div>
+      </div>
+      <div class="field-group">
+        <label>{{ ls.current === "bn" ? "ওয়ার্ড নং" : "Ward No." }}<span class="req">*</span></label>
+        <div class="input-wrap"><i class="fas fa-hashtag ico"></i>
+          <input [(ngModel)]="ward" placeholder="যেমন: 02">
+        </div>
+      </div>
+      <div class="field-group">
+        <label>মৌসুম <span class="req">*</span></label>
+        <div class="input-wrap"><i class="fas fa-sun ico"></i>
+          <select [(ngModel)]="season">
+            <option value="">-- নির্বাচন করুন --</option>
+            <option>রবি (শীতকালীন)</option>
+            <option>খরিফ-১ (গ্রীষ্মকালীন)</option>
+            <option>খরিফ-২ (বর্ষাকালীন)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label>চক্র (মাস) <span class="req">*</span></label>
+        <div class="input-wrap"><i class="fas fa-calendar ico"></i>
+          <input [(ngModel)]="cycleMonth" type="month">
+        </div>
+      </div>
+
+      <!-- Quota settings (editable before session opens) -->
+      <div class="field-group">
+        <label>সার (একর প্রতি কেজি)</label>
+        <div class="input-wrap"><i class="fas fa-wheat-awn ico"></i>
+          <input [(ngModel)]="fertPerAcre" type="number" min="0" step="0.5" placeholder="20">
+        </div>
+      </div>
+      <div class="field-group">
+        <label>বীজ (একর প্রতি কেজি)</label>
+        <div class="input-wrap"><i class="fas fa-leaf ico"></i>
+          <input [(ngModel)]="seedPerAcre" type="number" min="0" step="0.5" placeholder="5">
+        </div>
+      </div>
+    </div>
+
+    <div class="setup-foot">
+      <button class="btn-start" (click)="startSession()" [disabled]="startLoading">
+        <i class="fas" [class.fa-play]="!startLoading" [class.fa-spinner]="startLoading"
+           [class.fa-spin]="startLoading"></i>
+        {{ startLoading ? 'শুরু হচ্ছে...' : 'বিতরণ শুরু করুন' }}
+      </button>
+      <div class="setup-err" *ngIf="setupError">
+        <i class="fas fa-triangle-exclamation"></i> {{ setupError }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ACTIVE SESSION ════════════════════════════════════ -->
+  <div *ngIf="sessionOpen">
+
+    <!-- Session bar -->
+    <div class="session-bar">
+      <div class="sb-left">
+        <span class="badge-open"><span class="dot"></span> OPEN</span>
+        <span class="sb-ward">ওয়ার্ড {{ ward }}</span>
+        <span class="sb-cycle">{{ cycleMonth }} · {{ season }}</span>
+        <span class="sb-count">বিতরণ: <b>{{ totalDistributed }}</b></span>
+      </div>
+      <div class="sb-right">
+        <button class="btn-close-session" (click)="closeSession()">
+          <i class="fas fa-stop-circle"></i> {{ ls.current === "bn" ? "বন্ধ করুন" : "Close" }}</button>
+      </div>
+    </div>
+
+    <!-- Scan area + result side by side -->
+    <div class="scan-layout">
+
+      <!-- LEFT: Scanner -->
+      <div class="scan-panel">
+        <div class="scan-tabs">
+          <button [class.active]="scanMode==='qr'" (click)="switchMode('qr')">
+            <i class="fas fa-qrcode"></i> QR স্ক্যান
+          </button>
+          <button [class.active]="scanMode==='manual'" (click)="switchMode('manual')">
+            <i class="fas fa-keyboard"></i> Manual
+          </button>
+        </div>
+
+        <!-- QR Camera -->
+        <div *ngIf="scanMode==='qr'" class="qr-container">
+          <div id="farmer-qr-reader" class="qr-reader"></div>
+          <div class="qr-controls">
+            <button class="btn-cam" *ngIf="!scannerActive" (click)="startScanner()">
+              <i class="fas fa-camera"></i> ক্যামেরা চালু করুন
+            </button>
+            <button class="btn-cam stop" *ngIf="scannerActive" (click)="stopScanner()">
+              <i class="fas fa-stop"></i> {{ ls.current === "bn" ? "বন্ধ করুন" : "Close" }}</button>
+          </div>
+          <p class="qr-hint" *ngIf="!scannerActive">
+            <i class="fas fa-info-circle"></i> কৃষক কার্ডের QR কোড ক্যামেরার সামনে ধরুন
+          </p>
+        </div>
+
+        <!-- Manual input -->
+        <div *ngIf="scanMode==='manual'" class="manual-area">
+          <label>কার্ড নম্বর লিখুন</label>
+          <div class="manual-input-row">
+            <input [(ngModel)]="manualCardNo" placeholder="FRM-02-2025-XXXXX"
+                   (keydown.enter)="submitManual()" [disabled]="scanning">
+            <button class="btn-submit-manual" (click)="submitManual()" [disabled]="scanning || !manualCardNo.trim()">
+              <i class="fas fa-check" *ngIf="!scanning"></i>
+              <i class="fas fa-spinner fa-spin" *ngIf="scanning"></i>
+            </button>
+          </div>
+          <p class="qr-hint"><i class="fas fa-info-circle"></i> কার্ডের উপরের নম্বরটি হুবহু টাইপ করুন</p>
+        </div>
+      </div>
+
+      <!-- RIGHT: Result -->
+      <div class="result-panel">
+
+        <!-- Scanning indicator -->
+        <div class="scanning-state" *ngIf="scanning">
+          <i class="fas fa-spinner fa-spin"></i>
+          <span>তথ্য যাচাই হচ্ছে...</span>
+        </div>
+
+        <!-- Success result -->
+        <div class="result-box success" *ngIf="lastResult && lastResult.success && !scanning">
+          <div class="res-check"><i class="fas fa-circle-check"></i></div>
+          <div class="res-name">{{ lastResult.farmerName }}</div>
+          <div class="res-card">{{ lastResult.cardNo }}</div>
+          <div class="res-items">
+            <div class="res-item" *ngIf="lastResult.fertilizerKg > 0">
+              <span class="ri-label">সার</span>
+              <span class="ri-val">{{ lastResult.fertilizerKg }} কেজি</span>
+            </div>
+            <div class="res-item" *ngIf="lastResult.seedKg > 0">
+              <span class="ri-label">বীজ</span>
+              <span class="ri-val">{{ lastResult.seedKg }} কেজি</span>
+            </div>
+            <div class="res-item" *ngIf="lastResult.pesticideLitre > 0">
+              <span class="ri-label">কীটনাশক</span>
+              <span class="ri-val">{{ lastResult.pesticideLitre }} লিটার</span>
+            </div>
+          </div>
+          <div class="res-time">{{ lastResult.distDate }}</div>
+          <div class="res-msg">{{ lastResult.message }}</div>
+        </div>
+
+        <!-- Failure result -->
+        <div class="result-box fail" *ngIf="lastResult && !lastResult.success && !scanning">
+          <div class="res-fail-icon"><i class="fas fa-circle-xmark"></i></div>
+          <div class="res-fail-msg">{{ lastResult.message }}</div>
+
+          <!-- জমি যাচাই না থাকলে বিশেষ নির্দেশনা -->
+          <div class="land-verify-hint"
+               *ngIf="lastResult.message && lastResult.message.includes('জমি যাচাই')">
+            <i class="fas fa-info-circle"></i>
+            <div>
+              <strong>জমি যাচাই করতে:</strong><br>
+              <span>Farmer Card → <strong>{{ ls.current === "bn" ? "ব্যবস্থাপনা" : "Manage" }}</strong> পেজে যান →
+              কার্ডের পাশে <em>"যাচাই করুন"</em> বাটনে ক্লিক করুন।</span>
+              <br>
+              <a routerLink="/farmer-card/admin" class="hint-link">
+                <i class="fas fa-external-link-alt"></i> Farmer Card Admin খুলুন
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="result-empty" *ngIf="!lastResult && !scanning">
+          <i class="fas fa-id-card"></i>
+          <p>কার্ড স্ক্যান করুন বা নম্বর লিখুন</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Session log table -->
+    <div class="log-section" *ngIf="sessionLogs.length > 0">
+      <div class="log-head">
+        <h3><i class="fas fa-list-check me-2"></i>এই session-এর বিতরণ তালিকা</h3>
+        <span class="log-count">মোট {{ sessionLogs.length }} জন</span>
+      </div>
+      <div class="table-wrap">
+        <table class="log-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>কৃষকের নাম</th>
+              <th>কার্ড নং</th>
+              <th>সার (কেজি)</th>
+              <th>বীজ (কেজি)</th>
+              <th>সময়</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of sessionLogs; let i = index">
+              <td class="td-num">{{ i + 1 }}</td>
+              <td class="td-name">{{ l.farmerName }}</td>
+              <td><code>{{ l.cardNo }}</code></td>
+              <td class="td-val">{{ l.fertilizerKg > 0 ? l.fertilizerKg + ' kg' : '—' }}</td>
+              <td class="td-val">{{ l.seedKg > 0 ? l.seedKg + ' kg' : '—' }}</td>
+              <td class="td-time">{{ l.createdAt | date:'hh:mm a' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

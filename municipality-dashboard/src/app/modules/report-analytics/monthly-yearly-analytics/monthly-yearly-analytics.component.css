@@ -1,0 +1,138 @@
+/* ── Analytics Page Layout ───────────────────────────────────────── */
+.analytics-page {
+  padding: 24px;
+  background: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ── Page Header ─────────────────────────────────────────────────── */
+.page-header { margin-bottom: 28px; }
+.page-title  { font-size: 1.6rem; font-weight: 700; color: #1e293b;
+               display: flex; align-items: center; gap: 10px; margin: 0 0 6px; }
+.page-title .icon { font-size: 1.4rem; }
+.page-sub    { color: #64748b; font-size: 0.92rem; margin: 0; }
+
+.loading-bar {
+  text-align: center; padding: 20px; color: #64748b;
+  background: #fff; border-radius: 12px; margin-bottom: 20px;
+}
+
+/* ── KPI Grid ────────────────────────────────────────────────────── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border-left: 4px solid transparent;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.kpi-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.1); }
+
+.kpi-card.blue   { border-color: #3b82f6; }
+.kpi-card.green  { border-color: #10b981; }
+.kpi-card.orange { border-color: #f59e0b; }
+.kpi-card.teal   { border-color: #14b8a6; }
+.kpi-card.indigo { border-color: #6366f1; }
+.kpi-card.red    { border-color: #ef4444; }
+
+.kpi-icon { font-size: 1.8rem; flex-shrink: 0; }
+.kpi-value { font-size: 1.4rem; font-weight: 700; color: #1e293b; }
+.kpi-label { font-size: 0.78rem; color: #64748b; margin-top: 2px; }
+
+/* ── Chart Cards ─────────────────────────────────────────────────── */
+.chart-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 20px;
+}
+
+.chart-card.half { flex: 1; min-width: 280px; }
+
+.chart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.chart-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+.charts-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.chart-body { position: relative; }
+.doughnut-wrap { max-width: 300px; margin: 0 auto; }
+
+/* ── Controls ────────────────────────────────────────────────────── */
+.chart-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.toggle-group {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.toggle-group button {
+  padding: 6px 16px;
+  font-size: 0.84rem;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.toggle-group button.active {
+  background: #3b82f6;
+  color: #fff;
+  border-radius: 8px;
+}
+.toggle-group button:hover:not(.active) { background: #e2e8f0; }
+
+select {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  color: #374151;
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+select:focus { border-color: #3b82f6; }
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .analytics-page { padding: 14px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .charts-row { flex-direction: column; }
+}
+@media (max-width: 480px) {
+  .kpi-grid { grid-template-columns: 1fr; }
+}

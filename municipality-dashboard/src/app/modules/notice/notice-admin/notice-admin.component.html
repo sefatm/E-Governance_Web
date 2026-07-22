@@ -1,0 +1,181 @@
+<div class="container">
+
+  <!-- PAGE HEADER -->
+  <h2>
+    <i class="fas fa-bullhorn"></i>
+    Notice &amp; Announcement Management
+  </h2>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-row">
+    <div class="summary-card">
+      <span class="sum-icon total"><i class="fas fa-list"></i></span>
+      <div>
+        <p class="sum-label">মোট নোটিশ</p>
+        <p class="sum-value">{{ totalCount }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <span class="sum-icon active"><i class="fas fa-check-circle"></i></span>
+      <div>
+        <p class="sum-label">{{ ls.current === "bn" ? "সক্রিয়" : "Active" }}</p>
+        <p class="sum-value">{{ activeCount }}</p>
+      </div>
+    </div>
+    <div class="summary-card">
+      <span class="sum-icon emergency"><i class="fas fa-exclamation-triangle"></i></span>
+      <div>
+        <p class="sum-label">জরুরি নোটিশ</p>
+        <p class="sum-value">{{ emergencyCount }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE / EDIT FORM -->
+  <div class="form-card">
+    <h3>{{ isEditMode ? 'নোটিশ সম্পাদনা করুন' : 'নতুন নোটিশ যোগ করুন' }}</h3>
+
+    <!-- Row 1: Type + Priority -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>নোটিশের ধরন <span class="req">*</span></label>
+        <select [(ngModel)]="form.type" name="type">
+          <option *ngFor="let t of typeOptions" [value]="t">{{ t }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>{{ ls.current === "bn" ? "অগ্রাধিকার" : "Priority" }}</label>
+        <select [(ngModel)]="form.priority" name="priority">
+          <option *ngFor="let p of priorityOptions" [value]="p">{{ p }}</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Title -->
+    <div class="form-group full">
+      <label>শিরোনাম <span class="req">*</span></label>
+      <input type="text" [(ngModel)]="form.title" name="title" placeholder="নোটিশের শিরোনাম লিখুন">
+    </div>
+
+    <!-- Description -->
+    <div class="form-group full">
+      <label>{{ ls.current === "bn" ? "বিবরণ" : "Details" }}<span class="req">*</span></label>
+      <textarea [(ngModel)]="form.description" name="description" rows="4" placeholder="বিস্তারিত বিবরণ লিখুন..."></textarea>
+    </div>
+
+    <!-- Row 2: Dates -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>{{ ls.current === "bn" ? "প্রকাশের তারিখ" : "Publish Date" }}</label>
+        <input type="date" [(ngModel)]="form.publishDate" name="publishDate">
+      </div>
+      <div class="form-group">
+        <label>{{ ls.current === "bn" ? "মেয়াদ শেষের তারিখ" : "Expiry Date" }}</label>
+        <input type="date" [(ngModel)]="form.expiryDate" name="expiryDate">
+      </div>
+    </div>
+
+    <!-- Attachment URL -->
+    <div class="form-group full">
+      <label>সংযুক্তির লিংক (ঐচ্ছিক)</label>
+      <input type="url" [(ngModel)]="form.attachmentUrl" name="attachmentUrl" placeholder="https://...">
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+      <button class="btn-primary" (click)="save()" [disabled]="isSubmitting">
+        <i class="fas" [class.fa-save]="!isSubmitting" [class.fa-spinner]="isSubmitting" [class.fa-spin]="isSubmitting"></i>
+        {{ isEditMode ? 'আপডেট করুন' : 'নোটিশ তৈরি করুন' }}
+      </button>
+      <button class="btn-secondary" *ngIf="isEditMode" (click)="resetForm()">
+        <i class="fas fa-times"></i> {{ ls.current === "bn" ? "বাতিল" : "Cancelled" }}</button>
+    </div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button *ngFor="let f of filterOptions" [class.active]="activeFilter === f" (click)="applyFilter(f)">
+      {{ f }}
+    </button>
+  </div>
+
+  <!-- LOADING-->
+  <div class="loading-row" *ngIf="isLoading">
+    <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</div>
+
+  <!-- TABLE -->
+  <table *ngIf="!isLoading">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>{{ ls.current === "bn" ? "ধরন" : "Type" }}</th>
+        <th>শিরোনাম</th>
+        <th>{{ ls.current === "bn" ? "অগ্রাধিকার" : "Priority" }}</th>
+        <th>প্রকাশ তারিখ</th>
+        <th>মেয়াদ</th>
+        <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
+        <th>অ্যাকশন</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let n of filteredNotices; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>
+          <span class="type-tag type-{{ n.type | lowercase }}">
+            <i [class]="typeIcon(n.type)"></i> {{ n.type }}
+          </span>
+        </td>
+        <td class="title-cell">{{ n.title }}</td>
+        <td><span [class]="'badge ' + priorityClass(n.priority || '')">{{ n.priority }}</span></td>
+        <td>{{ n.publishDate }}</td>
+        <td>{{ n.expiryDate || '—' }}</td>
+        <td>
+          <span [class]="'badge ' + statusClass(n.status || '')" (click)="toggleStatus(n)" style="cursor:pointer" title="ক্লিক করে পরিবর্তন করুন">
+            {{ n.status }}
+          </span>
+        </td>
+        <td class="action-col">
+          <button class="icon-btn view"   (click)="viewDetails(n)"  [title]="ls.current === 'bn' ? 'বিস্তারিত' : 'View Details'">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="icon-btn edit"   (click)="edit(n)"         [title]="ls.current === 'bn' ? 'সম্পাদনা' : 'Edit'">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button class="icon-btn delete" (click)="delete(n.id!)"   [title]="ls.current === 'bn' ? 'মুছুন' : 'Delete'">
+            <i class="fas fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="filteredNotices.length === 0">
+        <td colspan="8" class="empty-row">কোনো নোটিশ পাওয়া যায়নি</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- DETAIL MODAL -->
+  <div class="modal-backdrop" *ngIf="showModal" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <span class="type-tag type-{{ selectedNotice?.type | lowercase }}">
+          <i [class]="typeIcon(selectedNotice?.type || '')"></i>
+          {{ selectedNotice?.type }}
+        </span>
+        <button class="modal-close" (click)="closeModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <h3 class="modal-title">{{ selectedNotice?.title }}</h3>
+      <p class="modal-desc">{{ selectedNotice?.description }}</p>
+      <div class="modal-meta">
+        <span><i class="fas fa-calendar"></i> প্রকাশ: {{ selectedNotice?.publishDate }}</span>
+        <span *ngIf="selectedNotice?.expiryDate"><i class="fas fa-hourglass-end"></i> মেয়াদ: {{ selectedNotice?.expiryDate }}</span>
+        <span><i class="fas fa-signal"></i> অগ্রাধিকার: {{ selectedNotice?.priority }}</span>
+        <span><i class="fas fa-circle"></i> অবস্থা: {{ selectedNotice?.status }}</span>
+      </div>
+      <a *ngIf="selectedNotice?.attachmentUrl" [href]="selectedNotice?.attachmentUrl" target="_blank" class="attachment-link">
+        <i class="fas fa-paperclip"></i> সংযুক্তি দেখুন
+      </a>
+    </div>
+  </div>
+
+</div>

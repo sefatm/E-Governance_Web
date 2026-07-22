@@ -1,0 +1,140 @@
+<!-- Toast -->
+<div class="tl-toast-area" *ngIf="successMsg || errorMsg">
+  <div *ngIf="successMsg" class="tl-toast tl-toast--ok"><i class="fas fa-circle-check"></i><span>{{ successMsg }}</span></div>
+  <div *ngIf="errorMsg"   class="tl-toast tl-toast--fail"><i class="fas fa-circle-xmark"></i><span>{{ errorMsg }}</span></div>
+</div>
+
+<div class="tl-page">
+  <div class="tl-header">
+    <div class="tl-header__left">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo" onerror="this.style.display='none'">
+      <div class="tl-header__text">
+        <span class="tl-header__bn">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <span class="tl-header__country">{{ ls.current === "bn" ? "গণপ্রজাতন্ত্রী বাংলাদেশ সরকার" : "Government of the People's Republic of Bangladesh" }}</span>
+        <div class="tl-header__divider"></div>
+        <h2 class="tl-header__title">অভিযোগ ট্র্যাকিং সিস্টেম</h2>
+        <span class="tl-header__title-en">Complaint Tracking — Citizen Complaint Management System</span>
+      </div>
+    </div>
+    <div class="tl-header__right">
+      <img src="assets/photo/bangladesh-govt.png" alt="Logo" class="tl-header__logo tl-header__logo--right" onerror="this.style.display='none'">
+    </div>
+  </div>
+
+  <!-- Track card -->
+  <div class="tl-card" style="border-top:none;border-radius:0 0 16px 16px">
+    <div class="tl-panel tl-panel--active">
+
+      <div class="tl-panel__head">
+        <div class="tl-panel__icon"><i class="fas fa-mobile-screen-button"></i></div>
+        <div>
+          <h3>মোবাইল নম্বর দিয়ে অভিযোগ খুঁজুন</h3>
+          <p>আপনার নিবন্ধিত মোবাইল নম্বর দিন — OTP যাচাইয়ের পর অভিযোগের অবস্থান দেখুন</p>
+        </div>
+      </div>
+
+      <!-- Step 1: Mobile -->
+      <div *ngIf="!otpSent">
+        <div class="tl-section-label"><i class="fas fa-phone"></i> {{ ls.current === "bn" ? "মোবাইল নম্বর" : "Mobile Number" }}</div>
+        <div class="track-input-row">
+          <div class="tl-input-wrap" style="flex:1">
+            <i class="fas fa-phone tl-ico"></i>
+            <input type="tel" [(ngModel)]="mobile" placeholder="01XXXXXXXXX"
+                   (keydown.enter)="sendOtp()" maxlength="11">
+          </div>
+          <button class="tl-btn tl-btn--submit" (click)="sendOtp()" [disabled]="!mobile || isSending">
+            <i class="fas fa-paper-plane"></i> {{ isSending ? 'পাঠানো হচ্ছে...' : 'OTP পাঠান' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: OTP -->
+      <div *ngIf="otpSent && !verified">
+        <div class="tl-section-label"><i class="fas fa-lock"></i> {{ ls.current === "bn" ? "OTP যাচাই করুন" : "Verify OTP" }}</div>
+        <div class="otp-hint">
+          <i class="fas fa-circle-info"></i>
+          <span>{{ mobile }} নম্বরে OTP পাঠানো হয়েছে</span>
+          <button class="otp-resend" (click)="resendOtp()">পুনরায় পাঠান</button>
+        </div>
+        <div class="track-input-row" style="margin-top:12px">
+          <div class="tl-input-wrap" style="flex:1">
+            <i class="fas fa-key tl-ico"></i>
+            <input type="text" [(ngModel)]="otp" placeholder="6 সংখ্যার OTP"
+                   (keydown.enter)="verifyOtp()" maxlength="6">
+          </div>
+          <button class="tl-btn tl-btn--submit" (click)="verifyOtp()" [disabled]="!otp">
+            <i class="fas fa-shield-check"></i> {{ ls.current === "bn" ? "যাচাই করুন" : "Verify" }}</button>
+          <button class="tl-btn tl-btn--cancel" (click)="resetTrack()">
+            <i class="fas fa-times"></i> {{ ls.current === "bn" ? "বাতিল" : "Cancelled" }}</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Results -->
+      <div *ngIf="verified">
+        <div class="verified-bar">
+          <i class="fas fa-circle-check" style="color:#059669"></i>
+          <span>{{ mobile }} — যাচাই সম্পন্ন</span>
+          <button class="tl-btn-clear" (click)="resetTrack()" style="margin-left:auto">
+            <i class="fas fa-rotate-left"></i> নতুন খুঁজুন
+          </button>
+        </div>
+
+        <div *ngIf="filteredComplaints.length === 0" class="no-result">
+          <i class="fas fa-search" style="font-size:36px;color:#d1d5db;margin-bottom:10px;display:block"></i>
+          এই নম্বরে কোনো অভিযোগ পাওয়া যায়নি
+        </div>
+
+        <div class="complaint-cards" *ngIf="filteredComplaints.length > 0">
+          <div class="complaint-card" *ngFor="let c of filteredComplaints">
+            <div class="cc-head">
+              <span class="cat-badge">{{ c.category }}</span>
+              <span class="status-pill"
+                [class.s-pending]="c.status==='Pending'"
+                [class.s-progress]="c.status==='In Progress'"
+                [class.s-resolved]="c.status==='Resolved'"
+                [class.s-rejected]="c.status==='Rejected'">
+                <span class="s-dot"></span>{{ c.status }}
+              </span>
+            </div>
+            <div class="cc-body">
+              <div class="cc-row"><span class="cc-label">{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</span><span>{{ c.ward }}</span></div>
+              <div class="cc-row"><span class="cc-label">এলাকা</span><span>{{ c.area }}</span></div>
+              <div class="cc-row" *ngIf="c.location"><span class="cc-label">{{ ls.current === "bn" ? "অবস্থান" : "Location" }}</span><span>{{ c.location }}</span></div>
+              <div class="cc-row" *ngIf="c.description"><span class="cc-label">{{ ls.current === "bn" ? "বিবরণ" : "Details" }}</span><span class="cc-desc">{{ c.description }}</span></div>
+              <div class="cc-row" *ngIf="c.remarks"><span class="cc-label">কর্তৃপক্ষের মন্তব্য</span><span class="cc-remarks">{{ c.remarks }}</span></div>
+            </div>
+            <div class="cc-timeline">
+              <div class="tl-step" [class.tl-step--done]="true">
+                <div class="tl-dot tl-dot--done"><i class="fas fa-check"></i></div>
+                <span>দাখিল হয়েছে</span>
+              </div>
+              <div class="tl-step" [class.tl-step--done]="c.status==='In Progress'||c.status==='Resolved'">
+                <div class="tl-dot" [class.tl-dot--done]="c.status==='In Progress'||c.status==='Resolved'"><i class="fas fa-spinner"></i></div>
+                <span>{{ ls.current === "bn" ? "প্রক্রিয়াধীন" : "Processing" }}</span>
+              </div>
+              <div class="tl-step" [class.tl-step--done]="c.status==='Resolved'">
+                <div class="tl-dot" [class.tl-dot--done]="c.status==='Resolved'"><i class="fas fa-circle-check"></i></div>
+                <span>{{ ls.current === "bn" ? "সমাধান হয়েছে" : "Resolved" }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="otp-demo-overlay" *ngIf="showOtpPopup" (click)="closeOtpPopup()">
+  <div class="otp-demo-card" (click)="$event.stopPropagation()">
+    <button class="otp-demo-close" (click)="closeOtpPopup()">&times;</button>
+    <div class="otp-demo-icon"><i class="fas fa-shield-alt"></i></div>
+    <div class="otp-demo-kicker">SECURE VERIFICATION</div>
+    <h3>Demo OTP Code</h3>
+    <p>Use this 6-digit code to continue verification.</p>
+    <div class="otp-demo-code">{{ generatedOtp }}</div>
+    <small>Valid for 5 minutes</small>
+    <button class="otp-demo-action" (click)="closeOtpPopup()">Enter OTP</button>
+  </div>
+</div>

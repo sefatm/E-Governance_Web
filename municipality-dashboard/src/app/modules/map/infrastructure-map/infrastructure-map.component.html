@@ -1,0 +1,232 @@
+<div class="map-page">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="ph-left">
+      <div class="ph-icon"><i class="fas fa-building"></i></div>
+      <div>
+        <h2>{{ ls.current === "bn" ? "লাইভ পৌরসভা জিআইএস মানচিত্র" : "Live Municipality GIS Map" }}</h2>
+        <p>Madaripur Municipality — Wards, Infrastructure, Complaints, Health, Waste & Holdings</p>
+      </div>
+    </div>
+    <div class="header-stats">
+      <div class="hs-item">
+        <span class="hs-val">{{ totalCount }}</span>
+        <span class="hs-label">Total Items</span>
+      </div>
+      <div *ngFor="let l of layers" class="hs-div-group">
+        <div class="hs-div"></div>
+        <div class="hs-item">
+          <span class="hs-val">{{ l.count }}</span>
+          <span class="hs-label" [style.color]="'rgba(255,255,255,0.7)'">{{ l.label }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="map-body">
+
+    <!-- LEFT: Map -->
+    <div class="map-wrap">
+
+      <!-- Layer Toggle Toolbar -->
+      <div class="layer-toolbar">
+        <span class="toolbar-label">Layers:</span>
+        <button *ngFor="let l of layers" [class.layer-active]="l.visible" [style.--lc]="l.color" (click)="toggleLayer(l)" class="layer-btn">
+          <i [class]="l.icon"></i>
+          {{ l.label }}
+          <span class="layer-count">{{ l.count }}</span>
+        </button>
+        <div class="toolbar-sep"></div>
+        <div class="legend-row">
+          <span class="leg-item"><span class="leg-dot" style="background:#dc2626"></span> {{ ls.current === "bn" ? "উচ্চ" : "High" }}</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#d97706"></span> {{ ls.current === "bn" ? "মাধ্যম" : "Medium" }}</span>
+          <span class="leg-item"><span class="leg-dot" style="background:#059669"></span> {{ ls.current === "bn" ? "নিম্ন" : "Low" }}</span>
+        </div>
+        <div class="toolbar-sep"></div>
+        <button class="map-action-btn" [class.layer-active]="wardVisible" (click)="toggleWardLayer()"><i class="fas fa-draw-polygon"></i> Wards</button>
+        <button class="map-action-btn" (click)="locateMe()"><i class="fas fa-location-arrow"></i> {{ locating ? 'Locating…' : 'My GPS' }}</button>
+        <button class="map-action-btn" (click)="fitAll()"><i class="fas fa-expand"></i> Fit Data</button>
+      </div>
+
+      <!-- Leaflet Map -->
+      <div id="infra-map-container"></div>
+
+    </div>
+
+    <!-- RIGHT: Side Panel -->
+    <div class="side-panel">
+
+      <!-- Filter -->
+      <div class="filter-section">
+        <div class="sp-title"><i class="fas fa-filter"></i> Filters</div>
+        <div class="filter-body">
+          <input type="text" [(ngModel)]="searchText" (input)="applyFilter()"
+                 placeholder="Search name, area, road..." class="search-input">
+          <div class="filter-row">
+            <select [(ngModel)]="filterWard" (change)="applyFilter()">
+              <option value="">{{ ls.current === "bn" ? "সকল ওয়ার্ড" : "All Wards" }}</option>
+              <option *ngFor="let w of wardOptions" [value]="w">Ward {{ w }}</option>
+            </select>
+            <select [(ngModel)]="filterStatus" (change)="applyFilter()">
+              <option value="">{{ ls.current === "bn" ? "সকল অবস্থা" : "All Status" }}</option>
+              <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+            </select>
+          </div>
+          <button class="btn-reset" (click)="resetFilter()">
+            <i class="fas fa-redo"></i> Reset Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Type Tabs -->
+      <div class="type-tabs">
+        <button [class.active]="activeTab === 'all'" (click)="setTab('all')">{{ ls.current === "bn" ? "সকল" : "All" }}</button>
+        <button *ngFor="let l of layers"
+                [class.active]="activeTab === l.key"
+                [style.--lc]="l.color"
+                (click)="setTab(l.key)">
+          <i [class]="l.icon"></i>
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-row" *ngIf="isLoading">
+        <i class="fas fa-spinner fa-spin"></i> {{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}
+      </div>
+
+      <!-- Item List -->
+      <div class="item-list" *ngIf="!isLoading">
+        <div class="item-card"
+             *ngFor="let item of listItems"
+             [class.selected]="isSelectedItem(item)"
+             (click)="selectItem(item, item._type)">
+
+          <div class="ic-left">
+            <div class="ic-icon" [style.background]="item._layer?.color">
+              {{ item._layer?.emoji }}
+            </div>
+            <div class="ic-info">
+              <span class="ic-name">{{ item.applicantName || item.ownerName || item.centerName || item.name || item.roadName || item.area || 'N/A' }}</span>
+              <span class="ic-meta">Ward {{ item.ward }} · {{ item.area || '—' }}</span>
+            </div>
+          </div>
+
+          <div class="ic-right">
+            <span [class]="'prio-badge prio-' + (item.priority || 'low' | lowercase)">
+              {{ item.priority || '—' }}
+            </span>
+            <span [class]="'status-dot status-' + (item.status || 'pending' | lowercase).replace(' ','-')">
+              {{ item.status || '—' }}
+            </span>
+          </div>
+
+        </div>
+
+        <div class="empty-row" *ngIf="listItems.length === 0">
+          <i class="fas fa-inbox"></i> No items found
+        </div>
+      </div>
+
+      <!-- Selected Item Detail -->
+      <div class="detail-panel" *ngIf="selectedItem">
+        <div class="dp-header" [style.background]="getLayerByKey(selectedType)?.color">
+          <span>{{ getLayerByKey(selectedType)?.emoji }} {{ getLayerByKey(selectedType)?.label }}</span>
+          <button class="dp-close" (click)="selectedItem = null"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="dp-grid">
+          <div class="dp-item" *ngIf="selectedItem.applicantName || selectedItem.name">
+            <span class="dp-label">{{ ls.current === "bn" ? "আবেদনকারী" : "Applicant" }}</span>
+            <span class="dp-val">{{ selectedItem.applicantName || selectedItem.name }}</span>
+          </div>
+          <div class="dp-item">
+            <span class="dp-label">{{ ls.current === "bn" ? "ওয়ার্ড" : "Ward" }}</span>
+            <span class="dp-val">{{ selectedItem.ward || '—' }}</span>
+          </div>
+          <div class="dp-item">
+            <span class="dp-label">Area</span>
+            <span class="dp-val">{{ selectedItem.area || '—' }}</span>
+          </div>
+          <div class="dp-item" *ngIf="selectedItem.type">
+            <span class="dp-label">{{ ls.current === "bn" ? "ধরন" : "Type" }}</span>
+            <span class="dp-val">{{ selectedItem.type }}</span>
+          </div>
+          <div class="dp-item" *ngIf="selectedItem.roadName">
+            <span class="dp-label">{{ ls.current === "bn" ? "রাস্তা" : "Road" }}</span>
+            <span class="dp-val">{{ selectedItem.roadName }}</span>
+          </div>
+          <div class="dp-item" *ngIf="selectedItem.location">
+            <span class="dp-label">{{ ls.current === "bn" ? "অবস্থান" : "Location" }}</span>
+            <span class="dp-val">{{ selectedItem.location }}</span>
+          </div>
+          <div class="dp-item" *ngIf="selectedItem.buildingType">
+            <span class="dp-label">Building</span>
+            <span class="dp-val">{{ selectedItem.buildingType }}</span>
+          </div>
+          <div class="dp-item" *ngIf="selectedItem.floors">
+            <span class="dp-label">Floors</span>
+            <span class="dp-val">{{ selectedItem.floors }}</span>
+          </div>
+          <div class="dp-item">
+            <span class="dp-label">{{ ls.current === "bn" ? "অগ্রাধিকার" : "Priority" }}</span>
+            <span class="dp-val">{{ selectedItem.priority || '—' }}</span>
+          </div>
+          <div class="dp-item">
+            <span class="dp-label">{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</span>
+            <span class="dp-val">{{ selectedItem.status || '—' }}</span>
+          </div>
+          <div class="dp-item full" *ngIf="selectedItem.description">
+            <span class="dp-label">{{ ls.current === "bn" ? "বিবরণ" : "Description" }}</span>
+            <span class="dp-val">{{ selectedItem.description }}</span>
+          </div>
+
+          <!-- Current location -->
+          <div class="dp-item full">
+            <span class="dp-label">Map Location</span>
+            <span class="dp-val" *ngIf="selectedItem.lat || selectedItem.latitude; else noPin">
+              📍 {{ (selectedItem.lat || selectedItem.latitude) | number:'1.4-6' }},
+                 {{ (selectedItem.lng || selectedItem.longitude) | number:'1.4-6' }}
+            </span>
+            <ng-template #noPin><span class="dp-val" style="color:#9ca3af">Not pinned yet</span></ng-template>
+          </div>
+
+          <!-- Pin mode actions -->
+          <div class="dp-item full pin-actions" *ngIf="canPinSelected()">
+            <ng-container *ngIf="!pinModeActive">
+              <button class="btn-pin" (click)="enablePinMode()">
+                📍 {{ (selectedItem.lat || selectedItem.latitude) ? 'Move Pin' : 'Set Location on Map' }}
+              </button>
+            </ng-container>
+            <ng-container *ngIf="pinModeActive">
+              <div class="pin-mode-bar">
+                <span class="pin-hint">🎯 Map-এ click করে location set করুন</span>
+                <div class="pin-btns">
+                  <button class="btn-save-pin" [disabled]="!pendingLocation || isSavingPin"
+                          (click)="savePin()">
+                    {{ isSavingPin ? 'Saving…' : '✓ Save Pin' }}
+                  </button>
+                  <button class="btn-cancel-pin" (click)="cancelPinMode()">✕ Cancel</button>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Success / Error messages -->
+          <div class="dp-item full" *ngIf="successMsg">
+            <span style="color:#059669;font-weight:600;font-size:.85rem">✅ {{ successMsg }}</span>
+          </div>
+          <div class="dp-item full" *ngIf="errorMsg">
+            <span style="color:#dc2626;font-weight:600;font-size:.85rem">❌ {{ errorMsg }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pin mode overlay on map -->
+      <div class="pin-mode-overlay" *ngIf="pinModeActive">
+        🎯 Pin Mode Active — Map-এ click করুন
+      </div>
+
+    </div>
+  </div>
+</div>
