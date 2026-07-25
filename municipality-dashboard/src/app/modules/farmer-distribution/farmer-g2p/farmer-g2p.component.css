@@ -242,13 +242,14 @@
   font-size: .86rem;
 }
 .batch-table th {
-  background: #f8fafc;
+  background: #064e3b;
   padding: .6rem .8rem;
   text-align: left;
-  color: #4b5563;
-  font-weight: 600;
+  color: #ffffff;
+  font-weight: 800;
   white-space: nowrap;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid #053827;
+  letter-spacing: 0;
 }
 .batch-table td {
   padding: .55rem .8rem;
@@ -265,13 +266,14 @@
   font-size: .86rem;
 }
 .dist-table th {
-  background: #f8fafc;
+  background: #064e3b;
   padding: .6rem .8rem;
   text-align: left;
-  color: #4b5563;
-  font-weight: 600;
+  color: #ffffff;
+  font-weight: 800;
   white-space: nowrap;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid #053827;
+  letter-spacing: 0;
 }
 .dist-table td {
   padding: .55rem .8rem;

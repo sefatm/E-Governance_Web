@@ -187,7 +187,7 @@ export class CardAnalyticsComponent implements OnInit, OnDestroy {
               }
             ]
           },
-          options: { responsive: true, plugins: { legend: { position: 'top' } } }
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
         }));
       }
     }
@@ -208,7 +208,7 @@ export class CardAnalyticsComponent implements OnInit, OnDestroy {
               { label: 'VGD/VGF', data: this.wardData.map(w => w.vgd),     backgroundColor: '#831843' }
             ]
           },
-          options: { responsive: true, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: true }, y: { stacked: true } } }
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { x: { stacked: true }, y: { stacked: true } } }
         }));
       }
     }

@@ -18,7 +18,11 @@ export class TcbScanComponent implements OnInit, OnDestroy {
   dealerName  = 'Sefat Mahmud';
   ward        = '03';
   cycleMonth  = new Date().toISOString().slice(0, 7); // YYYY-MM
+  distributionDate = new Date().toISOString().slice(0, 10);
+  distributionTime = '10:00 AM';
+  location = '';
   sessionOpen = false;
+  notifiedCount: number | null = null;
 
   // Scanner state
   scannerActive  = false;
@@ -45,12 +49,20 @@ export class TcbScanComponent implements OnInit, OnDestroy {
 
   openSession(): void {
     if (!this.dealerName || !this.ward || !this.cycleMonth) return;
-    this.tcbSvc.openSession(this.dealerName, this.ward, this.cycleMonth).subscribe({
+    this.tcbSvc.openSession({
+      dealerName: this.dealerName,
+      ward: this.ward,
+      cycleMonth: this.cycleMonth,
+      distributionDate: this.distributionDate,
+      distributionTime: this.distributionTime,
+      location: this.location
+    }).subscribe({
       next: (res) => {
         if (res.error) { alert(res.error); return; }
         this.sessionId   = res.sessionId;
         this.sessionCode = res.sessionCode;
         this.stockSummary = res.stock || null;
+        this.notifiedCount = typeof res.notified === 'number' ? res.notified : null;
         this.sessionOpen = true;
         this.refreshLogs();
       },
@@ -66,6 +78,7 @@ export class TcbScanComponent implements OnInit, OnDestroy {
         this.sessionOpen = false;
         this.sessionId   = null;
         this.lastResult  = null;
+        this.notifiedCount = null;
       }
     });
   }

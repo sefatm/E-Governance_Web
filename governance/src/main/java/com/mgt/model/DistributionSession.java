@@ -1,6 +1,7 @@
 package com.mgt.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,6 +17,9 @@ public class DistributionSession {
     @Column(name = "ward")           private String ward;
     @Column(name = "cycle_month")    private String cycleMonth;
     @Column(name = "status")         private String status = "OPEN";
+    @Column(name = "distribution_date") private LocalDate distributionDate;
+    @Column(name = "distribution_time") private String distributionTime;
+    @Column(name = "location")       private String location;
     @Column(name = "opened_at")      private LocalDateTime openedAt;
     @Column(name = "closed_at")      private LocalDateTime closedAt;
     @Column(name = "total_scanned")  private int totalScanned;
@@ -34,6 +38,12 @@ public class DistributionSession {
     public void setCycleMonth(String v)         { this.cycleMonth = v; }
     public String getStatus()                   { return status; }
     public void setStatus(String v)             { this.status = v; }
+    public LocalDate getDistributionDate()       { return distributionDate; }
+    public void setDistributionDate(LocalDate v) { this.distributionDate = v; }
+    public String getDistributionTime()          { return distributionTime; }
+    public void setDistributionTime(String v)    { this.distributionTime = v; }
+    public String getLocation()                  { return location; }
+    public void setLocation(String v)            { this.location = v; }
     public LocalDateTime getOpenedAt()          { return openedAt; }
     public void setOpenedAt(LocalDateTime v)    { this.openedAt = v; }
     public LocalDateTime getClosedAt()          { return closedAt; }

@@ -1,0 +1,4 @@
+ALTER TABLE distribution_session
+  ADD COLUMN IF NOT EXISTS distribution_date DATE NULL,
+  ADD COLUMN IF NOT EXISTS distribution_time VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS location VARCHAR(255) NULL;

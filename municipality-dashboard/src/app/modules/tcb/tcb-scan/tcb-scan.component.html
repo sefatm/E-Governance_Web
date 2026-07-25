@@ -18,6 +18,20 @@
       <label>মাস (YYYY-MM)</label>
       <input [(ngModel)]="cycleMonth" type="month" />
     </div>
+    <div class="form-grid">
+      <div class="form-row">
+        <label>Distribution Date</label>
+        <input [(ngModel)]="distributionDate" type="date" />
+      </div>
+      <div class="form-row">
+        <label>Time</label>
+        <input [(ngModel)]="distributionTime" placeholder="10:00 AM" />
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Location</label>
+      <input [(ngModel)]="location" placeholder="Ward 03 Community Center" />
+    </div>
 
     <button class="btn-primary" (click)="openSession()">Session শুরু করুন</button>
   </div>
@@ -32,8 +46,15 @@
         <span><b>{{ sessionCode }}</b></span>
         <span>ওয়ার্ড {{ ward }} · {{ cycleMonth }}</span>
         <span class="scanned-count">স্ক্যান: <b>{{ totalScanned }}</b></span>
+        <span *ngIf="notifiedCount !== null" class="scanned-count">Notified: <b>{{ notifiedCount }}</b></span>
       </div>
       <button class="btn-danger-sm" (click)="closeSession()">Session বন্ধ</button>
+    </div>
+
+    <div class="notice-bar">
+      <span>Date: <b>{{ distributionDate || '—' }}</b></span>
+      <span>Time: <b>{{ distributionTime || '—' }}</b></span>
+      <span>Location: <b>{{ location || '—' }}</b></span>
     </div>
 
     <!-- Stock summary -->

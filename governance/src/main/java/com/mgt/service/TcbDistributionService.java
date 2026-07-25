@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -18,12 +19,64 @@ public class TcbDistributionService {
     @Autowired DistributionLogDAO     logDAO;
 
     @Autowired ApplicationEmailNotifier emailNotifier;
+    @Autowired EmailService emailService;
+    @Autowired SmsService smsService;
     @Autowired FamilyCardDAO  familyCardDAO;
     @Autowired FarmerCardDAO  farmerCardDAO;
     @Autowired LpgCardDAO     lpgCardDAO;
     @Autowired VgdCardDAO     vgdCardDAO;
 
     // ── SESSION ────────────────────────────────────────────────────────────────
+
+    public Map<String, Object> openSession(String dealerName, String ward, String cycleMonth,
+                                           String distributionDate, String distributionTime, String location) {
+        List<DistributionSession> existing = sessionDAO.getOpenByWardAndCycle(ward, cycleMonth);
+        if (!existing.isEmpty()) {
+            DistributionSession s = existing.get(0);
+            Map<String, Object> res = new LinkedHashMap<>();
+            res.put("sessionId", s.getId());
+            res.put("sessionCode", s.getSessionCode());
+            res.put("message", "Existing session is being reused.");
+            res.put("reused", true);
+            TcbStock existingStock = stockDAO.getById(s.getStockId());
+            res.put("stock", existingStock != null ? buildStockSummary(existingStock) : null);
+            return res;
+        }
+
+        TcbStock stock = stockDAO.getByCycleAndWard(cycleMonth, ward);
+        if (stock == null) {
+            return Map.of("error", "No stock has been created for ward " + ward + " and cycle " + cycleMonth + ".");
+        }
+
+        int remaining = stock.getTotalCards() - stock.getDistributed();
+        if (remaining <= 0) {
+            return Map.of("error", "This ward stock is finished. Please create a new stock batch.");
+        }
+
+        DistributionSession session = new DistributionSession();
+        session.setSessionCode("SES-" + ward + "-" + cycleMonth + "-"
+                + String.format("%04d", (int)(Math.random() * 9000) + 1000));
+        session.setStockId(stock.getId());
+        session.setDealerName(dealerName);
+        session.setWard(ward);
+        session.setCycleMonth(cycleMonth);
+        session.setStatus("OPEN");
+        session.setDistributionDate(parseDate(distributionDate));
+        session.setDistributionTime(blankToNull(distributionTime));
+        session.setLocation(blankToNull(location));
+        sessionDAO.save(session);
+
+        int notified = notifyBeneficiaries(session, stock);
+
+        Map<String, Object> res = new LinkedHashMap<>();
+        res.put("sessionId", session.getId());
+        res.put("sessionCode", session.getSessionCode());
+        res.put("message", "Session started.");
+        res.put("reused", false);
+        res.put("notified", notified);
+        res.put("stock", buildStockSummary(stock));
+        return res;
+    }
 
     public Map<String, Object> openSession(String dealerName, String ward, String cycleMonth) {
         List<DistributionSession> existing = sessionDAO.getOpenByWardAndCycle(ward, cycleMonth);
@@ -281,7 +334,154 @@ public class TcbDistributionService {
         m.put("totalCards",  s.getTotalCards());
         m.put("distributed", s.getDistributed());
         m.put("remaining",   s.getTotalCards() - s.getDistributed());
+        m.put("oilPricePerLitre", s.getOilPricePerLitre());
+        m.put("ricePricePerKg", s.getRicePricePerKg());
+        m.put("lentilPricePerKg", s.getLentilPricePerKg());
+        m.put("sugarPricePerKg", s.getSugarPricePerKg());
         return m;
+    }
+
+    private int notifyBeneficiaries(DistributionSession session, TcbStock stock) {
+        int sent = 0;
+        for (CardInfo info : getApprovedCardsForWard(session.getWard())) {
+            Entitlement ent = getEntitlement(info.cardType);
+            BigDecimal payable = calculatePayable(ent, stock);
+            String items = buildEntitlementItems(ent, stock);
+            String noticeText = buildSessionNoticeText(session, info, items, payable);
+
+            if (isMobile(info.contact)) {
+                smsService.send(info.contact, noticeText);
+                sent++;
+            }
+            if (isEmail(info.contact)) {
+                emailService.sendHtml(info.contact, "TCB distribution notice - " + session.getCycleMonth(),
+                        buildSessionNoticeHtml(info, session, items, payable));
+                sent++;
+            }
+        }
+        return sent;
+    }
+
+    private List<CardInfo> getApprovedCardsForWard(String ward) {
+        List<CardInfo> cards = new ArrayList<>();
+        cards.addAll(queryBeneficiaries("family_card", "holder_name", "'FAMILY'", ward));
+        cards.addAll(queryBeneficiaries("farmer_card", "farmer_name", "'FARMER'", ward));
+        cards.addAll(queryBeneficiaries("lpg_card", "holder_name", "'LPG'", ward));
+        cards.addAll(queryBeneficiaries("vgd_card", "holder_name", "card_type", ward));
+        return cards;
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<CardInfo> queryBeneficiaries(String table, String nameColumn, String typeExpr, String ward) {
+        String sql = "SELECT " + nameColumn + ", nid, ward, status, " + typeExpr + ", card_no, contact "
+                + "FROM " + table + " WHERE ward = :w AND UPPER(status) = 'APPROVED'";
+        List<Object[]> rows = familyCardDAO.getEm()
+                .createNativeQuery(sql)
+                .setParameter("w", ward)
+                .getResultList();
+
+        List<CardInfo> result = new ArrayList<>();
+        for (Object[] row : rows) {
+            CardInfo info = new CardInfo(str(row[0]), str(row[1]), str(row[2]), str(row[3]), str(row[4]));
+            info.cardNo = str(row[5]);
+            info.contact = str(row[6]);
+            result.add(info);
+        }
+        return result;
+    }
+
+    private BigDecimal calculatePayable(Entitlement ent, TcbStock stock) {
+        return ent.oil.multiply(stock.getOilPricePerLitre())
+                .add(ent.rice.multiply(stock.getRicePricePerKg()))
+                .add(ent.lentil.multiply(stock.getLentilPricePerKg()))
+                .add(ent.sugar.multiply(stock.getSugarPricePerKg()));
+    }
+
+    private String buildEntitlementItems(Entitlement ent, TcbStock stock) {
+        List<String> items = new ArrayList<>();
+        if (ent.oil.compareTo(BigDecimal.ZERO) > 0)
+            items.add("Oil " + qty(ent.oil) + "L @ Tk " + money(stock.getOilPricePerLitre()) + "/L");
+        if (ent.rice.compareTo(BigDecimal.ZERO) > 0)
+            items.add("Rice " + qty(ent.rice) + "kg @ Tk " + money(stock.getRicePricePerKg()) + "/kg");
+        if (ent.lentil.compareTo(BigDecimal.ZERO) > 0)
+            items.add("Lentil " + qty(ent.lentil) + "kg @ Tk " + money(stock.getLentilPricePerKg()) + "/kg");
+        if (ent.sugar.compareTo(BigDecimal.ZERO) > 0)
+            items.add("Sugar " + qty(ent.sugar) + "kg @ Tk " + money(stock.getSugarPricePerKg()) + "/kg");
+        return String.join(", ", items);
+    }
+
+    private String buildSessionNoticeText(DistributionSession s, CardInfo info, String items, BigDecimal payable) {
+        return "TCB notice: " + info.holderName + ", card " + info.cardNo
+                + ". Bring Tk " + money(payable)
+                + ". Items: " + items
+                + ". Date: " + formatDate(s.getDistributionDate())
+                + ", Time: " + valueOrDash(s.getDistributionTime())
+                + ", Location: " + valueOrDash(s.getLocation())
+                + ". Ward " + s.getWard() + ", " + s.getCycleMonth() + ".";
+    }
+
+    private String buildSessionNoticeHtml(CardInfo info, DistributionSession s, String items, BigDecimal payable) {
+        return "<div style='font-family:Segoe UI,Arial,sans-serif;background:#f1f5f9;padding:20px'>"
+                + "<div style='max-width:620px;margin:auto;background:#fff;border-radius:12px;overflow:hidden'>"
+                + "<div style='background:#064e3b;color:#fff;padding:24px;border-bottom:4px solid #f59e0b'>"
+                + "<h2 style='margin:0'>TCB Distribution Notice</h2>"
+                + "<p style='margin:6px 0 0;color:#d1fae5'>Municipal E-Governance Portal</p></div>"
+                + "<div style='padding:24px;color:#1f2937'>"
+                + "<p>Dear <b>" + info.holderName + "</b>,</p>"
+                + "<p>Your TCB goods will be distributed as scheduled below. Please bring the exact cash amount.</p>"
+                + "<table style='width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #dbe5df'>"
+                + row("Card No", info.cardNo)
+                + row("Items", items)
+                + row("Cash to bring", "Tk " + money(payable))
+                + row("Date", formatDate(s.getDistributionDate()))
+                + row("Time", valueOrDash(s.getDistributionTime()))
+                + row("Location", valueOrDash(s.getLocation()))
+                + row("Ward / Month", s.getWard() + " / " + s.getCycleMonth())
+                + "</table></div></div></div>";
+    }
+
+    private String row(String label, String value) {
+        return "<tr><td style='padding:10px;border-bottom:1px solid #e5e7eb;color:#065f46;font-weight:700;width:150px'>"
+                + label + "</td><td style='padding:10px;border-bottom:1px solid #e5e7eb'>" + value + "</td></tr>";
+    }
+
+    private LocalDate parseDate(String value) {
+        if (value == null || value.isBlank()) return null;
+        try { return LocalDate.parse(value); }
+        catch (Exception e) { return null; }
+    }
+
+    private String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private String formatDate(LocalDate date) {
+        return date == null ? "-" : date.format(DateTimeFormatter.ofPattern("dd MMM yyyy"));
+    }
+
+    private String valueOrDash(String value) {
+        return value == null || value.isBlank() ? "-" : value;
+    }
+
+    private String money(BigDecimal value) {
+        return qty(value != null ? value : BigDecimal.ZERO);
+    }
+
+    private String qty(BigDecimal value) {
+        return (value != null ? value : BigDecimal.ZERO).stripTrailingZeros().toPlainString();
+    }
+
+    private String str(Object value) {
+        return value == null ? "" : value.toString();
+    }
+
+    private boolean isEmail(String value) {
+        return value != null && value.contains("@") && value.contains(".");
+    }
+
+    private boolean isMobile(String value) {
+        if (value == null) return false;
+        return value.replaceAll("[^0-9]", "").matches("(88)?01[0-9]{9}");
     }
 
     /** NID দিয়ে citizen-এর contact (email) বের করে — যেকোনো কার্ড টেবিল থেকে */
@@ -372,7 +572,7 @@ public class TcbDistributionService {
     // ── Inner helpers ──────────────────────────────────────────────────────────
 
     private static class CardInfo {
-        String holderName, nid, ward, status, cardType;
+        String holderName, nid, ward, status, cardType, cardNo, contact;
         CardInfo(String h, String n, String w, String s, String t) {
             holderName = h; nid = n; ward = w; status = s; cardType = t;
         }

@@ -36,6 +36,10 @@ public class TcbDistributionController {
         s.setLentilKg(dec(body, "lentilKg"));
         s.setSugarKg(dec(body, "sugarKg"));
         s.setCashAmount(dec(body, "cashAmount"));
+        s.setOilPricePerLitre(dec(body, "oilPricePerLitre"));
+        s.setRicePricePerKg(dec(body, "ricePricePerKg"));
+        s.setLentilPricePerKg(dec(body, "lentilPricePerKg"));
+        s.setSugarPricePerKg(dec(body, "sugarPricePerKg"));
         s.setTotalCards(num(body, "totalCards"));
         s.setDistributed(0); 
 
@@ -55,6 +59,9 @@ public class TcbDistributionController {
         String dealerName = body.get("dealerName");
         String ward = body.get("ward");
         String cycleMonth = body.get("cycleMonth");
+        String distributionDate = body.get("distributionDate");
+        String distributionTime = body.get("distributionTime");
+        String location = body.get("location");
 
         if (ward == null || ward.isBlank()
                 || cycleMonth == null || cycleMonth.isBlank()) {
@@ -64,7 +71,7 @@ public class TcbDistributionController {
         }
 
         Map<String, Object> result =
-                svc.openSession(dealerName, ward, cycleMonth);
+                svc.openSession(dealerName, ward, cycleMonth, distributionDate, distributionTime, location);
 
         if (result.containsKey("error"))
             return ResponseEntity.badRequest().body(result);

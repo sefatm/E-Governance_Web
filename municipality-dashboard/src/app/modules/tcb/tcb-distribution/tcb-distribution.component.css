@@ -246,14 +246,16 @@
   border-collapse: collapse;
   font-size: .86rem;
 }
+.dist-page .dist-table thead th,
 .dist-table th {
-  background: #f8fafc;
+  background: #064e3b !important;
   padding: .6rem .8rem;
   text-align: left;
-  color: #4b5563;
-  font-weight: 600;
+  color: #ffffff !important;
+  font-weight: 800;
+  letter-spacing: .04em;
   white-space: nowrap;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 2px solid #047857;
 }
 .dist-table td {
   padding: .55rem .8rem;

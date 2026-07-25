@@ -2,7 +2,8 @@
 
 .stock-page {
   padding: 1rem;
-  max-width: 1100px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
   font-family: 'Segoe UI', sans-serif;
   display: flex;
@@ -164,7 +165,7 @@
 .section-card {
   background: #fff;
   border-radius: 12px;
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem 1rem;
   box-shadow: 0 1px 6px rgba(0,0,0,.07);
 }
 .section-head {
@@ -185,27 +186,43 @@
 .btn-refresh:hover { background: #e2e8f0; }
 
 /* ── TABLE ───────────────────────────────────────── */
-.table-wrap { overflow-x: auto; }
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+}
 .stock-table {
   width: 100%;
+  min-width: 1320px;
   border-collapse: collapse;
-  font-size: .86rem;
+  font-size: .78rem;
 }
 .stock-table th {
-  background: #f8fafc;
-  padding: .6rem .8rem;
+  background: #065f46;
+  padding: .55rem .45rem;
   text-align: left;
-  color: #4b5563;
-  font-weight: 600;
-  white-space: nowrap;
-  border-bottom: 2px solid #e5e7eb;
+  color: #ffffff;
+  font-weight: 800;
+  white-space: normal;
+  border-bottom: 2px solid #f59e0b;
+  letter-spacing: .02em;
+  line-height: 1.25;
 }
 .stock-table td {
-  padding: .55rem .8rem;
+  padding: .55rem .45rem;
   border-bottom: 1px solid #f3f4f6;
   color: #374151;
   vertical-align: middle;
+  line-height: 1.35;
 }
+.stock-table th:nth-child(1), .stock-table td:nth-child(1) { width: 34px; text-align:center; }
+.stock-table th:nth-child(2), .stock-table td:nth-child(2) { width: 82px; }
+.stock-table th:nth-child(3), .stock-table td:nth-child(3) { width: 72px; }
+.stock-table th:nth-child(4), .stock-table td:nth-child(4) { width: 58px; }
+.stock-table th:nth-child(5), .stock-table td:nth-child(5) { width: 130px; }
+.stock-table th:nth-child(n+6), .stock-table td:nth-child(n+6) { text-align:center; }
+.stock-table th:nth-child(18), .stock-table td:nth-child(18) { width: 88px; }
 .stock-table tr:hover td { background: #f9fafb; }
 .stock-table tr.row-low td { background: #fff7ed; }
 .stock-table tr.row-low:hover td { background: #ffedd5; }

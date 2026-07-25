@@ -22,8 +22,15 @@ export class TcbService {
   }
 
   // Session
-  openSession(dealerName: string, ward: string, cycleMonth: string): Observable<any> {
-    return this.http.post(`${this.base}/session/open`, { dealerName, ward, cycleMonth });
+  openSession(payload: {
+    dealerName: string;
+    ward: string;
+    cycleMonth: string;
+    distributionDate?: string;
+    distributionTime?: string;
+    location?: string;
+  }): Observable<any> {
+    return this.http.post(`${this.base}/session/open`, payload);
   }
   closeSession(sessionId: number): Observable<any> {
     return this.http.put(`${this.base}/session/${sessionId}/close`, {});

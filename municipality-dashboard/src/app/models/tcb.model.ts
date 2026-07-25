@@ -29,6 +29,9 @@ export interface DistributionSession {
   dealerName: string;
   ward: string;
   cycleMonth: string;
+  distributionDate?: string;
+  distributionTime?: string;
+  location?: string;
   status?: string;
   openedAt?: string;
   closedAt?: string;

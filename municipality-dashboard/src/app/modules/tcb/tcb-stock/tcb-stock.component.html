@@ -202,10 +202,11 @@
         </tbody>
         <tfoot>
           <tr class="total-row">
-            <td colspan="10" class="total-label">{{ ls.current === "bn" ? "মোট" : "Total" }}</td>
+            <td colspan="14" class="total-label">{{ ls.current === "bn" ? "মোট" : "Total" }}</td>
             <td class="td-total">{{ grandTotal('totalCards') }}</td>
             <td class="td-dist">{{ grandTotal('distributed') }}</td>
-            <td colspan="2"></td>
+            <td>{{ grandTotal('totalCards') - grandTotal('distributed') }}</td>
+            <td></td>
           </tr>
         </tfoot>
       </table>

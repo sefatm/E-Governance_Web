@@ -1,113 +1,113 @@
 <div class="page-wrapper">
+  <div class="page-head">
+    <div>
+      <h2>Candidate Approval Panel</h2>
+      <p>Review, verify and approve candidate nomination applications</p>
+    </div>
+    <div class="summary-pill">{{ candidates.length }} Application(s)</div>
+  </div>
 
-  <h2>Candidate Approval Panel</h2>
-
-  <!-- Loading state -->
   <div *ngIf="isLoading" class="loading-state">
     <div class="spinner"></div>
-    <span>{{ ls.current === "bn" ? "লোড হচ্ছে..." : "Loading..." }}</span>
+    <span>{{ ls.current === "bn" ? "Loading..." : "Loading..." }}</span>
   </div>
 
-  <!-- Error state -->
   <div *ngIf="!isLoading && errorMessage" class="error-state">
-    <span class="error-icon">⚠</span>
+    <span class="error-icon">!</span>
     <span>{{ errorMessage }}</span>
-    <button class="btn-retry" (click)="loadCandidates()">Try Again</button>
+    <button class="btn-retry" (click)="loadCandidates()">Try again</button>
   </div>
 
-  <!-- Empty state -->
   <div *ngIf="!isLoading && !errorMessage && candidates.length === 0" class="empty-state">
     No candidates found.
   </div>
 
-  <!-- Table -->
   <div class="table-wrapper" *ngIf="!isLoading && !errorMessage && candidates.length > 0">
     <table class="table">
       <thead>
         <tr>
           <th>#</th>
-          <th>{{ ls.current === "bn" ? "নাম" : "Name" }}</th>
-          <th>{{ ls.current === "bn" ? "দল" : "Party" }}</th>
+          <th>Candidate</th>
+          <th>Party</th>
           <th>Election Type</th>
           <th>Area</th>
           <th>Zone</th>
-          <th>{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</th>
-          <th>{{ ls.current === "bn" ? "কার্যক্রম" : "Action" }}</th>
+          <th>Status</th>
+          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let c of candidates; let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ c.name }}</td>
-          <td>{{ c.party }}</td>
-          <td>{{ c.electionType }}</td>
-          <td>{{ c.area }}</td>
-          <td>{{ c.zoneId }}</td>
+        <ng-container *ngFor="let c of candidates; let i = index">
+          <tr [class.row-expanded]="expandedIndex === i">
+            <td class="td-num">{{ i + 1 }}</td>
+            <td>
+              <div class="candidate-cell">
+                <img *ngIf="c.symbolFileUrl" [src]="fileUrl(c.symbolFileUrl)" alt="Candidate symbol">
+                <div *ngIf="!c.symbolFileUrl" class="cc-avatar">{{ c.name?.charAt(0)?.toUpperCase() }}</div>
+                <div>
+                  <strong>{{ c.name }}</strong>
+                  <small>{{ c.mobileNumber || c.nid || 'No contact' }}</small>
+                </div>
+              </div>
+            </td>
+            <td>{{ c.party || '-' }}</td>
+            <td>{{ c.electionType || '-' }}</td>
+            <td>{{ c.area || '-' }}</td>
+            <td>{{ c.zoneId || '-' }}</td>
+            <td><span class="status-badge" [ngClass]="statusClass(c.status)">{{ c.status || 'Pending' }}</span></td>
+            <td class="action-cell">
+              <div class="act-row">
+                <button class="act-btn btn-view" title="View details" (click)="toggleDetails(i)">
+                  <i class="fas" [class.fa-eye]="expandedIndex !== i" [class.fa-eye-slash]="expandedIndex === i"></i>
+                </button>
+                <button class="act-btn btn-approve" *ngIf="c.status?.toUpperCase() === 'PENDING'" title="Approve" (click)="approve(c.id)">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button class="act-btn btn-reject" *ngIf="c.status?.toUpperCase() === 'PENDING'" title="Reject" (click)="toggleReject(c)">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
 
-          <td>
-            <span [ngClass]="{
-              'badge-pending':  c.status?.toUpperCase() === 'PENDING',
-              'badge-approved': c.status?.toUpperCase() === 'APPROVED',
-              'badge-rejected': c.status?.toUpperCase() === 'REJECTED'
-            }">{{ c.status }}</span>
-          </td>
+              <div *ngIf="c.showReject" class="reject-box">
+                <input type="text" [(ngModel)]="c.rejectReason" placeholder="Enter rejection reason..." />
+                <button class="btn-confirm" (click)="confirmReject(c)">Confirm</button>
+              </div>
+            </td>
+          </tr>
 
-          <td class="action-cell">
-            <ng-container *ngIf="c.status?.toUpperCase() === 'PENDING'">
-              <button class="btn-approve" (click)="approve(c.id)">✓ Approve</button>
-              <button class="btn-reject"  (click)="toggleReject(c)">✗ Reject</button>
-            </ng-container>
+          <tr *ngIf="expandedIndex === i" class="detail-row">
+            <td colspan="8">
+              <div class="detail-box">
+                <div class="detail-profile">
+                  <img *ngIf="c.symbolFileUrl" [src]="fileUrl(c.symbolFileUrl)" alt="Candidate symbol">
+                  <div *ngIf="!c.symbolFileUrl" class="detail-avatar">{{ c.symbol || c.name?.charAt(0)?.toUpperCase() || '-' }}</div>
+                  <strong>{{ c.symbol || 'Symbol' }}</strong>
+                  <span>Candidate Symbol</span>
+                </div>
 
-            <div *ngIf="c.showReject" class="reject-box">
-              <input [(ngModel)]="c.rejectReason" placeholder="কারণ লিখুন..." />
-              <button class="btn-confirm" (click)="confirmReject(c)">{{ ls.current === "bn" ? "নিশ্চিত করুন" : "Confirm" }}</button>
-            </div>
-
-            <button class="btn-view" (click)="view(c)">👁 View</button>
-          </td>
-        </tr>
+                <div class="detail-grid">
+                  <div class="dg-item"><span>Name</span><strong>{{ c.name || '-' }}</strong></div>
+                  <div class="dg-item"><span>Father's Name</span><strong>{{ c.fathersName || '-' }}</strong></div>
+                  <div class="dg-item"><span>Mother's Name</span><strong>{{ c.mothersName || '-' }}</strong></div>
+                  <div class="dg-item"><span>Date of Birth</span><strong>{{ c.dob || '-' }}</strong></div>
+                  <div class="dg-item"><span>NID</span><strong>{{ c.nid || '-' }}</strong></div>
+                  <div class="dg-item"><span>Mobile</span><strong>{{ c.mobileNumber || '-' }}</strong></div>
+                  <div class="dg-item"><span>Party</span><strong>{{ c.party || '-' }}</strong></div>
+                  <div class="dg-item"><span>Symbol</span><strong>{{ c.symbol || '-' }}</strong></div>
+                  <div class="dg-item"><span>Election Type</span><strong>{{ c.electionType || '-' }}</strong></div>
+                  <div class="dg-item"><span>Area</span><strong>{{ c.area || '-' }}</strong></div>
+                  <div class="dg-item"><span>Zone</span><strong>{{ c.zoneId || '-' }}</strong></div>
+                  <div class="dg-item"><span>Center</span><strong>{{ c.centerId || '-' }}</strong></div>
+                  <div class="dg-item"><span>Criminal Record</span><strong>{{ c.hasCriminalRecord ? 'Yes' : 'No' }}</strong></div>
+                  <div class="dg-item"><span>Status</span><strong [ngClass]="statusClass(c.status)">{{ c.status || 'Pending' }}</strong></div>
+                  <div class="dg-item dg-wide"><span>Declaration</span><strong>{{ c.declaration || '-' }}</strong></div>
+                  <div class="dg-item dg-wide" *ngIf="c.rejectReason"><span>Reject Reason</span><strong class="badge-rejected">{{ c.rejectReason }}</strong></div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
       </tbody>
     </table>
-  </div>
-</div>
-
-<!-- VIEW MODAL -->
-<div *ngIf="selected !== null" class="modal-overlay" (click)="closeView()">
-  <div class="modal" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h3>Candidate Details</h3>
-      <button class="btn-close" (click)="closeView()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "নাম" : "Name" }}</span>            <span class="value">{{ selected.name }}</span></div>
-      <div class="detail-row"><span class="label">Father's Name</span>      <span class="value">{{ selected.fathersName }}</span></div>
-      <div class="detail-row"><span class="label">Mother's Name</span>      <span class="value">{{ selected.mothersName }}</span></div>
-      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "জন্ম তারিখ" : "Date of Birth" }}</span>    <span class="value">{{ selected.dob }}</span></div>
-      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "এনআইডি" : "NID" }}</span>            <span class="value">{{ selected.nid }}</span></div>
-      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "মোবাইল" : "Mobile" }}</span>         <span class="value">{{ selected.mobileNumber }}</span></div>
-      <div class="detail-row"><span class="label">{{ ls.current === "bn" ? "দল" : "Party" }}</span>             <span class="value">{{ selected.party }}</span></div>
-      <div class="detail-row">
-        <span class="label">{{ ls.current === "bn" ? "প্রতীক" : "Symbol" }}</span>
-        <span class="value">
-          <img *ngIf="selected.symbolFileUrl"
-               [src]="serverUrl + '/' + selected.symbolFileUrl"
-               alt="symbol" style="height:40px; border-radius:4px;" />
-          <span *ngIf="!selected.symbolFileUrl">{{ selected.symbol || '—' }}</span>
-        </span>
-      </div>
-      <div class="detail-row"><span class="label">Area</span>          <span class="value">{{ selected.area }}</span></div>
-      <div class="detail-row">
-        <span class="label">{{ ls.current === "bn" ? "অবস্থা" : "Status" }}</span>
-        <span class="value" [ngClass]="{
-          'badge-pending':  selected.status?.toUpperCase() === 'PENDING',
-          'badge-approved': selected.status?.toUpperCase() === 'APPROVED',
-          'badge-rejected': selected.status?.toUpperCase() === 'REJECTED'
-        }">{{ selected.status }}</span>
-      </div>
-      <div class="detail-row" *ngIf="selected.rejectReason">
-        <span class="label">Reject Reason</span>
-        <span class="value badge-rejected">{{ selected.rejectReason }}</span>
-      </div>
-    </div>
   </div>
 </div>
